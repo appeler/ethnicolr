@@ -1,0 +1,11 @@
+.*
+!.gitignore
+!.gitattributes
+!.travis.yml
+*.pyc
+*.log
+output.csv
+./data
+build/
+ethnicolr.egg-info/
+ethnicolr/data/fl_voter_reg/
