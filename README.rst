@@ -19,11 +19,12 @@ Caveats and Notes
 -----------------------
 
 If you picked a random individual with last name 'Smith' from the US in 2010  
-and asked us to guess this person's race, the best guess would be based on what
-is available from the aggregated Census file. It is the Bayes Optimal Solution. 
-So what good are last name only predictive models for? A few things---guessing 
-the race of people in different years, (than when the census was conducted 
-if some assumptions hold), people in different countries (again if some 
+and asked us to guess this person's race (measured as crudely as by the census),
+the best guess would be based on what is available from the aggregated Census file. 
+It is the Bayes Optimal Solution. So what good are last name only predictive models
+for? A few things---if you want to impute ethnicity at a more granular level,
+guess the race of people in different years (than when the census was conducted 
+if some assumptions hold), guess the race of people in different countries (again if some 
 assumptions hold), when names are slightly different (again with some assumptions), etc. 
 The big benefit comes from when both the first name and last name is known.
 
@@ -63,27 +64,27 @@ To see the available command line options for any function, please type in
 Examples
 ----------
 
-To append census data from 2010 to a `file without column headers <ethnicolr/data/input-without-header.csv>`__ and the first column carries the last name by using `-l 0`
+To append census data from 2010 to a `file without column headers <ethnicolr/data/input-without-header.csv>`__ and the first column carries the last name, use ``-l 0``
 
 ::
 
    census_ln -y 2010 -o output-census2010.csv -l 0 input-without-header.csv
 
-To append census data from 2010 to a `file with column header in the first row <ethnicolr/data/input-with-header.csv>`__, specify the column name carrying last names using the `-l` option, keeping the rest the same:
+To append census data from 2010 to a `file with column header in the first row <ethnicolr/data/input-with-header.csv>`__, specify the column name carrying last names using the ``-l`` option, keeping the rest the same:
 
 ::
 
    census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv   
 
 
-To predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__, if the input file doesn't have any column headers, you must using '-l' and '-f' to specify the index of column that carrying the last name and first name respectively (first column is 0).
+To predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__, if the input file doesn't have any column headers, you must using ``-l`` and ``-f`` to specify the index of column carrying the last name and first name respectively (first column has index 0).
 
 ::
 
    pred_wiki_name -o output-wiki-pred-race.csv -l 0 -f 1 input-without-header.csv
 
 
-And to predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__ for a file with column headers, you can specify the column name of last name and first name by `-l` and `-f` respectively.
+And to predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__ for a file with column headers, you can specify the column name of last name and first name by using ``-l`` and ``-f`` flags respectively.
 
 ::
 
