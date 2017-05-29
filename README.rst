@@ -3,6 +3,8 @@ ethnicolr: Predict Race and Ethnicity From Name
 
 .. image:: https://travis-ci.org/soodoku/ethnicolr.svg?branch=master
     :target: https://travis-ci.org/soodoku/ethnicolr
+.. image:: https://ci.appveyor.com/api/projects/status/qfvbu8h99ymtw2ub?svg=true
+    :target: https://ci.appveyor.com/project/soodoku/ethnicolr
 .. image:: https://img.shields.io/pypi/v/ethnicolr.svg
     :target: https://pypi.python.org/pypi/ethnicolr
 
