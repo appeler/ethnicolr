@@ -3,8 +3,8 @@ ethnicolr: Predict Race and Ethnicity From Name
 
 .. image:: https://travis-ci.org/soodoku/ethnicolor.svg?branch=master
     :target: https://travis-ci.org/soodoku/ethnicolor
-.. image:: https://img.shields.io/pypi/v/ethnicolor.svg
-    :target: https://pypi.python.org/pypi/ethnicolor
+.. image:: https://img.shields.io/pypi/v/ethnicolr.svg
+    :target: https://pypi.python.org/pypi/ethnicolr
 
 We exploit the US census data, the Florida voting registration data, and
 the Wikipedia data collected by Skiena and colleagues, to predict race
