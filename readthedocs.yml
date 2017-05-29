@@ -1,0 +1,6 @@
+formats:
+    - none
+
+python:
+    version: 3.5.0
+    setup_py_install: true
