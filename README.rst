@@ -35,7 +35,7 @@ Install
 
     pip install ethnicolr
 
-Usage
+General API
 ----------
 
 To see the available command line options for any function, please type in 
@@ -216,8 +216,8 @@ we make some assumptions about where the data is
       race (white, black, asian, or hispanic), asian (percentage chance Asian),
       hispanic, nh_black, nh_white
 
-API Usage
-----------
+Using ethnicolr
+----------------
 
 ::
 
