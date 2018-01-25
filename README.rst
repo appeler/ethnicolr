@@ -8,7 +8,7 @@ ethnicolr: Predict Race and Ethnicity From Name
 .. image:: https://img.shields.io/pypi/v/ethnicolr.svg
     :target: https://pypi.python.org/pypi/ethnicolr
 
-We exploit the US census data, the Florida voting registration data, and
+We exploit the US census data, the Florida voting registration data, and 
 the Wikipedia data collected by Skiena and colleagues, to predict race
 and ethnicity based on first and last name or just the last name. The granularity 
 at which we predict the race depends on the dataset. For instance, 
@@ -16,6 +16,12 @@ Skiena et al.' Wikipedia data is at the ethnic group level, while the
 census data we use in the model (the raw data has additional categories of 
 Native Americans and Bi-racial) merely categorizes between Non-Hispanic Whites, 
 Non-Hispanic Blacks, Asians, and Hispanics.
+
+DIME Race
+-----------
+Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__ 
+is posted `here <http://dx.doi.org/10.7910/DVN/M5K7VR>`__ The underlying python scripts 
+are posted `here <https://github.com/appeler/dime_race>`__ 
 
 Caveats and Notes
 -----------------------
@@ -36,6 +42,8 @@ Install
 ::
 
     pip install ethnicolr
+
+Note: If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
 
 General API
 ----------
@@ -284,10 +292,12 @@ Using ethnicolr
 Application
 --------------
 
-Illustrating the use of the package by imputing the race of the campaign contributors recorded by FEC for the years 2000 and 2010.
+To illustrate how the package can be used, we impute the race of the campaign contributors recorded by FEC for the years 2000 and 2010 and tally campaign contributions by race.
 
 `Contrib 2000 <ethnicolr/examples/ethnicolr_app_contrib2000.ipynb>`__
 `Contrib 2010 <ethnicolr/examples/ethnicolr_app_contrib2010.ipynb>`__
+
+Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__ is posted `here <http://dx.doi.org/10.7910/DVN/M5K7VR>`__ The underlying python scripts are posted `here <https://github.com/appeler/dime_race>`__ 
 
 Data
 ----------
