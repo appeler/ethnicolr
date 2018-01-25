@@ -10,7 +10,7 @@ Welcome to ethnicolr's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   know_your_ip
+   ethnicolr
    
 Indices and tables
 ==================

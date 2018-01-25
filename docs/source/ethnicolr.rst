@@ -46,7 +46,7 @@ Install
 Note: If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
 
 General API
-----------
+----------------
 
 To see the available command line options for any function, please type in 
 ``<function-name> --help``
