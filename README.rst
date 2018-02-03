@@ -17,6 +17,10 @@ census data we use in the model (the raw data has additional categories of
 Native Americans and Bi-racial) merely categorizes between Non-Hispanic Whites, 
 Non-Hispanic Blacks, Asians, and Hispanics.
 
+Downloads
+----------
+As of February 3rd, 2018, the package had been downloaded over 1,900 times (see `saved BigQuery <https://bigquery.cloud.google.com/savedquery/267723140544:58ac43f7f8034d43b90b3ecd72f36114>`__).
+
 DIME Race
 -----------
 Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__ 
