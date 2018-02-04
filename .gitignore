@@ -2,6 +2,7 @@
 !.gitignore
 !.gitattributes
 !.travis.yml
+!.pep8speaks.yml
 *.pyc
 *.log
 output.csv
