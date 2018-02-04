@@ -1,0 +1,72 @@
+# This is an Anaconda project file.
+#
+# Here you can describe your project and how to run it.
+# Use `anaconda-project run` to run the project.
+# The file is in YAML format, please see http://www.yaml.org/start.html for more.
+#
+
+#
+# Set the 'name' key to name your project
+#
+name: ethnicolr
+#
+# Set the 'icon' key to give your project an icon
+#
+icon:
+#
+# Set the 'description' key to a one-liner summary
+#
+description: Impute race and ethnicity from names.
+#
+# In the commands section, list your runnable scripts, notebooks, and other code.
+# Use `anaconda-project add-command` to add commands.
+#
+commands:
+  ethnicolr:
+    unix: python ${PROJECT_DIR}/ethnicolr.py
+    windows: python %PROJECT_DIR%\ethnicolr.py
+    supports_http_options: true
+
+#
+# In the variables section, list any environment variables your code depends on.
+# Use `anaconda-project add-variable` to add variables.
+#
+variables: {}
+#
+# In the services section, list any services that should be
+# available before your code runs.
+# Use `anaconda-project add-service` to add services.
+#
+services: {}
+#
+# In the downloads section, list any URLs to download to local files
+# before your code runs.
+# Use `anaconda-project add-download` to add downloads.
+#
+downloads: {}
+#
+# In the packages section, list any packages that must be installed
+# before your code runs.
+# Use `anaconda-project add-packages` to add packages.
+#
+packages:
+ - pip:
+   - pandas>=0.19.2
+   - h5py>=2.7.0
+   - Keras==2.0.5
+   - numpy>=1.12.1
+   - tensorflow>=1.1.0
+
+#
+# You can define multiple, named environment specs.
+# Each inherits any global packages or channels,
+# but can have its own unique ones also.
+# Use `anaconda-project add-env-spec` to add environment specs.
+#
+env_specs:
+  default:
+    packages: []
+platforms:
+ - linux-64
+ - osx-64
+ - win-64
