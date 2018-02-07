@@ -59,13 +59,13 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1.4',
+    version='0.1.5',
 
     description='Predict Race/Ethnicity Based on Name',
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/soodoku/ethnicolr',
+    url='https://github.com/appeler/ethnicolr',
 
     # Author details
     author='Suriyan Laohaprapanon, Gaurav Sood',
