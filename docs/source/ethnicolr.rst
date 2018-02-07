@@ -1,5 +1,3 @@
-ethnicolr: Predict Race and Ethnicity From Name
-----------------------------------------------------
 
 .. image:: https://travis-ci.org/appeler/ethnicolr.svg?branch=master
     :target: https://travis-ci.org/appeler/ethnicolr
@@ -9,6 +7,10 @@ ethnicolr: Predict Race and Ethnicity From Name
     :target: https://pypi.python.org/pypi/ethnicolr
 .. image:: https://anaconda.org/soodoku/ethnicolr/badges/version.svg
     :target: https://anaconda.org/soodoku/ethnicolr/
+\
+
+Predicting Race and Ethnicity From Names
+--------------------------------------------
 
 We exploit the US census data, the Florida voting registration data, and 
 the Wikipedia data collected by Skiena and colleagues, to predict race
@@ -19,18 +21,8 @@ census data we use in the model (the raw data has additional categories of
 Native Americans and Bi-racial) merely categorizes between Non-Hispanic Whites, 
 Non-Hispanic Blacks, Asians, and Hispanics.
 
-Downloads
-----------
-As of February 3rd, 2018, the package had been downloaded over 1,900 times (see `saved BigQuery <https://bigquery.cloud.google.com/savedquery/267723140544:58ac43f7f8034d43b90b3ecd72f36114>`__).
-
-DIME Race
------------
-Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__ 
-is posted `here <http://dx.doi.org/10.7910/DVN/M5K7VR>`__ The underlying python scripts 
-are posted `here <https://github.com/appeler/dime_race>`__ 
-
 Caveats and Notes
------------------------
+=======================
 
 If you picked a random individual with last name 'Smith' from the US in 2010  
 and asked us to guess this person's race (measured as crudely as by the census),
@@ -42,21 +34,17 @@ if some assumptions hold), guess the race of people in different countries (agai
 assumptions hold), when names are slightly different (again with some assumptions), etc. 
 The big benefit comes from when both the first name and last name is known.
 
-Install
-----------
+Installation
+-------------------
 
 ::
 
     pip install ethnicolr
 
-Or ::
-   
-   conda install ethnicolr
-
-Note: If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
+**Note**: If you are installing the package on Windows, Theano installation typically needs admin. privileges. 
 
 General API
-------------------
+----------------
 
 To see the available command line options for any function, please type in 
 ``<function-name> --help``
@@ -81,38 +69,9 @@ To see the available command line options for any function, please type in
                            name
 
 
-Examples
-----------
-
-To append census data from 2010 to a `file without column headers <ethnicolr/data/input-without-header.csv>`__ and the first column carries the last name, use ``-l 0``
-
-::
-
-   census_ln -y 2010 -o output-census2010.csv -l 0 input-without-header.csv
-
-To append census data from 2010 to a `file with column header in the first row <ethnicolr/data/input-with-header.csv>`__, specify the column name carrying last names using the ``-l`` option, keeping the rest the same:
-
-::
-
-   census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv   
-
-
-To predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__, if the input file doesn't have any column headers, you must using ``-l`` and ``-f`` to specify the index of column carrying the last name and first name respectively (first column has index 0).
-
-::
-
-   pred_wiki_name -o output-wiki-pred-race.csv -l 0 -f 1 input-without-header.csv
-
-
-And to predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__ for a file with column headers, you can specify the column name of last name and first name by using ``-l`` and ``-f`` flags respectively.
-
-::
-
-   pred_wiki_name -o output-wiki-pred-race.csv -l last_name -f first_name input-with-header.csv
-
 
 Functions
-----------
+-------------
 
 We expose 6 functions, each of which either take a pandas DataFrame or a CSV. If the CSV doesn't have a header,
 we make some assumptions about where the data is
@@ -125,15 +84,16 @@ we make some assumptions about where the data is
    -  What it does:
 
       -  Removes extra space.
-      -  For names in the `census file <ethnicolr/data/census>`__, it appends relevant data.
+      -  For names in the `census file <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/data/census>`__, it appends relevant data.
 
    -  Options:
 
       -  year: 2000 or 2010
       -  if no year is given, data from the 2000 census is appended
 
-   -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic
+   -  Output: Appends the following columns to the pandas DataFrame or CSV::
+
+        pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic  
 
 -  **pred\_census\_ln**
 
@@ -144,18 +104,19 @@ we make some assumptions about where the data is
 
       -  Removes extra space.
       -  Uses the `last name census 2000
-         model <ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb>`__
+         model <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb>`__
          or `last name census 2010
-         model <ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb>`__
+         model <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb>`__
          to predict the race and ethnicity.
 
    -  Options:
 
       -  year: 2000 or 2010
 
-   -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (white, black, asian, or hispanic), api (percentage chance asian),
-      black, hispanic, white.
+   -  Output: Appends the following columns to the pandas DataFrame or CSV::
+
+        race (white, black, asian, or hispanic), api (percentage chance asian),
+        black, hispanic, white.  
 
 -  **pred\_wiki\_ln**
 
@@ -165,17 +126,18 @@ we make some assumptions about where the data is
    -  What it does:
 
       -  Removes extra space.
-      -  Uses the `last name wiki model <ethnicolr/models/ethnicolr_keras_lstm_wiki_ln.ipynb>`__
+      -  Uses the `last name wiki model <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/models/ethnicolr_keras_lstm_wiki_ln.ipynb>`__
          to predict the race and ethnicity.
 
-   -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (categorical variable --- category with the highest probability), 
-      "Asian,GreaterEastAsian,EastAsian", "Asian,GreaterEastAsian,Japanese", 
-      "Asian,IndianSubContinent", "GreaterAfrican,Africans", "GreaterAfrican,Muslim",
-      "GreaterEuropean,British","GreaterEuropean,EastEuropean", 
-      "GreaterEuropean,Jewish","GreaterEuropean,WestEuropean,French",
-      "GreaterEuropean,WestEuropean,Germanic","GreaterEuropean,WestEuropean,Hispanic",
-      "GreaterEuropean,WestEuropean,Italian","GreaterEuropean,WestEuropean,Nordic"
+   -  Output: Appends the following columns to the pandas DataFrame or CSV::
+
+        race (categorical variable --- category with the highest probability), 
+        "Asian,GreaterEastAsian,EastAsian", "Asian,GreaterEastAsian,Japanese", 
+        "Asian,IndianSubContinent", "GreaterAfrican,Africans", "GreaterAfrican,Muslim",
+        "GreaterEuropean,British", "GreaterEuropean,EastEuropean", 
+        "GreaterEuropean,Jewish", "GreaterEuropean,WestEuropean,French",
+        "GreaterEuropean,WestEuropean,Germanic", "GreaterEuropean,WestEuropean,Hispanic",
+        "GreaterEuropean,WestEuropean,Italian", "GreaterEuropean,WestEuropean,Nordic"
 
 -  **pred\_wiki\_name**
 
@@ -189,17 +151,18 @@ we make some assumptions about where the data is
 
       -  Removes extra space.
       -  Uses the `full name wiki
-         model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__ to predict the
+         model <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__ to predict the
          race and ethnicity.
 
-   -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (categorical variable---category with the highest probability), 
-      "Asian,GreaterEastAsian,EastAsian", "Asian,GreaterEastAsian,Japanese", 
-      "Asian,IndianSubContinent", "GreaterAfrican,Africans", "GreaterAfrican,Muslim",
-      "GreaterEuropean,British","GreaterEuropean,EastEuropean", 
-      "GreaterEuropean,Jewish","GreaterEuropean,WestEuropean,French",
-      "GreaterEuropean,WestEuropean,Germanic","GreaterEuropean,WestEuropean,Hispanic",
-      "GreaterEuropean,WestEuropean,Italian","GreaterEuropean,WestEuropean,Nordic"
+   -  Output: Appends the following columns to the pandas DataFrame or CSV::
+
+        race (categorical variable---category with the highest probability), 
+        "Asian,GreaterEastAsian,EastAsian", "Asian,GreaterEastAsian,Japanese", 
+        "Asian,IndianSubContinent", "GreaterAfrican,Africans", "GreaterAfrican,Muslim",
+        "GreaterEuropean,British", "GreaterEuropean,EastEuropean", 
+        "GreaterEuropean,Jewish", "GreaterEuropean,WestEuropean,French",
+        "GreaterEuropean,WestEuropean,Germanic", "GreaterEuropean,WestEuropean,Hispanic",
+        "GreaterEuropean,WestEuropean,Italian", "GreaterEuropean,WestEuropean,Nordic"
 
 -  **pred\_fl\_reg\_ln**
 
@@ -210,12 +173,13 @@ we make some assumptions about where the data is
 
       -  Removes extra space, if there.
       -  Uses the `last name FL registration
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln.ipynb>`__ to predict the race
+         model <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln.ipynb>`__ to predict the race
          and ethnicity.
 
-   -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (white, black, asian, or hispanic), asian (percentage chance Asian),
-      hispanic, nh_black, nh_white
+   -  Output: Appends the following columns to the pandas DataFrame or CSV::
+
+        race (white, black, asian, or hispanic), asian (percentage chance Asian), 
+        hispanic, nh_black, nh_white  
 
 -  **pred\_fl\_reg\_name**
 
@@ -229,12 +193,14 @@ we make some assumptions about where the data is
 
       -  Removes extra space.
       -  Uses the `full name wiki
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_name.ipynb>`__ to predict the
+         model <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/models/ethnicolr_keras_lstm_fl_voter_name.ipynb>`__ to predict the
          race and ethnicity.
 
-   -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (white, black, asian, or hispanic), asian (percentage chance Asian),
-      hispanic, nh_black, nh_white
+   -  Output: Appends the following columns to the pandas DataFrame or CSV::
+
+        race (white, black, asian, or hispanic), asian (percentage chance Asian),
+        hispanic, nh_black, nh_white
+
 
 Using ethnicolr
 ----------------
@@ -299,28 +265,57 @@ Using ethnicolr
                - `black`, `api`, `white`, `hispanic` are the prediction
                    probability.
 
+Examples
+----------
+
+To append census data from 2010 to a `file without column headers <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/data/input-without-header.csv>`__ and the first column carries the last name, use ``-l 0``
+
+::
+
+   census_ln -y 2010 -o output-census2010.csv -l 0 input-without-header.csv
+
+To append census data from 2010 to a `file with column header in the first row <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/data/input-with-header.csv>`__, specify the column name carrying last names using the ``-l`` option, keeping the rest the same:
+
+::
+
+   census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv   
+
+
+To predict race/ethnicity using `Wikipedia full name model <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__, if the input file doesn't have any column headers, you must using ``-l`` and ``-f`` to specify the index of column carrying the last name and first name respectively (first column has index 0).
+
+::
+
+   pred_wiki_name -o output-wiki-pred-race.csv -l 0 -f 1 input-without-header.csv
+
+
+And to predict race/ethnicity using `Wikipedia full name model <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__ for a file with column headers, you can specify the column name of last name and first name by using ``-l`` and ``-f`` flags respectively.
+
+::
+
+   pred_wiki_name -o output-wiki-pred-race.csv -l last_name -f first_name input-with-header.csv
+
 Application
 --------------
 
 To illustrate how the package can be used, we impute the race of the campaign contributors recorded by FEC for the years 2000 and 2010 and tally campaign contributions by race.
 
-`Contrib 2000 <ethnicolr/examples/ethnicolr_app_contrib2000.ipynb>`__
-`Contrib 2010 <ethnicolr/examples/ethnicolr_app_contrib2010.ipynb>`__
+`Contrib 2000 <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/examples/ethnicolr_app_contrib2000.ipynb>`__
+`Contrib 2010 <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/examples/ethnicolr_app_contrib2010.ipynb>`__
 
 Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__ is posted `here <http://dx.doi.org/10.7910/DVN/M5K7VR>`__ The underlying python scripts are posted `here <https://github.com/appeler/dime_race>`__ 
 
-Data
-----------
+Underlying Data
+------------------
 
-In particular, we utilize the last-name--race data from the `2000
+We utilize the last-name--race data from the `2000
 census <http://www.census.gov/topics/population/genealogy/data/2000_surnames.html>`__
 and `2010
 census <http://www.census.gov/topics/population/genealogy/data/2010_surnames.html>`__,
-the `Wikipedia data <ethnicolr/data/wiki/>`__ collected by Skiena and colleagues,
+the `Wikipedia data <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/data/wiki/>`__ collected by Skiena and colleagues,
 and the Florida voter registration data from early 2017.
 
--  `Census <ethnicolr/data/census/>`__
--  `The Wikipedia dataset <ethnicolr/data/wiki/>`__
+-  `Census <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/data/census/>`__
+-  `The Wikipedia dataset <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/data/wiki/>`__
 -  `Florida voter registration database <http://dx.doi.org/10.7910/DVN/UBIG3F>`__
 
 Authors

@@ -2,5 +2,5 @@ formats:
     - none
 
 python:
-    version: 3.5.0
+    version: 3.5
     setup_py_install: true
