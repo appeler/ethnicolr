@@ -7,6 +7,8 @@ ethnicolr: Predict Race and Ethnicity From Name
     :target: https://ci.appveyor.com/project/soodoku/ethnicolr
 .. image:: https://img.shields.io/pypi/v/ethnicolr.svg
     :target: https://pypi.python.org/pypi/ethnicolr
+.. image:: https://anaconda.org/soodoku/ethnicolr/badges/version.svg
+    :target: https://anaconda.org/soodoku/ethnicolr/
 
 We exploit the US census data, the Florida voting registration data, and 
 the Wikipedia data collected by Skiena and colleagues, to predict race
@@ -47,10 +49,14 @@ Install
 
     pip install ethnicolr
 
+Or ::
+   
+   conda install ethnicolr
+
 Note: If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
 
 General API
-----------
+------------------
 
 To see the available command line options for any function, please type in 
 ``<function-name> --help``

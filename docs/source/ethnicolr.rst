@@ -5,7 +5,8 @@
     :target: https://ci.appveyor.com/project/soodoku/ethnicolr
 .. image:: https://img.shields.io/pypi/v/ethnicolr.svg
     :target: https://pypi.python.org/pypi/ethnicolr
-
+.. image:: https://anaconda.org/soodoku/ethnicolr/badges/version.svg
+    :target: https://anaconda.org/soodoku/ethnicolr/
 \
 
 Predicting Race and Ethnicity From Names
@@ -21,7 +22,7 @@ Native Americans and Bi-racial) merely categorizes between Non-Hispanic Whites,
 Non-Hispanic Blacks, Asians, and Hispanics.
 
 Caveats and Notes
-===================
+=======================
 
 If you picked a random individual with last name 'Smith' from the US in 2010  
 and asked us to guess this person's race (measured as crudely as by the census),
@@ -34,7 +35,7 @@ assumptions hold), when names are slightly different (again with some assumption
 The big benefit comes from when both the first name and last name is known.
 
 Installation
---------------
+-------------------
 
 ::
 
@@ -70,7 +71,7 @@ To see the available command line options for any function, please type in
 
 
 Functions
-----------
+-------------
 
 We expose 6 functions, each of which either take a pandas DataFrame or a CSV. If the CSV doesn't have a header,
 we make some assumptions about where the data is
