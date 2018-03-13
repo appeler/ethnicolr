@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
 import argparse
-import pandas as pd
+import sys
+
 import numpy as np
+import pandas as pd
 from keras.models import load_model
 from keras.preprocessing import sequence
-
 from pkg_resources import resource_filename
 
 from .utils import column_exists, find_ngrams, fixup_columns
@@ -24,61 +24,64 @@ NGRAMS = 2
 FEATURE_LEN = 20
 
 
-def pred_fl_reg_ln(df, namecol):
-    """Predict the race/ethnicity by the last name using Florida voter model.
+class Pred_fl_reg_ln():
 
-    Using the Flolida voter last name model to predict the race/ethnicity of
-    the input DataFrame.
+    def __init__(self):
+        #  sort n-gram by freq (highest -> lowest)
+        vdf = pd.read_csv(VOCAB)
+        self.vocab = vdf.vocab.tolist()
 
-    Args:
-        df (:obj:`DataFrame`): Pandas DataFrame containing the last name
-            column.
-        namecol (str or int): Column's name or location of the name in
-            DataFrame.
+        rdf = pd.read_csv(RACE)
+        self.race = rdf.race.tolist()
 
-    Returns:
-        DataFrame: Pandas DataFrame with additional columns:
-            - `race` the predict result
-            - Additional columns for probability of each classes.
+        self.model = load_model(MODEL)
 
-    """
+    def pred_fl_reg_ln(self, df, namecol):
+        """Predict the race/ethnicity by the last name using Florida voter model.
 
-    if namecol not in df.columns:
-        print("No column `{0!s}` in the DataFrame".format(namecol))
-        return df
+        Using the Florida voter last name model to predict the race/ethnicity of
+        the input DataFrame.
 
-    df['__last_name'] = df[namecol].str.strip()
-    df['__last_name'] = df['__last_name'].str.title()
+        Args:
+            df (:obj:`DataFrame`): Pandas DataFrame containing the last name
+                column.
+            namecol (str or int): Column's name or location of the name in
+                DataFrame.
 
-    #  sort n-gram by freq (highest -> lowest)
-    vdf = pd.read_csv(VOCAB)
-    vocab = vdf.vocab.tolist()
+        Returns:
+            DataFrame: Pandas DataFrame with additional columns:
+                - `race` the predict result
+                - Additional columns for probability of each classes.
 
-    rdf = pd.read_csv(RACE)
-    race = rdf.race.tolist()
+        """
 
-    model = load_model(MODEL)
+        if namecol not in df.columns:
+            print("No column `{0!s}` in the DataFrame".format(namecol))
+            return df
 
-    # build X from index of n-gram sequence
-    X = np.array(df.__last_name.apply(lambda c: find_ngrams(vocab, c, NGRAMS)))
-    X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
+        df['__last_name'] = df[namecol].str.strip()
+        df['__last_name'] = df['__last_name'].str.title()
 
-    df['__pred'] = model.predict_classes(X, verbose=2)
+        # build X from index of n-gram sequence
+        X = np.array(df['__last_name'].apply(lambda c: find_ngrams(self.vocab, c, NGRAMS)))
+        X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
 
-    df['race'] = df.__pred.apply(lambda c: race[c])
+        df['__pred'] = self.model.predict_classes(X, verbose=2)
 
-    # take out temporary working columns
-    del df['__pred']
-    del df['__last_name']
+        df['race'] = df['__pred'].apply(lambda c: self.race[c])
 
-    proba = model.predict_proba(X, verbose=2)
+        # take out temporary working columns
+        del df['__pred']
+        del df['__last_name']
 
-    pdf = pd.DataFrame(proba, columns=race)
-    pdf.set_index(df.index, inplace=True)
+        proba = self.model.predict_proba(X, verbose=2)
 
-    rdf = pd.concat([df, pdf], axis=1)
+        pdf = pd.DataFrame(proba, columns=self.race)
+        pdf.set_index(df.index, inplace=True)
 
-    return rdf
+        rdf = pd.concat([df, pdf], axis=1)
+
+        return rdf
 
 
 def main(argv=sys.argv[1:]):
@@ -105,7 +108,8 @@ def main(argv=sys.argv[1:]):
     if not column_exists(df, args.last):
         return -1
 
-    rdf = pred_fl_reg_ln(df, args.last)
+    inst = Pred_fl_reg_ln()
+    rdf = inst.pred_fl_reg_ln(df, args.last)
 
     print("Saving output to file: `{0:s}`".format(args.output))
     rdf.columns = fixup_columns(rdf.columns)
