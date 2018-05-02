@@ -299,8 +299,9 @@ Application
 
 To illustrate how the package can be used, we impute the race of the campaign contributors recorded by FEC for the years 2000 and 2010 and tally campaign contributions by race.
 
-`Contrib 2000 <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/examples/ethnicolr_app_contrib2000.ipynb>`__
-`Contrib 2010 <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/examples/ethnicolr_app_contrib2010.ipynb>`__
+`Contrib 2000/2010 using `census_ln` <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/examples/ethnicolr_app_contrib20xx-census_ln.ipynb>`__
+`Contrib 2000/2010 using `pred_census_ln` <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/examples/ethnicolr_app_contrib20xx.ipynb>`__
+`Contrib 2000/2010 using `pred_fl_reg_name` <https://github.com/appeler/ethnicolr/tree/master/ethnicolr/examples/ethnicolr_app_contrib20xx-fl_reg.ipynb>`__
 
 Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__ is posted `here <http://dx.doi.org/10.7910/DVN/M5K7VR>`__ The underlying python scripts are posted `here <https://github.com/appeler/dime_race>`__ 
 
