@@ -272,9 +272,9 @@ Using ethnicolr
 
    >>> pred_census_ln(df, 'name')
          name   race       api     black  hispanic     white
-   0    smith  white  0.007041  0.289588  0.021370  0.923900
-   1    zhang    api  0.986815  0.001280  0.003912  0.003388
-   2  jackson  black  0.005966  0.928257  0.058646  0.735056
+   0    smith  white  0.002019  0.247235  0.014485  0.736260
+   1    zhang    api  0.997807  0.000149  0.000470  0.001574
+   2  jackson  black  0.002797  0.528193  0.014605  0.454405
 
    >>> help(pred_census_ln)
    Help on function pred_census_ln in module ethnicolr.pred_census_ln:
@@ -304,8 +304,9 @@ Application
 
 To illustrate how the package can be used, we impute the race of the campaign contributors recorded by FEC for the years 2000 and 2010 and tally campaign contributions by race.
 
-`Contrib 2000 <ethnicolr/examples/ethnicolr_app_contrib2000.ipynb>`__
-`Contrib 2010 <ethnicolr/examples/ethnicolr_app_contrib2010.ipynb>`__
+- `Contrib 2000/2010 using census_ln <ethnicolr/examples/ethnicolr_app_contrib20xx-census_ln.ipynb>`__
+- `Contrib 2000/2010 using pred_census_ln <ethnicolr/examples/ethnicolr_app_contrib20xx.ipynb>`__
+- `Contrib 2000/2010 using pred_fl_reg_name <ethnicolr/examples/ethnicolr_app_contrib20xx-fl_reg.ipynb>`__
 
 Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__ is posted `here <http://dx.doi.org/10.7910/DVN/M5K7VR>`__ The underlying python scripts are posted `here <https://github.com/appeler/dime_race>`__ 
 
