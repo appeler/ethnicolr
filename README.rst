@@ -21,7 +21,7 @@ Non-Hispanic Blacks, Asians, and Hispanics.
 
 Downloads
 ----------
-As of June 26th, 2018, the package had been downloaded over 12,000 times (see `saved BigQuery <https://bigquery.cloud.google.com/savedquery/267723140544:58ac43f7f8034d43b90b3ecd72f36114>`__).
+As of November 1st, 2018, the package had been downloaded over 12,000 times (see `saved BigQuery <https://bigquery.cloud.google.com/savedquery/267723140544:58ac43f7f8034d43b90b3ecd72f36114>`__).
 
 DIME Race
 -----------
