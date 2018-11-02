@@ -47,6 +47,10 @@ def pred_wiki_ln(df, namecol):
         print("No column `{0!s}` in the DataFrame".format(namecol))
         return df
 
+    nn = df[namecol].notnull()
+    if df[nn].shape[0] == 0:
+        return df
+
     df['__last_name'] = df[namecol].str.strip()
     df['__last_name'] = df['__last_name'].str.title()
 
@@ -60,12 +64,12 @@ def pred_wiki_ln(df, namecol):
     model = load_model(MODEL)
 
     # build X from index of n-gram sequence
-    X = np.array(df.__last_name.apply(lambda c: find_ngrams(vocab, c, NGRAMS)))
+    X = np.array(df[nn].__last_name.apply(lambda c: find_ngrams(vocab, c, NGRAMS)))
     X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
 
-    df['__pred'] = model.predict_classes(X, verbose=2)
+    df.loc[nn, '__pred'] = model.predict_classes(X, verbose=2)
 
-    df['race'] = df.__pred.apply(lambda c: race[c])
+    df.loc[nn, 'race'] = df[nn].__pred.apply(lambda c: race[int(c)])
 
     # take out temporary working columns
     del df['__pred']
@@ -74,7 +78,7 @@ def pred_wiki_ln(df, namecol):
     proba = model.predict_proba(X, verbose=2)
 
     pdf = pd.DataFrame(proba, columns=race)
-    pdf.set_index(df.index, inplace=True)
+    pdf.set_index(df[nn].index, inplace=True)
 
     rdf = pd.concat([df, pdf], axis=1)
 

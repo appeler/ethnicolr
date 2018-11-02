@@ -24,10 +24,6 @@ NGRAMS = 2
 FEATURE_LEN = 25
 
 
-def join_names(r):
-    return ' '.join(r).title()
-
-
 def pred_fl_reg_name(df, lname_col, fname_col):
     """Predict the race/ethnicity by the full name using Florida voter model.
 
@@ -56,9 +52,12 @@ def pred_fl_reg_name(df, lname_col, fname_col):
         print("No column `{0!s}` in the DataFrame".format(fname_col))
         return df
 
-    names = [lname_col, fname_col]
+    df['__name'] = (df[lname_col] + ' ' + df[fname_col]).str.title()
 
-    df['__name'] = df[names].apply(lambda r: join_names(r), axis=1)
+    nn = df['__name'].notnull()
+    if df[nn].shape[0] == 0:
+        del df['__name']
+        return df
 
     #  sort n-gram by freq (highest -> lowest)
     vdf = pd.read_csv(VOCAB)
@@ -70,12 +69,12 @@ def pred_fl_reg_name(df, lname_col, fname_col):
     model = load_model(MODEL)
 
     # build X from index of n-gram sequence
-    X = np.array(df.__name.apply(lambda c: find_ngrams(vocab, c, NGRAMS)))
+    X = np.array(df[nn].__name.apply(lambda c: find_ngrams(vocab, c, NGRAMS)))
     X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
 
-    df['__pred'] = model.predict_classes(X, verbose=2)
+    df.loc[nn, '__pred'] = model.predict_classes(X, verbose=2)
 
-    df['race'] = df.__pred.apply(lambda c: race[c])
+    df.loc[nn, 'race'] = df[nn].__pred.apply(lambda c: race[int(c)])
 
     # take out temporary working columns
     del df['__pred']
@@ -84,7 +83,7 @@ def pred_fl_reg_name(df, lname_col, fname_col):
     proba = model.predict_proba(X, verbose=2)
 
     pdf = pd.DataFrame(proba, columns=race)
-    pdf.set_index(df.index, inplace=True)
+    pdf.set_index(df[nn].index, inplace=True)
 
     rdf = pd.concat([df, pdf], axis=1)
 

@@ -49,6 +49,8 @@ def census_ln(df, namecol, year=2000):
     elif year == 2010:
         census_df = pd.read_csv(CENSUS2010, usecols=['name'] + CENSUS_COLS)
 
+    census_df.drop(census_df[census_df.name.isnull()].index, inplace=True)
+
     census_df.columns = ['__last_name'] + CENSUS_COLS
 
     rdf = pd.merge(df, census_df, how='left', on='__last_name')
