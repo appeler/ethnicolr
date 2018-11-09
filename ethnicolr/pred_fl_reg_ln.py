@@ -24,19 +24,13 @@ NGRAMS = 2
 FEATURE_LEN = 20
 
 
-class Pred_fl_reg_ln():
+class FloridaRegLnModel():
+    vocab = None
+    race = None
+    model = None
 
-    def __init__(self):
-        #  sort n-gram by freq (highest -> lowest)
-        vdf = pd.read_csv(VOCAB)
-        self.vocab = vdf.vocab.tolist()
-
-        rdf = pd.read_csv(RACE)
-        self.race = rdf.race.tolist()
-
-        self.model = load_model(MODEL)
-
-    def pred_fl_reg_ln(self, df, namecol):
+    @classmethod
+    def pred_fl_reg_ln(cls, df, namecol):
         """Predict the race/ethnicity by the last name using Florida voter model.
 
         Using the Florida voter last name model to predict the race/ethnicity of
@@ -66,26 +60,42 @@ class Pred_fl_reg_ln():
         df['__last_name'] = df[namecol].str.strip()
         df['__last_name'] = df['__last_name'].str.title()
 
+        if cls.model is None:
+            #  sort n-gram by freq (highest -> lowest)
+            vdf = pd.read_csv(VOCAB)
+            cls.vocab = vdf.vocab.tolist()
+
+            rdf = pd.read_csv(RACE)
+            cls.race = rdf.race.tolist()
+
+            cls.model = load_model(MODEL)
+
         # build X from index of n-gram sequence
-        X = np.array(df[nn].__last_name.apply(lambda c: find_ngrams(self.vocab, c, NGRAMS)))
+        X = np.array(df[nn]['__last_name'].apply(lambda c:
+                                                 find_ngrams(cls.vocab,
+                                                             c, NGRAMS)))
         X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
 
-        df.loc[nn, '__pred'] = self.model.predict_classes(X, verbose=2)
+        df.loc[nn, '__pred'] = cls.model.predict_classes(X, verbose=2)
 
-        df.loc[nn, 'race'] = df[nn].__pred.apply(lambda c: self.race[c])
+        df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
+                                                    cls.race[int(c)])
 
         # take out temporary working columns
         del df['__pred']
         del df['__last_name']
 
-        proba = self.model.predict_proba(X, verbose=2)
+        proba = cls.model.predict_proba(X, verbose=2)
 
-        pdf = pd.DataFrame(proba, columns=self.race)
+        pdf = pd.DataFrame(proba, columns=cls.race)
         pdf.set_index(df[nn].index, inplace=True)
 
         rdf = pd.concat([df, pdf], axis=1)
 
         return rdf
+
+
+pred_fl_reg_ln = FloridaRegLnModel.pred_fl_reg_ln
 
 
 def main(argv=sys.argv[1:]):

@@ -3,7 +3,7 @@ from .census_ln import census_ln
 from .pred_census_ln import pred_census_ln
 from .pred_wiki_ln import pred_wiki_ln
 from .pred_wiki_name import pred_wiki_name
-from .pred_fl_reg_ln import Pred_fl_reg_ln
+from .pred_fl_reg_ln import pred_fl_reg_ln
 from .pred_fl_reg_name import pred_fl_reg_name
 
 
