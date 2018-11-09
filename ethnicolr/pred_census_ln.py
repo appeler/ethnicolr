@@ -24,67 +24,81 @@ NGRAMS = 2
 FEATURE_LEN = 20
 
 
-def pred_census_ln(df, namecol, year=2000):
-    """Predict the race/ethnicity by the last name using Census model.
+class CensusLnModel():
+    vocab = None
+    race = None
+    model = None
+    model_year = None
 
-    Using the Census last name model to predict the race/ethnicity of the input
-    DataFrame.
+    @classmethod
+    def pred_census_ln(cls, df, namecol, year=2000):
+        """Predict the race/ethnicity by the last name using Census model.
 
-    Args:
-        df (:obj:`DataFrame`): Pandas DataFrame containing the last name
-            column.
-        namecol (str or int): Column's name or location of the name in
-            DataFrame.
-        year (int): The year of Census model to be used. (2000 or 2010)
-            (default is 2000)
+        Using the Census last name model to predict the race/ethnicity of the input
+        DataFrame.
 
-    Returns:
-        DataFrame: Pandas DataFrame with additional columns:
-            - `race` the predict result
-            - `black`, `api`, `white`, `hispanic` are the prediction
-                probability.
+        Args:
+            df (:obj:`DataFrame`): Pandas DataFrame containing the last name
+                column.
+            namecol (str or int): Column's name or location of the name in
+                DataFrame.
+            year (int): The year of Census model to be used. (2000 or 2010)
+                (default is 2000)
 
-    """
+        Returns:
+            DataFrame: Pandas DataFrame with additional columns:
+                - `race` the predict result
+                - `black`, `api`, `white`, `hispanic` are the prediction
+                    probability.
 
-    if namecol not in df.columns:
-        print("No column `{0!s}` in the DataFrame".format(namecol))
-        return df
+        """
 
-    nn = df[namecol].notnull()
-    if df[nn].shape[0] == 0:
-        return df
+        if namecol not in df.columns:
+            print("No column `{0!s}` in the DataFrame".format(namecol))
+            return df
 
-    df['__last_name'] = df[namecol].str.strip()
-    df['__last_name'] = df['__last_name'].str.title()
+        nn = df[namecol].notnull()
+        if df[nn].shape[0] == 0:
+            return df
 
-    #  sort n-gram by freq (highest -> lowest)
-    vdf = pd.read_csv(VOCAB.format(year))
-    vocab = vdf.vocab.tolist()
+        df['__last_name'] = df[namecol].str.strip()
+        df['__last_name'] = df['__last_name'].str.title()
 
-    rdf = pd.read_csv(RACE.format(year))
-    race = rdf.race.tolist()
+        if cls.model is None and cls.model_year != year:
+            #  sort n-gram by freq (highest -> lowest)
+            vdf = pd.read_csv(VOCAB.format(year))
+            cls.vocab = vdf.vocab.tolist()
 
-    model = load_model(MODEL.format(year))
+            rdf = pd.read_csv(RACE.format(year))
+            cls.race = rdf.race.tolist()
 
-    # build X from index of n-gram sequence
-    X = np.array(df[nn].__last_name.apply(lambda c: find_ngrams(vocab, c, NGRAMS)))
-    X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
+            cls.model = load_model(MODEL.format(year))
 
-    df.loc[nn, '__pred'] = model.predict_classes(X, verbose=2)
-    df.loc[nn, 'race'] = df[nn].__pred.apply(lambda c: race[int(c)])
+        # build X from index of n-gram sequence
+        X = np.array(df[nn]['__last_name'].apply(lambda c:
+                                                 find_ngrams(cls.vocab,
+                                                             c, NGRAMS)))
+        X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
 
-    # take out temporary working columns
-    del df['__pred']
-    del df['__last_name']
+        df.loc[nn, '__pred'] = cls.model.predict_classes(X, verbose=2)
+        df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
+                                                    cls.race[int(c)])
 
-    proba = model.predict_proba(X, verbose=2)
+        # take out temporary working columns
+        del df['__pred']
+        del df['__last_name']
 
-    pdf = pd.DataFrame(proba, columns=race)
-    pdf.set_index(df[nn].index, inplace=True)
+        proba = cls.model.predict_proba(X, verbose=2)
 
-    rdf = pd.concat([df, pdf], axis=1)
+        pdf = pd.DataFrame(proba, columns=cls.race)
+        pdf.set_index(df[nn].index, inplace=True)
 
-    return rdf
+        rdf = pd.concat([df, pdf], axis=1)
+
+        return rdf
+
+
+pred_census_ln = CensusLnModel.pred_census_ln
 
 
 def main(argv=sys.argv[1:]):

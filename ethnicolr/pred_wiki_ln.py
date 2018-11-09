@@ -24,65 +24,78 @@ NGRAMS = 2
 FEATURE_LEN = 20
 
 
-def pred_wiki_ln(df, namecol):
-    """Predict the race/ethnicity by the last name using Wiki model.
+class WikiLnModel():
+    vocab = None
+    race = None
+    model = None
 
-    Using the Wiki last name model to predict the race/ethnicity of the input
-    DataFrame.
+    @classmethod
+    def pred_wiki_ln(cls, df, namecol):
+        """Predict the race/ethnicity by the last name using Wiki model.
 
-    Args:
-        df (:obj:`DataFrame`): Pandas DataFrame containing the last name
-            column.
-        namecol (str or int): Column's name or location of the name in
-            DataFrame.
+        Using the Wiki last name model to predict the race/ethnicity of the input
+        DataFrame.
 
-    Returns:
-        DataFrame: Pandas DataFrame with additional columns:
-            - `race` the predict result
-            - Additional columns for probability of each classes.
+        Args:
+            df (:obj:`DataFrame`): Pandas DataFrame containing the last name
+                column.
+            namecol (str or int): Column's name or location of the name in
+                DataFrame.
 
-    """
+        Returns:
+            DataFrame: Pandas DataFrame with additional columns:
+                - `race` the predict result
+                - Additional columns for probability of each classes.
 
-    if namecol not in df.columns:
-        print("No column `{0!s}` in the DataFrame".format(namecol))
-        return df
+        """
 
-    nn = df[namecol].notnull()
-    if df[nn].shape[0] == 0:
-        return df
+        if namecol not in df.columns:
+            print("No column `{0!s}` in the DataFrame".format(namecol))
+            return df
 
-    df['__last_name'] = df[namecol].str.strip()
-    df['__last_name'] = df['__last_name'].str.title()
+        nn = df[namecol].notnull()
+        if df[nn].shape[0] == 0:
+            return df
 
-    #  sort n-gram by freq (highest -> lowest)
-    vdf = pd.read_csv(VOCAB)
-    vocab = vdf.vocab.tolist()
+        df['__last_name'] = df[namecol].str.strip()
+        df['__last_name'] = df['__last_name'].str.title()
 
-    rdf = pd.read_csv(RACE)
-    race = rdf.race.tolist()
+        if cls.model is None:
+            #  sort n-gram by freq (highest -> lowest)
+            vdf = pd.read_csv(VOCAB)
+            cls.vocab = vdf.vocab.tolist()
 
-    model = load_model(MODEL)
+            rdf = pd.read_csv(RACE)
+            cls.race = rdf.race.tolist()
 
-    # build X from index of n-gram sequence
-    X = np.array(df[nn].__last_name.apply(lambda c: find_ngrams(vocab, c, NGRAMS)))
-    X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
+            cls.model = load_model(MODEL)
 
-    df.loc[nn, '__pred'] = model.predict_classes(X, verbose=2)
+        # build X from index of n-gram sequence
+        X = np.array(df[nn]['__last_name'].apply(lambda c:
+                                                 find_ngrams(cls.vocab,
+                                                             c, NGRAMS)))
+        X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
 
-    df.loc[nn, 'race'] = df[nn].__pred.apply(lambda c: race[int(c)])
+        df.loc[nn, '__pred'] = cls.model.predict_classes(X, verbose=2)
 
-    # take out temporary working columns
-    del df['__pred']
-    del df['__last_name']
+        df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
+                                                    cls.race[int(c)])
 
-    proba = model.predict_proba(X, verbose=2)
+        # take out temporary working columns
+        del df['__pred']
+        del df['__last_name']
 
-    pdf = pd.DataFrame(proba, columns=race)
-    pdf.set_index(df[nn].index, inplace=True)
+        proba = cls.model.predict_proba(X, verbose=2)
 
-    rdf = pd.concat([df, pdf], axis=1)
+        pdf = pd.DataFrame(proba, columns=cls.race)
+        pdf.set_index(df[nn].index, inplace=True)
 
-    return rdf
+        rdf = pd.concat([df, pdf], axis=1)
+
+        return rdf
+
+
+pred_wiki_ln = WikiLnModel.pred_wiki_ln
 
 
 def main(argv=sys.argv[1:]):

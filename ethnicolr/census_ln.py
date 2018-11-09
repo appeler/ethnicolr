@@ -16,48 +16,60 @@ CENSUS_COLS = ['pctwhite', 'pctblack', 'pctapi', 'pctaian', 'pct2prace',
                'pcthispanic']
 
 
-def census_ln(df, namecol, year=2000):
-    """Appends additional columns from Census data to the input DataFrame
-    based on the last name.
+class CensusLnData():
+    census_df = None
 
-    Removes extra space. Checks if the name is the Census data.  If it is,
-    outputs data from that row.
+    @classmethod
+    def census_ln(cls, df, namecol, year=2000):
+        """Appends additional columns from Census data to the input DataFrame
+        based on the last name.
 
-    Args:
-        df (:obj:`DataFrame`): Pandas DataFrame containing the last name
-            column.
-        namecol (str or int): Column's name or location of the name in
-            DataFrame.
-        year (int): The year of Census data to be used. (2000 or 2010)
-            (default is 2000)
+        Removes extra space. Checks if the name is the Census data.  If it is,
+        outputs data from that row.
 
-    Returns:
-        DataFrame: Pandas DataFrame with additional columns 'pctwhite',
-            'pctblack', 'pctapi', 'pctaian', 'pct2prace', 'pcthispanic'
+        Args:
+            df (:obj:`DataFrame`): Pandas DataFrame containing the last name
+                column.
+            namecol (str or int): Column's name or location of the name in
+                DataFrame.
+            year (int): The year of Census data to be used. (2000 or 2010)
+                (default is 2000)
 
-    """
+        Returns:
+            DataFrame: Pandas DataFrame with additional columns 'pctwhite',
+                'pctblack', 'pctapi', 'pctaian', 'pct2prace', 'pcthispanic'
 
-    if namecol not in df.columns:
-        print("No column `{0!s}` in the DataFrame".format(namecol))
-        return df
+        """
 
-    df['__last_name'] = df[namecol].str.strip()
-    df['__last_name'] = df['__last_name'].str.upper()
+        if namecol not in df.columns:
+            print("No column `{0!s}` in the DataFrame".format(namecol))
+            return df
 
-    if year == 2000:
-        census_df = pd.read_csv(CENSUS2000, usecols=['name'] + CENSUS_COLS)
-    elif year == 2010:
-        census_df = pd.read_csv(CENSUS2010, usecols=['name'] + CENSUS_COLS)
+        df['__last_name'] = df[namecol].str.strip()
+        df['__last_name'] = df['__last_name'].str.upper()
 
-    census_df.drop(census_df[census_df.name.isnull()].index, inplace=True)
+        if cls.census_df is None or cls.census_year != year:
+            if year == 2000:
+                cls.census_df = pd.read_csv(CENSUS2000, usecols=['name'] +
+                                            CENSUS_COLS)
+            elif year == 2010:
+                cls.census_df = pd.read_csv(CENSUS2010, usecols=['name'] +
+                                        CENSUS_COLS)
 
-    census_df.columns = ['__last_name'] + CENSUS_COLS
+            cls.census_df.drop(cls.census_df[cls.census_df.name.isnull()]
+                               .index, inplace=True)
 
-    rdf = pd.merge(df, census_df, how='left', on='__last_name')
+            cls.census_df.columns = ['__last_name'] + CENSUS_COLS
+            cls.census_year = year
 
-    del rdf['__last_name']
+        rdf = pd.merge(df, cls.census_df, how='left', on='__last_name')
 
-    return rdf
+        del rdf['__last_name']
+
+        return rdf
+
+
+census_ln = CensusLnData.census_ln
 
 
 def main(argv=sys.argv[1:]):
