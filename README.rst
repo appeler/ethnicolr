@@ -9,6 +9,8 @@ ethnicolr: Predict Race and Ethnicity From Name
     :target: https://pypi.python.org/pypi/ethnicolr
 .. image:: https://anaconda.org/soodoku/ethnicolr/badges/version.svg
     :target: https://anaconda.org/soodoku/ethnicolr/
+.. image:: https://pepy.tech/badge/ethnicolr
+    :target: https://pepy.tech/project/ethnicolr
 
 We exploit the US census data, the Florida voting registration data, and 
 the Wikipedia data collected by Skiena and colleagues, to predict race
@@ -18,10 +20,6 @@ Skiena et al.' Wikipedia data is at the ethnic group level, while the
 census data we use in the model (the raw data has additional categories of 
 Native Americans and Bi-racial) merely categorizes between Non-Hispanic Whites, 
 Non-Hispanic Blacks, Asians, and Hispanics.
-
-Downloads
-----------
-As of November 1st, 2018, the package had been downloaded over 12,000 times (see `saved BigQuery <https://bigquery.cloud.google.com/savedquery/267723140544:58ac43f7f8034d43b90b3ecd72f36114>`__).
 
 DIME Race
 -----------
