@@ -59,7 +59,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.2.0',
+    version='0.2.1',
 
     description='Predict Race/Ethnicity Based on Name',
     long_description=long_description,
@@ -117,7 +117,7 @@ setup(
         'h5py>=2.7.0',
         'Keras>=2.0.6',
         'numpy>=1.12.1',
-        'tensorflow>=1.1.0'
+        'tensorflow==1.12.3'
     ],
 
     # List additional groups of dependencies here (e.g. development
