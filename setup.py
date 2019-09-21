@@ -59,7 +59,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.2.1',
+    version='0.2.2',
 
     description='Predict Race/Ethnicity Based on Name',
     long_description=long_description,
@@ -113,10 +113,10 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'pandas>=0.19.2',
-        'h5py>=2.7.0',
-        'Keras>=2.0.6',
-        'numpy>=1.12.1',
+        'pandas==0.19.2',
+        'h5py==2.7.0',
+        'Keras==2.0.6',
+        'numpy==1.12.1',
         'tensorflow==1.12.3'
     ],
 
