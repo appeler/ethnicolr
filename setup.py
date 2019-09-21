@@ -115,7 +115,7 @@ setup(
     install_requires=[
         'pandas==0.19.2',
         'h5py==2.7.0',
-        'Keras==2.0.6',
+        'Keras==2.2.0',
         'numpy==1.12.1',
         'tensorflow==1.12.3'
     ],
