@@ -117,7 +117,7 @@ setup(
         'h5py==2.7.0',
         'Keras==2.2.0',
         'numpy==1.14.5',
-        'tensorflow==1.12.3'
+        'tensorflow==1.13.1'
     ],
 
     # List additional groups of dependencies here (e.g. development
