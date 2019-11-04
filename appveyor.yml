@@ -16,7 +16,6 @@ install:
   - "conda create -q -n test-environment python=%PYTHON_VERSION% scipy nose"
   - activate test-environment
   - pip install .
-  - pip install -r requirements.txt
 
 test_script:
   - nosetests
