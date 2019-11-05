@@ -43,6 +43,9 @@ The big benefit comes from when both the first name and last name is known.
 Install
 ----------
 
+We strongly recommend installing `ethnicolor` inside a Python virtual environment
+(see `venv documentation <https://docs.python.org/3/library/venv.html#creating-virtual-environments>`__)
+
 ::
 
     pip install ethnicolr
