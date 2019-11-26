@@ -52,7 +52,7 @@ We strongly recommend installing `ethnicolor` inside a Python virtual environmen
 
 Or ::
    
-   conda install ethnicolr
+   conda install -c soodoku ethnicolr 
 
 Note: If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
 
