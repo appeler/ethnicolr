@@ -1,0 +1,23 @@
+{
+  "name": "ethnicolr",
+  "version": "1.0.0",
+  "description": "infer race/ethnicity from names",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/appeler/ethnicolr.git"
+  },
+  "author": "suriyan laohaprapanon and gaurav sood",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/appeler/ethnicolr/issues"
+  },
+  "homepage": "https://github.com/appeler/ethnicolr#readme",
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" }
+}
