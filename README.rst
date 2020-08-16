@@ -54,7 +54,9 @@ Or ::
    
    conda install -c soodoku ethnicolr 
 
-Note: If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
+Notes: 
+ - Tensorflow 2.X is not supported at this time, therefore only Python 3.7 and lower will work.
+ - If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
 
 General API
 ------------------
