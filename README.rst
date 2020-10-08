@@ -136,7 +136,8 @@ we make some assumptions about where the data is
       -  if no year is given, data from the 2000 census is appended
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic
+      pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic. See 
+      `here <https://github.com/appeler/ethnicolr/blob/master/ethnicolr/data/census/census_2000.pdf>`__ for what the column names mean.
 
 -  **pred\_census\_ln**
 
@@ -158,7 +159,7 @@ we make some assumptions about where the data is
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
       race (white, black, asian, or hispanic), api (percentage chance asian),
-      black, hispanic, white.
+      black, hispanic, white. 
 
 -  **pred\_wiki\_ln**
 
