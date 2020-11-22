@@ -328,10 +328,12 @@ and the Florida voter registration data from early 2017.
 -  `The Wikipedia dataset <ethnicolr/data/wiki/>`__
 -  `Florida voter registration database <http://dx.doi.org/10.7910/DVN/UBIG3F>`__
 
-External Performance Validation and Uses
+Evaluation
 ------------------------------------------
-SCAN Health Plan, a Medicare Advantage plan that serves over 200,000 members throughout California used the software to better assess racial disparities of health among the people they serve. They only had racial data on about 47% of their members so used it to learn the race of the remaining 53%. On the data they had labels for, they found .9 AUC and 83% accuracy for the last name model.
- 
+1. SCAN Health Plan, a Medicare Advantage plan that serves over 200,000 members throughout California used the software to better assess racial disparities of health among the people they serve. They only had racial data on about 47% of their members so used it to learn the race of the remaining 53%. On the data they had labels for, they found .9 AUC and 83% accuracy for the last name model.
+
+2. Evaluation on NC Data: https://github.com/appeler/nc_race_ethnicity
+
 Authors
 ----------
 
