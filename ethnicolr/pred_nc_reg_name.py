@@ -100,7 +100,7 @@ class NCRegNameModel():
         return rdf
 
 
-pred_nc_reg_name = FloridaRegNameModel.pred_nc_reg_name
+pred_nc_reg_name = NCRegNameModel.pred_nc_reg_name
 
 
 def main(argv=sys.argv[1:]):
