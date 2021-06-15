@@ -54,8 +54,8 @@ Or ::
    
    conda install -c soodoku ethnicolr 
 
-Notes: 
- - Tensorflow 2.X is not supported at this time, therefore only Python 3.7 and lower will work.
+Notes:
+ - The models are run and verified on Tensorflow 2x using Python 3.7 and 3.8 and lower will work. tf1x has been deprecated.
  - If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
 
 General API
