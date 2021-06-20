@@ -90,9 +90,6 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Topic :: Scientific/Engineering :: Information Analysis',
         'Topic :: Software Development :: Libraries :: Python Modules',
@@ -173,7 +170,9 @@ setup(
             'pred_wiki_ln=ethnicolr.pred_wiki_ln:main',
             'pred_fl_reg_name=ethnicolr.pred_fl_reg_name:main',
             'pred_fl_reg_ln=ethnicolr.pred_fl_reg_ln:main',
-            'pred_nc_reg_name=ethnicolr.pred_nc_reg_name:main',
+            'pred_fl_reg_name=ethnicolr.pred_fl_reg_ln_five_cat:main',
+            'pred_fl_reg_name=ethnicolr.pred_fl_reg_name:main',
+            'pred_nc_reg_name=ethnicolr.pred_nc_reg_name_five_cat:main',
         ],
     },
     cmdclass={
