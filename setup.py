@@ -112,7 +112,6 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'python_requires==3.8',
         'pandas>=1.2.3',
         'h5py>=2.10.0',
         'Keras>=2.4.3',
