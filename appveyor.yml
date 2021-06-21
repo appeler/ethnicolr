@@ -1,13 +1,25 @@
+build: false
+
 environment:
   matrix:
-  - TOXENV: py38
+    - PYTHON_VERSION: 3.6
+      MINICONDA: C:\Miniconda36-x64
+    - PYTHON_VERSION: 3.7
+      MINICONDA: C:\Miniconda37-x64
+    - PYTHON_VERSION: 3.8
+      MINICONDA: C:\Miniconda38-x64
 
-build: off
+init:
+  - "ECHO %PYTHON_VERSION% %MINICONDA%"
 
 install:
-- "python -m pip install --upgrade pip"
-- pip install tox
-- pip install .
+  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - "conda create -q -n test-environment python=%PYTHON_VERSION% scipy nose"
+  - activate test-environment
+  - pip install .
 
 test_script:
   - nosetests
