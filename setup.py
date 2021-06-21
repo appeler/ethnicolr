@@ -170,9 +170,9 @@ setup(
             'pred_wiki_ln=ethnicolr.pred_wiki_ln:main',
             'pred_fl_reg_name=ethnicolr.pred_fl_reg_name:main',
             'pred_fl_reg_ln=ethnicolr.pred_fl_reg_ln:main',
-            'pred_fl_reg_name=ethnicolr.pred_fl_reg_ln_five_cat:main',
-            'pred_fl_reg_name=ethnicolr.pred_fl_reg_name:main',
-            'pred_nc_reg_name=ethnicolr.pred_nc_reg_name_five_cat:main',
+            'pred_fl_reg_ln_five_cat=ethnicolr.pred_fl_reg_ln_five_cat:main',
+            'pred_fl_reg_name_five_cat=ethnicolr.pred_fl_reg_name_five_cat:main',
+            'pred_nc_reg_name=ethnicolr.pred_nc_reg_name:main',
         ],
     },
     cmdclass={
