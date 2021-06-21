@@ -112,10 +112,10 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'pandas==0.24.2',
-        'h5py==2.9.0',
-        'Keras==2.2.4',
-        'numpy==1.16.4',
+        'pandas==1.2.3',
+        'h5py==2.10.0',
+        'Keras==2.4.3',
+        'numpy==1.19.5',
         'tensorflow==2.5.0'
     ],
 
