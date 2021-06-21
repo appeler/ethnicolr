@@ -1,6 +1,6 @@
 environment:
   matrix:
-    - PYTHON: "C:\Python38"
+  - TOXENV: py38
 
 build: off
 
