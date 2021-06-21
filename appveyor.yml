@@ -1,10 +1,11 @@
 environment:
   matrix:
-  - TOXENV: py38
+    - PYTHON: "C:\Python38"
 
 build: off
 
 install:
+- "python -m pip install --upgrade pip"
 - pip install .
 
 test_script:
