@@ -2,6 +2,10 @@ build: false
 
 environment:
   matrix:
+    - PYTHON_VERSION: 3.6
+      MINICONDA: C:\Miniconda36-x64
+    - PYTHON_VERSION: 3.7
+      MINICONDA: C:\Miniconda37-x64
     - PYTHON_VERSION: 3.8
       MINICONDA: C:\Miniconda38-x64
 
