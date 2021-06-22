@@ -201,6 +201,59 @@ we make some assumptions about where the data is
         race (white, black, asian, or hispanic), asian (percentage chance Asian),
         hispanic, nh_black, nh_white
 
+-  **pred\_fl\_reg\_ln\_five\_cat**
+
+   -  Input: pandas DataFrame or CSV and string or list of the name or location
+      of the column containing the last name.
+
+   -  What it does?:
+
+      -  Removes extra space, if there.
+      -  Uses the `last name FL registration
+         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_5classes_100k.ipynb>`__ to predict the race
+         and ethnicity.
+
+   -  Output: Appends the following columns to the pandas DataFrame or CSV:
+      race (white, black, asian, hispanic or other), asian (percentage chance Asian),
+      hispanic, nh_black, nh_white, other
+
+-  **pred\_fl\_reg\_name\_five\_cat**
+
+   -  Input: pandas DataFrame or CSV and string or list containing the name or
+      location of the column containing the first name, last name, middle
+      name, and suffix, if there. The first name and last name columns are
+      required. If no middle name of suffix columns are there, it is
+      assumed that there are no middle names or suffixes.
+
+   -  What it does:
+
+      -  Removes extra space.
+      -  Uses the `full name FL
+         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_5classes_100k.ipynb>`__ to predict the
+         race and ethnicity.
+
+   -  Output: Appends the following columns to the pandas DataFrame or CSV:
+      race (white, black, asian, hispanic, or other), asian (percentage chance Asian),
+      hispanic, nh_black, nh_white, other
+
+-  **pred\_nc\_reg\_name**
+
+   -  Input: pandas DataFrame or CSV and string or list containing the name or
+      location of the column containing the first name, last name, middle
+      name, and suffix, if there. The first name and last name columns are
+      required. If no middle name of suffix columns are there, it is
+      assumed that there are no middle names or suffixes.
+
+   -  What it does:
+
+      -  Removes extra space.
+      -  Uses the `full name NC
+         model <ethnicolr/models/ethnicolr_keras_lstm_nc_12_cat_model.ipynb>`__ to predict the
+         race and ethnicity.
+
+   -  Output: Appends the following columns to the pandas DataFrame or CSV:
+      race + ethnicity. The codebook is `here <https://github.com/appeler/nc_race_ethnicity>`__
+
 
 Using ethnicolr
 ----------------
