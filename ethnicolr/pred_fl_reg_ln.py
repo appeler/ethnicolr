@@ -122,8 +122,7 @@ def main(argv=sys.argv[1:]):
     if not column_exists(df, args.last):
         return -1
 
-    inst = Pred_fl_reg_ln()
-    rdf = inst.pred_fl_reg_ln(df, args.last)
+    rdf = pred_fl_reg_ln(df, args.last)
 
     print("Saving output to file: `{0:s}`".format(args.output))
     rdf.columns = fixup_columns(rdf.columns)
