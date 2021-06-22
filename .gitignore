@@ -3,6 +3,7 @@
 !.gitattributes
 !.travis.yml
 !.pep8speaks.yml
+!.github
 *.pyc
 *.log
 output.csv
