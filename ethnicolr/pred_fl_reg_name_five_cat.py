@@ -100,15 +100,15 @@ class FloridaRegNameFiveCatModel():
         return rdf
 
 
-pred_fl_reg_name = FloridaRegNameModel.pred_fl_reg_name
+pred_fl_reg_name_five_cat = FloridaRegNameFiveCatModel.pred_fl_reg_name
 
 
 def main(argv=sys.argv[1:]):
-    title = 'Predict Race/Ethnicity by name using Florida registration model'
+    title = 'Predict Race/Ethnicity by name using Florida registration model (Five Cat)'
     parser = argparse.ArgumentParser(description=title)
     parser.add_argument('input', default=None,
                         help='Input file')
-    parser.add_argument('-o', '--output', default='fl-pred-name-output.csv',
+    parser.add_argument('-o', '--output', default='fl-pred-name-five-cat-output.csv',
                         help='Output file with prediction data')
     parser.add_argument('-f', '--first', required=True,
                         help='Name or index location of column contains '
@@ -133,7 +133,7 @@ def main(argv=sys.argv[1:]):
     if not column_exists(df, args.first):
         return -1
 
-    rdf = pred_fl_reg_name(df, args.last, args.first)
+    rdf = pred_fl_reg_name_five_cat(df, args.last, args.first)
 
     print("Saving output to file: `{0:s}`".format(args.output))
     rdf.columns = fixup_columns(rdf.columns)

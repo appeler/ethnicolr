@@ -95,7 +95,7 @@ class FloridaRegLnFiveCatModel():
         return rdf
 
 
-pred_fl_reg_ln = FloridaRegLnModel.pred_fl_reg_ln
+pred_fl_reg_ln_five_cat = FloridaRegLnFiveCatModel.pred_fl_reg_ln
 
 
 def main(argv=sys.argv[1:]):
@@ -103,7 +103,7 @@ def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(description=title)
     parser.add_argument('input', default=None,
                         help='Input file')
-    parser.add_argument('-o', '--output', default='fl-pred-ln-output.csv',
+    parser.add_argument('-o', '--output', default='fl-pred-ln-five-cat-output.csv',
                         help='Output file with prediction data')
     parser.add_argument('-l', '--last', required=True,
                         help='Name or index location of column contains '
@@ -122,8 +122,7 @@ def main(argv=sys.argv[1:]):
     if not column_exists(df, args.last):
         return -1
 
-    inst = Pred_fl_reg_ln()
-    rdf = inst.pred_fl_reg_ln(df, args.last)
+    rdf = pred_fl_reg_ln_five_cat(df, args.last)
 
     print("Saving output to file: `{0:s}`".format(args.output))
     rdf.columns = fixup_columns(rdf.columns)
