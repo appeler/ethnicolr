@@ -1,5 +1,2 @@
-h5py>2.10.0
-Keras==2.4.3
-numpy==1.19.5
-pandas>1.2.3
 tensorflow==2.5.0
+pandas>1.2.3

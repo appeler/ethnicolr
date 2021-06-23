@@ -5,8 +5,8 @@ import sys
 import argparse
 import pandas as pd
 import numpy as np
-from keras.models import load_model
-from keras.preprocessing import sequence
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import sequence
 
 from pkg_resources import resource_filename
 
