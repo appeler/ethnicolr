@@ -76,7 +76,9 @@ class WikiLnModel():
                                                              c, NGRAMS)))
         X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
 
-        df.loc[nn, '__pred'] = cls.model.predict_classes(X, verbose=2)
+        proba = cls.model.predict(X, verbose=2)
+
+        df.loc[nn, '__pred'] = np.argmax(proba, axis=-1)
 
         df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
                                                     cls.race[int(c)])
@@ -84,8 +86,6 @@ class WikiLnModel():
         # take out temporary working columns
         del df['__pred']
         del df['__last_name']
-
-        proba = cls.model.predict_proba(X, verbose=2)
 
         pdf = pd.DataFrame(proba, columns=cls.race)
         pdf.set_index(df[nn].index, inplace=True)
