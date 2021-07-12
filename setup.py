@@ -115,7 +115,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         'tensorflow==2.5.0',
-        'pandas>1.2.3'
+        'pandas>=1.1.5'
     ],
 
     # List additional groups of dependencies here (e.g. development
