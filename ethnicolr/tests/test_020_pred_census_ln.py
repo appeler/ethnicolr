@@ -26,12 +26,12 @@ class TestCensusLn(unittest.TestCase):
 
     def test_pred_census_ln_2000(self):
         odf = pred_census_ln(self.df, 'last', 2000)
-        self.assertTrue(all(odf.sum(axis=1) == 1.0))
+        self.assertTrue(all(odf.sum(axis=1).round(1) == 1.0))
         self.assertTrue(all(odf.true_race == odf.race))
 
     def test_pred_census_ln_2010(self):
         odf = pred_census_ln(self.df, 'last', 2010)
-        self.assertTrue(all(odf.sum(axis=1) == 1.0))
+        self.assertTrue(all(odf.sum(axis=1).round(1) == 1.0))
         self.assertTrue(all(odf.true_race == odf.race))
 
 
