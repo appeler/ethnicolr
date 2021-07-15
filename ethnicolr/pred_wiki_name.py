@@ -14,7 +14,7 @@ from .utils import column_exists, find_ngrams, fixup_columns
 
 MODELFN = "models/wiki/lstm/wiki_name_lstm.h5"
 VOCABFN = "models/wiki/lstm/wiki_name_vocab.csv"
-RACEFN = "models/wiki/lstm/wiki_race.csv"
+RACEFN = "models/wiki/lstm/wiki_name_race.csv"
 
 MODEL = resource_filename(__name__, MODELFN)
 VOCAB = resource_filename(__name__, VOCABFN)
