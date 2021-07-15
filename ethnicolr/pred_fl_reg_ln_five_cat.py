@@ -14,7 +14,7 @@ from .utils import column_exists, find_ngrams, fixup_columns
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_5_cat.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab_5_cat.csv"
-RACEFN = "models/fl_voter_reg/lstm/fl_race_five_cat.csv"
+RACEFN = "models/fl_voter_reg/lstm/fl_ln_five_cat_race.csv"
 
 MODEL = resource_filename(__name__, MODELFN)
 VOCAB = resource_filename(__name__, VOCABFN)
