@@ -249,7 +249,7 @@ we make some assumptions about where the data is
 
       -  Removes extra space, if there.
       -  Uses the `last name FL registration
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_5classes_100k.ipynb>`__ to predict the race
+         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb>`__ to predict the race
          and ethnicity.
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
@@ -268,7 +268,7 @@ we make some assumptions about where the data is
 
       -  Removes extra space.
       -  Uses the `full name FL
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_5classes_100k.ipynb>`__ to predict the
+         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb>`__ to predict the
          race and ethnicity.
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
