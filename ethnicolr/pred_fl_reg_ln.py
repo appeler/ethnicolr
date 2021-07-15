@@ -6,15 +6,15 @@ import sys
 
 import numpy as np
 import pandas as pd
-from keras.models import load_model
-from keras.preprocessing import sequence
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
 from .utils import column_exists, find_ngrams, fixup_columns
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab.csv"
-RACEFN = "models/fl_voter_reg/lstm/fl_race.csv"
+RACEFN = "models/fl_voter_reg/lstm/fl_ln_race.csv"
 
 MODEL = resource_filename(__name__, MODELFN)
 VOCAB = resource_filename(__name__, VOCABFN)
@@ -24,19 +24,13 @@ NGRAMS = 2
 FEATURE_LEN = 20
 
 
-class Pred_fl_reg_ln():
+class FloridaRegLnModel():
+    vocab = None
+    race = None
+    model = None
 
-    def __init__(self):
-        #  sort n-gram by freq (highest -> lowest)
-        vdf = pd.read_csv(VOCAB)
-        self.vocab = vdf.vocab.tolist()
-
-        rdf = pd.read_csv(RACE)
-        self.race = rdf.race.tolist()
-
-        self.model = load_model(MODEL)
-
-    def pred_fl_reg_ln(self, df, namecol):
+    @classmethod
+    def pred_fl_reg_ln(cls, df, namecol):
         """Predict the race/ethnicity by the last name using Florida voter model.
 
         Using the Florida voter last name model to predict the race/ethnicity of
@@ -59,29 +53,49 @@ class Pred_fl_reg_ln():
             print("No column `{0!s}` in the DataFrame".format(namecol))
             return df
 
+        nn = df[namecol].notnull()
+        if df[nn].shape[0] == 0:
+            return df
+
         df['__last_name'] = df[namecol].str.strip()
         df['__last_name'] = df['__last_name'].str.title()
 
+        if cls.model is None:
+            #  sort n-gram by freq (highest -> lowest)
+            vdf = pd.read_csv(VOCAB)
+            cls.vocab = vdf.vocab.tolist()
+
+            rdf = pd.read_csv(RACE)
+            cls.race = rdf.race.tolist()
+
+            cls.model = load_model(MODEL)
+
         # build X from index of n-gram sequence
-        X = np.array(df['__last_name'].apply(lambda c: find_ngrams(self.vocab, c, NGRAMS)))
+        X = np.array(df[nn]['__last_name'].apply(lambda c:
+                                                 find_ngrams(cls.vocab,
+                                                             c, NGRAMS)))
         X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
 
-        df['__pred'] = self.model.predict_classes(X, verbose=2)
+        proba = cls.model.predict(X, verbose=2)
 
-        df['race'] = df['__pred'].apply(lambda c: self.race[c])
+        df.loc[nn, '__pred'] = np.argmax(proba, axis=-1)
+
+        df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
+                                                    cls.race[int(c)])
 
         # take out temporary working columns
         del df['__pred']
         del df['__last_name']
 
-        proba = self.model.predict_proba(X, verbose=2)
-
-        pdf = pd.DataFrame(proba, columns=self.race)
-        pdf.set_index(df.index, inplace=True)
+        pdf = pd.DataFrame(proba, columns=cls.race)
+        pdf.set_index(df[nn].index, inplace=True)
 
         rdf = pd.concat([df, pdf], axis=1)
 
         return rdf
+
+
+pred_fl_reg_ln = FloridaRegLnModel.pred_fl_reg_ln
 
 
 def main(argv=sys.argv[1:]):
@@ -108,8 +122,7 @@ def main(argv=sys.argv[1:]):
     if not column_exists(df, args.last):
         return -1
 
-    inst = Pred_fl_reg_ln()
-    rdf = inst.pred_fl_reg_ln(df, args.last)
+    rdf = pred_fl_reg_ln(df, args.last)
 
     print("Saving output to file: `{0:s}`".format(args.output))
     rdf.columns = fixup_columns(rdf.columns)

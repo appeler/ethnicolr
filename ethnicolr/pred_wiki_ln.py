@@ -5,8 +5,8 @@ import sys
 import argparse
 import pandas as pd
 import numpy as np
-from keras.models import load_model
-from keras.preprocessing import sequence
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import sequence
 
 from pkg_resources import resource_filename
 
@@ -24,61 +24,78 @@ NGRAMS = 2
 FEATURE_LEN = 20
 
 
-def pred_wiki_ln(df, namecol):
-    """Predict the race/ethnicity by the last name using Wiki model.
+class WikiLnModel():
+    vocab = None
+    race = None
+    model = None
 
-    Using the Wiki last name model to predict the race/ethnicity of the input
-    DataFrame.
+    @classmethod
+    def pred_wiki_ln(cls, df, namecol):
+        """Predict the race/ethnicity by the last name using Wiki model.
 
-    Args:
-        df (:obj:`DataFrame`): Pandas DataFrame containing the last name
-            column.
-        namecol (str or int): Column's name or location of the name in
-            DataFrame.
+        Using the Wiki last name model to predict the race/ethnicity of the input
+        DataFrame.
 
-    Returns:
-        DataFrame: Pandas DataFrame with additional columns:
-            - `race` the predict result
-            - Additional columns for probability of each classes.
+        Args:
+            df (:obj:`DataFrame`): Pandas DataFrame containing the last name
+                column.
+            namecol (str or int): Column's name or location of the name in
+                DataFrame.
 
-    """
+        Returns:
+            DataFrame: Pandas DataFrame with additional columns:
+                - `race` the predict result
+                - Additional columns for probability of each classes.
 
-    if namecol not in df.columns:
-        print("No column `{0!s}` in the DataFrame".format(namecol))
-        return df
+        """
 
-    df['__last_name'] = df[namecol].str.strip()
-    df['__last_name'] = df['__last_name'].str.title()
+        if namecol not in df.columns:
+            print("No column `{0!s}` in the DataFrame".format(namecol))
+            return df
 
-    #  sort n-gram by freq (highest -> lowest)
-    vdf = pd.read_csv(VOCAB)
-    vocab = vdf.vocab.tolist()
+        nn = df[namecol].notnull()
+        if df[nn].shape[0] == 0:
+            return df
 
-    rdf = pd.read_csv(RACE)
-    race = rdf.race.tolist()
+        df['__last_name'] = df[namecol].str.strip()
+        df['__last_name'] = df['__last_name'].str.title()
 
-    model = load_model(MODEL)
+        if cls.model is None:
+            #  sort n-gram by freq (highest -> lowest)
+            vdf = pd.read_csv(VOCAB)
+            cls.vocab = vdf.vocab.tolist()
 
-    # build X from index of n-gram sequence
-    X = np.array(df.__last_name.apply(lambda c: find_ngrams(vocab, c, NGRAMS)))
-    X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
+            rdf = pd.read_csv(RACE)
+            cls.race = rdf.race.tolist()
 
-    df['__pred'] = model.predict_classes(X, verbose=2)
+            cls.model = load_model(MODEL)
 
-    df['race'] = df.__pred.apply(lambda c: race[c])
+        # build X from index of n-gram sequence
+        X = np.array(df[nn]['__last_name'].apply(lambda c:
+                                                 find_ngrams(cls.vocab,
+                                                             c, NGRAMS)))
+        X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
 
-    # take out temporary working columns
-    del df['__pred']
-    del df['__last_name']
+        proba = cls.model.predict(X, verbose=2)
 
-    proba = model.predict_proba(X, verbose=2)
+        df.loc[nn, '__pred'] = np.argmax(proba, axis=-1)
 
-    pdf = pd.DataFrame(proba, columns=race)
-    pdf.set_index(df.index, inplace=True)
+        df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
+                                                    cls.race[int(c)])
 
-    rdf = pd.concat([df, pdf], axis=1)
+        # take out temporary working columns
+        del df['__pred']
+        del df['__last_name']
 
-    return rdf
+        pdf = pd.DataFrame(proba, columns=cls.race)
+        pdf.set_index(df[nn].index, inplace=True)
+
+        rdf = pd.concat([df, pdf], axis=1)
+
+        return rdf
+
+
+pred_wiki_ln = WikiLnModel.pred_wiki_ln
 
 
 def main(argv=sys.argv[1:]):

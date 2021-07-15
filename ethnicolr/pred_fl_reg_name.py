@@ -5,8 +5,8 @@ import sys
 import argparse
 import pandas as pd
 import numpy as np
-from keras.models import load_model
-from keras.preprocessing import sequence
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import sequence
 
 from pkg_resources import resource_filename
 
@@ -14,7 +14,7 @@ from .utils import column_exists, find_ngrams, fixup_columns
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_name_lstm.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_name_vocab.csv"
-RACEFN = "models/fl_voter_reg/lstm/fl_race.csv"
+RACEFN = "models/fl_voter_reg/lstm/fl_name_race.csv"
 
 MODEL = resource_filename(__name__, MODELFN)
 VOCAB = resource_filename(__name__, VOCABFN)
@@ -24,71 +24,83 @@ NGRAMS = 2
 FEATURE_LEN = 25
 
 
-def join_names(r):
-    return ' '.join(r).title()
+class FloridaRegNameModel():
+    vocab = None
+    race = None
+    model = None
+
+    @classmethod
+    def pred_fl_reg_name(cls, df, lname_col, fname_col):
+        """Predict the race/ethnicity by the full name using Florida voter model.
+
+        Using the Florida voter full name model to predict the race/ethnicity of
+        the input DataFrame.
+
+        Args:
+            df (:obj:`DataFrame`): Pandas DataFrame containing the last name and
+                first name column.
+            lname_col (str or int): Column's name or location of the last name in
+                DataFrame.
+            fname_col (str or int): Column's name or location of the first name in
+                DataFrame.
+
+        Returns:
+            DataFrame: Pandas DataFrame with additional columns:
+                - `race` the predict result
+                - Additional columns for probability of each classes.
+
+        """
+
+        if lname_col not in df.columns:
+            print("No column `{0!s}` in the DataFrame".format(lname_col))
+            return df
+        if fname_col not in df.columns:
+            print("No column `{0!s}` in the DataFrame".format(fname_col))
+            return df
+
+        df['__name'] = (df[lname_col] + ' ' + df[fname_col]).str.title()
+
+        nn = df['__name'].notnull()
+        if df[nn].shape[0] == 0:
+            del df['__name']
+            return df
+
+        if cls.model is None:
+            #  sort n-gram by freq (highest -> lowest)
+            vdf = pd.read_csv(VOCAB)
+            cls.vocab = vdf.vocab.tolist()
+
+            rdf = pd.read_csv(RACE)
+            cls.race = rdf.race.tolist()
+
+            cls.model = load_model(MODEL)
+
+        # build X from index of n-gram sequence
+        X = np.array(df[nn]['__name'].apply(lambda c:
+                                            find_ngrams(cls.vocab,
+                                                        c, NGRAMS)))
+        X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
+
+        proba = cls.model.predict(X, verbose=2)
+
+        df.loc[nn, '__pred'] = np.argmax(proba, axis=-1)
+
+        df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
+                                                    cls.race[int(c)])
+
+        # take out temporary working columns
+        del df['__pred']
+        del df['__name']
+
+        pdf = pd.DataFrame(proba, columns=cls.race)
+        pdf.set_index(df[nn].index, inplace=True)
+
+        rdf = pd.concat([df, pdf], axis=1)
+
+        return rdf
 
 
-def pred_fl_reg_name(df, lname_col, fname_col):
-    """Predict the race/ethnicity by the full name using Florida voter model.
-
-    Using the Florida voter full name model to predict the race/ethnicity of
-    the input DataFrame.
-
-    Args:
-        df (:obj:`DataFrame`): Pandas DataFrame containing the last name and
-            first name column.
-        lname_col (str or int): Column's name or location of the last name in
-            DataFrame.
-        fname_col (str or int): Column's name or location of the first name in
-            DataFrame.
-
-    Returns:
-        DataFrame: Pandas DataFrame with additional columns:
-            - `race` the predict result
-            - Additional columns for probability of each classes.
-
-    """
-
-    if lname_col not in df.columns:
-        print("No column `{0!s}` in the DataFrame".format(lname_col))
-        return df
-    if fname_col not in df.columns:
-        print("No column `{0!s}` in the DataFrame".format(fname_col))
-        return df
-
-    names = [lname_col, fname_col]
-
-    df['__name'] = df[names].apply(lambda r: join_names(r), axis=1)
-
-    #  sort n-gram by freq (highest -> lowest)
-    vdf = pd.read_csv(VOCAB)
-    vocab = vdf.vocab.tolist()
-
-    rdf = pd.read_csv(RACE)
-    race = rdf.race.tolist()
-
-    model = load_model(MODEL)
-
-    # build X from index of n-gram sequence
-    X = np.array(df.__name.apply(lambda c: find_ngrams(vocab, c, NGRAMS)))
-    X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
-
-    df['__pred'] = model.predict_classes(X, verbose=2)
-
-    df['race'] = df.__pred.apply(lambda c: race[c])
-
-    # take out temporary working columns
-    del df['__pred']
-    del df['__name']
-
-    proba = model.predict_proba(X, verbose=2)
-
-    pdf = pd.DataFrame(proba, columns=race)
-    pdf.set_index(df.index, inplace=True)
-
-    rdf = pd.concat([df, pdf], axis=1)
-
-    return rdf
+pred_fl_reg_name = FloridaRegNameModel.pred_fl_reg_name
 
 
 def main(argv=sys.argv[1:]):

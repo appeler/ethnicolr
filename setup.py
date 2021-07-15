@@ -59,9 +59,9 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1.7',
+    version='0.7.0',
 
-    description='Predict Race/Ethnicity Based on Name',
+    description='Predict Race/Ethnicity Based on Sequence of Characters in the Name',
     long_description=long_description,
 
     # The project's main homepage.
@@ -90,8 +90,9 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Scientific/Engineering :: Information Analysis',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Utilities'
@@ -113,11 +114,8 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'pandas>=0.19.2',
-        'h5py>=2.7.0',
-        'Keras>=2.0.6',
-        'numpy>=1.12.1',
-        'tensorflow>=1.1.0'
+        'tensorflow==2.5.0',
+        'pandas>=1.1.5'
     ],
 
     # List additional groups of dependencies here (e.g. development
@@ -147,6 +145,8 @@ setup(
                       'models/wiki/lstm/*.csv',
                       'models/fl_voter_reg/lstm/*.h5',
                       'models/fl_voter_reg/lstm/*.csv',
+                      'models/nc_voter_reg/lstm/*.h5',
+                      'models/nc_voter_reg/lstm/*.csv',
                       'data/input*.csv',
                       'examples/*.ipynb'],
     },
@@ -169,6 +169,9 @@ setup(
             'pred_wiki_ln=ethnicolr.pred_wiki_ln:main',
             'pred_fl_reg_name=ethnicolr.pred_fl_reg_name:main',
             'pred_fl_reg_ln=ethnicolr.pred_fl_reg_ln:main',
+            'pred_fl_reg_ln_five_cat=ethnicolr.pred_fl_reg_ln_five_cat:main',
+            'pred_fl_reg_name_five_cat=ethnicolr.pred_fl_reg_name_five_cat:main',
+            'pred_nc_reg_name=ethnicolr.pred_nc_reg_name:main',
         ],
     },
     cmdclass={

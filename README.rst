@@ -1,14 +1,16 @@
 ethnicolr: Predict Race and Ethnicity From Name
 ----------------------------------------------------
 
-.. image:: https://travis-ci.org/appeler/ethnicolr.svg?branch=master
-    :target: https://travis-ci.org/appeler/ethnicolr
-.. image:: https://ci.appveyor.com/api/projects/status/qfvbu8h99ymtw2ub?svg=true
-    :target: https://ci.appveyor.com/project/soodoku/ethnicolr
+.. image:: https://travis-ci.com/appeler/ethnicolr.svg?branch=master
+    :target: https://travis-ci.com/appeler/ethnicolr
+.. image:: https://ci.appveyor.com/api/projects/status/u9fe72hn8nnhmaxt?svg=true
+    :target: https://ci.appveyor.com/project/soodoku/ethnicolr-m6u1p
 .. image:: https://img.shields.io/pypi/v/ethnicolr.svg
     :target: https://pypi.python.org/pypi/ethnicolr
 .. image:: https://anaconda.org/soodoku/ethnicolr/badges/version.svg
     :target: https://anaconda.org/soodoku/ethnicolr/
+.. image:: https://pepy.tech/badge/ethnicolr
+    :target: https://pepy.tech/project/ethnicolr
 
 We exploit the US census data, the Florida voting registration data, and 
 the Wikipedia data collected by Skiena and colleagues, to predict race
@@ -18,10 +20,6 @@ Skiena et al.' Wikipedia data is at the ethnic group level, while the
 census data we use in the model (the raw data has additional categories of 
 Native Americans and Bi-racial) merely categorizes between Non-Hispanic Whites, 
 Non-Hispanic Blacks, Asians, and Hispanics.
-
-Downloads
-----------
-As of February 3rd, 2018, the package had been downloaded over 1,900 times (see `saved BigQuery <https://bigquery.cloud.google.com/savedquery/267723140544:58ac43f7f8034d43b90b3ecd72f36114>`__).
 
 DIME Race
 -----------
@@ -45,15 +43,20 @@ The big benefit comes from when both the first name and last name is known.
 Install
 ----------
 
+We strongly recommend installing `ethnicolor` inside a Python virtual environment
+(see `venv documentation <https://docs.python.org/3/library/venv.html#creating-virtual-environments>`__)
+
 ::
 
     pip install ethnicolr
 
 Or ::
    
-   conda install ethnicolr
+   conda install -c soodoku ethnicolr 
 
-Note: If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
+Notes:
+ - The models are run and verified on Tensorflow 2x using Python 3.7 and 3.8 and lower will work. tf1x has been deprecated.
+ - If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
 
 General API
 ------------------
@@ -133,7 +136,8 @@ we make some assumptions about where the data is
       -  if no year is given, data from the 2000 census is appended
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic
+      pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic. See 
+      `here <https://github.com/appeler/ethnicolr/blob/master/ethnicolr/data/census/census_2000.pdf>`__ for what the column names mean.
 
 -  **pred\_census\_ln**
 
@@ -155,7 +159,7 @@ we make some assumptions about where the data is
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
       race (white, black, asian, or hispanic), api (percentage chance asian),
-      black, hispanic, white.
+      black, hispanic, white. 
 
 -  **pred\_wiki\_ln**
 
@@ -228,13 +232,67 @@ we make some assumptions about where the data is
    -  What it does:
 
       -  Removes extra space.
-      -  Uses the `full name wiki
+      -  Uses the `full name FL
          model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_name.ipynb>`__ to predict the
          race and ethnicity.
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
       race (white, black, asian, or hispanic), asian (percentage chance Asian),
       hispanic, nh_black, nh_white
+
+-  **pred\_fl\_reg\_ln\_five\_cat**
+
+   -  Input: pandas DataFrame or CSV and string or list of the name or location
+      of the column containing the last name.
+
+   -  What it does?:
+
+      -  Removes extra space, if there.
+      -  Uses the `last name FL registration
+         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb>`__ to predict the race
+         and ethnicity.
+
+   -  Output: Appends the following columns to the pandas DataFrame or CSV:
+      race (white, black, asian, hispanic or other), asian (percentage chance Asian),
+      hispanic, nh_black, nh_white, other
+
+-  **pred\_fl\_reg\_name\_five\_cat**
+
+   -  Input: pandas DataFrame or CSV and string or list containing the name or
+      location of the column containing the first name, last name, middle
+      name, and suffix, if there. The first name and last name columns are
+      required. If no middle name of suffix columns are there, it is
+      assumed that there are no middle names or suffixes.
+
+   -  What it does:
+
+      -  Removes extra space.
+      -  Uses the `full name FL
+         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb>`__ to predict the
+         race and ethnicity.
+
+   -  Output: Appends the following columns to the pandas DataFrame or CSV:
+      race (white, black, asian, hispanic, or other), asian (percentage chance Asian),
+      hispanic, nh_black, nh_white, other
+
+-  **pred\_nc\_reg\_name**
+
+   -  Input: pandas DataFrame or CSV and string or list containing the name or
+      location of the column containing the first name, last name, middle
+      name, and suffix, if there. The first name and last name columns are
+      required. If no middle name of suffix columns are there, it is
+      assumed that there are no middle names or suffixes.
+
+   -  What it does:
+
+      -  Removes extra space.
+      -  Uses the `full name NC
+         model <ethnicolr/models/ethnicolr_keras_lstm_nc_12_cat_model.ipynb>`__ to predict the
+         race and ethnicity.
+
+   -  Output: Appends the following columns to the pandas DataFrame or CSV:
+      race + ethnicity. The codebook is `here <https://github.com/appeler/nc_race_ethnicity>`__
+
 
 Using ethnicolr
 ----------------
@@ -323,6 +381,12 @@ and the Florida voter registration data from early 2017.
 -  `Census <ethnicolr/data/census/>`__
 -  `The Wikipedia dataset <ethnicolr/data/wiki/>`__
 -  `Florida voter registration database <http://dx.doi.org/10.7910/DVN/UBIG3F>`__
+
+Evaluation
+------------------------------------------
+1. SCAN Health Plan, a Medicare Advantage plan that serves over 200,000 members throughout California used the software to better assess racial disparities of health among the people they serve. They only had racial data on about 47% of their members so used it to learn the race of the remaining 53%. On the data they had labels for, they found .9 AUC and 83% accuracy for the last name model.
+
+2. Evaluation on NC Data: https://github.com/appeler/nc_race_ethnicity
 
 Authors
 ----------
