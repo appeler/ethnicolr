@@ -12,6 +12,7 @@ from pkg_resources import resource_filename
 
 from .utils import column_exists, find_ngrams, fixup_columns
 
+
 MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_uncrtn.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab.csv"
 RACEFN = "models/fl_voter_reg/lstm/fl_ln_race.csv"
@@ -41,10 +42,16 @@ class FloridaRegLnCnIntModel():
                 column.
             namecol (str or int): Column's name or location of the name in
                 DataFrame.
+            num_iter (int): Number of iterations/Predictions for each entry
+                that determines model uncertainity
+            conf_int (float): confidence interval of the prediction made
 
         Returns:
             DataFrame: Pandas DataFrame with additional columns:
                 - `race` the predict result
+                - probability of the class predicted by the model
+                - standard error of the prediction made by the model
+                - confidence interval as list [lower quantile, upper quantile]
                 - Additional columns for probability of each classes.
 
         """
@@ -85,6 +92,11 @@ class FloridaRegLnCnIntModel():
         for _ in range(num_iter):
             proba.append(cls.model.predict(X, verbose=2))
 
+        # creating arrays for the confidence interval analysis:
+        #   1 - mean of the predictions
+        #   2 - std deviation of the predictions
+        #   3 - lower quantile of the predictions
+        #   4 - upper quantile of the predictions
         proba = np.array(proba)
         mean_arr = proba.mean(axis=0).reshape(-1, len(cls.race))
         std_arr = proba.std(axis=0).reshape(-1, len(cls.race))
@@ -97,24 +109,23 @@ class FloridaRegLnCnIntModel():
                                                     cls.race[int(c)])
         stats = np.zeros((df.shape[0], 4))
         conf_int = []
+
+        # selecting the statistics of the chosen class
         for i in range(df.shape[0]):
             select_class = np.argmax(mean_arr[i], axis=-1)
             stats[i, 0] = mean_arr[i, select_class]
             stats[i, 1] = std_arr[i, select_class]
             stats[i, 2] = pct_low_arr[i, select_class]
             stats[i, 3] = pct_high_arr[i, select_class]
-            conf_int.append(np.array([stats[1,2],stats[i,3]]).tolist())
-
+            conf_int.append(np.array([stats[i,2],stats[i,3]]).tolist())
 
         df['proba'] = stats[:,0]
         df['std_err'] = stats[:,1]
         df['conf_int'] = conf_int
 
-
         # take out temporary working columns
         del df['__pred']
         del df['__last_name']
-
 
         pdf = pd.DataFrame(mean_arr, columns=cls.race)
         pdf.set_index(df[nn].index, inplace=True)
@@ -135,7 +146,7 @@ def main(argv=sys.argv[1:]):
                         help='Output file with prediction data')
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=0.9, type=int,
+    parser.add_argument('-c', '--conf', default=0.9, type=float,
                          help='Confidence interval of Predictions')
     parser.add_argument('-l', '--last', required=True,
                         help='Name or index location of column contains '
