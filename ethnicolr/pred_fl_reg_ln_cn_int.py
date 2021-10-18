@@ -10,7 +10,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
-from .utils import column_exists, find_ngrams, fixup_columns
+from ethnicolr.utils import column_exists, find_ngrams, fixup_columns
 
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_uncrtn.h5"
