@@ -117,10 +117,10 @@ class FloridaRegLnCnIntModel():
             stats[i, 1] = std_arr[i, select_class]
             stats[i, 2] = pct_low_arr[i, select_class]
             stats[i, 3] = pct_high_arr[i, select_class]
-            conf_int.append(np.array([stats[i,2],stats[i,3]]).tolist())
+            conf_int.append(np.array([stats[i, 2], stats[i, 3]]).tolist())
 
-        df['proba'] = stats[:,0]
-        df['std_err'] = stats[:,1]
+        df['proba'] = stats[:, 0]
+        df['std_err'] = stats[:, 1]
         df['conf_int'] = conf_int
 
         # take out temporary working columns
@@ -133,6 +133,7 @@ class FloridaRegLnCnIntModel():
         rdf = pd.concat([df, pdf], axis=1)
 
         return rdf
+
 
 pred_fl_reg_ln_cn_int = FloridaRegLnCnIntModel.pred_fl_reg_ln_cn_int
 

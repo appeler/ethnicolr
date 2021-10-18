@@ -12,5 +12,6 @@ from .pred_fl_reg_name_five_cat import pred_fl_reg_name_five_cat
 
 
 __all__ = ['census_ln', 'pred_census_ln', 'pred_wiki_ln', 'pred_wiki_name',
-           'pred_fl_reg_ln', 'pred_fl_reg_ln_cn_int', 'pred_fl_reg_name', 'pred_nc_reg_name',
-           'pred_fl_reg_ln_five_cat', 'pred_fl_reg_name_five_cat']
+           'pred_fl_reg_ln', 'pred_fl_reg_ln_cn_int', 'pred_fl_reg_name',
+           'pred_nc_reg_name', 'pred_fl_reg_ln_five_cat',
+           'pred_fl_reg_name_five_cat']
