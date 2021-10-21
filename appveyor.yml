@@ -23,7 +23,7 @@ install:
   - "conda create -q -n test-environment python=%PYTHON_VERSION% scipy nose"
   - activate test-environment
   - pip install .
-  - pip install tensorflow --user --upgrade --force-reinstall
+  - pip install tensorflow scipy --user --upgrade --force-reinstall
 
 test_script:
   - nosetests
