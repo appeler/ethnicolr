@@ -221,6 +221,24 @@ we make some assumptions about where the data is
       race (white, black, asian, or hispanic), asian (percentage chance Asian),
       hispanic, nh_black, nh_white
 
+-  **pred\_fl\_reg\_ln\_cn\_int**
+
+   -  Input: pandas DataFrame or CSV, string or list of the name or location
+      of the column containing the last name,  the number of iterations to calculate uncertainty
+      and the confidence interval for the model's prediction
+
+   -  What it does?:
+
+      -  Removes extra space, if there.
+      -  Uses the `last name FL registration
+         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_conf_int.ipynb>`__ to predict the race
+         and ethnicity.
+
+   -  Output: Appends the following columns to the pandas DataFrame or CSV:
+      race (white, black, asian, or hispanic), probability of that prediction, the standard error
+      of the prediction, the confidence interval requested as a list (lower, upper quantile) and
+      asian (percentage chance Asian), hispanic, nh_black, nh_white
+
 -  **pred\_fl\_reg\_name**
 
    -  Input: pandas DataFrame or CSV and string or list containing the name or
