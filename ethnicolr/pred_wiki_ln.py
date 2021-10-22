@@ -10,7 +10,7 @@ from tensorflow.keras.preprocessing import sequence
 
 from pkg_resources import resource_filename
 
-from .utils import column_exists, find_ngrams, fixup_columns
+from .utils import column_exists, find_ngrams, fixup_columns, transform_and_pred
 
 MODELFN = "models/wiki/lstm/wiki_ln_lstm.h5"
 VOCABFN = "models/wiki/lstm/wiki_ln_vocab.csv"
@@ -70,27 +70,7 @@ class WikiLnModel():
 
             cls.model = load_model(MODEL)
 
-        # build X from index of n-gram sequence
-        X = np.array(df[nn]['__last_name'].apply(lambda c:
-                                                 find_ngrams(cls.vocab,
-                                                             c, NGRAMS)))
-        X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
-
-        proba = cls.model.predict(X, verbose=2)
-
-        df.loc[nn, '__pred'] = np.argmax(proba, axis=-1)
-
-        df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
-                                                    cls.race[int(c)])
-
-        # take out temporary working columns
-        del df['__pred']
-        del df['__last_name']
-
-        pdf = pd.DataFrame(proba, columns=cls.race)
-        pdf.set_index(df[nn].index, inplace=True)
-
-        rdf = pd.concat([df, pdf], axis=1)
+        rdf = transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN)
 
         return rdf
 

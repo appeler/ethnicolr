@@ -2,7 +2,6 @@
 
 import sys
 
-
 def isstring(s):
     # if we use Python 3
     if (sys.version_info[0] >= 3):
@@ -79,3 +78,29 @@ def find_ngrams(vocab, text, n):
             idx = 0
         wi.append(idx)
     return wi
+
+def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN):
+
+    # build X from index of n-gram sequence
+    X = np.array(df[nn][namecol].apply(lambda c:
+                                                 find_ngrams(cls.vocab,
+                                                             c, NGRAMS)))
+    X = sequence.pad_sequences(X, maxlen=maxlen)
+
+    proba = cls.model.predict(X, verbose=2)
+
+    df.loc[nn, '__pred'] = np.argmax(proba, axis=-1)
+
+    df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
+                                                    cls.race[int(c)])
+
+    # take out temporary working columns
+    del df['__pred']
+    del df[namecol]
+
+    pdf = pd.DataFrame(proba, columns=cls.race)
+    pdf.set_index(df[nn].index, inplace=True)
+
+    rdf = pd.concat([df, pdf], axis=1)
+
+    return rdf
