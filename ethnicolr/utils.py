@@ -96,7 +96,7 @@ def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN
 
     # take out temporary working columns
     del df['__pred']
-    del df['__last_name']
+    del df[namecol]
 
     pdf = pd.DataFrame(proba, columns=cls.race)
     pdf.set_index(df[nn].index, inplace=True)
