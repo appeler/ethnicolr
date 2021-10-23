@@ -58,7 +58,7 @@ class FloridaRegNameModel():
             print("No column `{0!s}` in the DataFrame".format(fname_col))
             return df
 
-        df['__name'] = (df[lname_col] + ' ' + df[fname_col]).str.title()
+        df['__name'] = (df[lname_col].str.strip() + ' ' + df[fname_col].str.strip()).str.title()
 
         nn = df['__name'].notnull()
         if df[nn].shape[0] == 0:
