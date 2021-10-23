@@ -65,20 +65,17 @@ class NCRegNameModel():
             del df['__name']
             return df
 
-        if cls.model is None:
-            #  sort n-gram by freq (highest -> lowest)
-            vdf = pd.read_csv(VOCAB)
-            cls.vocab = vdf.vocab.tolist()
-
-            rdf = pd.read_csv(RACE)
-            cls.race = rdf.race.tolist()
-
-            cls.model = load_model(MODEL)
-
-        rdf = transform_and_pred(df = df, namecol = '__name', cls, maxlen=FEATURE_LEN)
+        rdf = transform_and_pred(df = df, 
+                                namecol = '__name', 
+                                cls, 
+                                VOCAB,
+                                RACE,
+                                MODEL,
+                                maxlen=FEATURE_LEN,
+                                num_iter=num_iter, 
+                                conf_int=conf_int)
 
         return rdf
-
 
 pred_nc_reg_name = NCRegNameModel.pred_nc_reg_name
 

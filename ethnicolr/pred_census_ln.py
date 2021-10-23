@@ -31,7 +31,7 @@ class CensusLnModel():
     model_year = None
 
     @classmethod
-    def pred_census_ln(cls, df, namecol, year = 2000, num_iter=100, conf_int=0.9):
+    def pred_census_ln(cls, df, namecol, year=2000, num_iter=100, conf_int=0.9):
         """Predict the race/ethnicity by the last name using Census model.
 
         Using the Census last name model to predict the race/ethnicity of the input
@@ -61,16 +61,19 @@ class CensusLnModel():
         if df[nn].shape[0] == 0:
             return df
 
-        df['__last_name'] = df[namecol].str.strip()
-        df['__last_name'] = df['__last_name'].str.title()
-
-        rdf = transform_and_pred(df = df, namecol = '__name', cls, maxlen=FEATURE_LEN)
+        rdf = transform_and_pred(df = df, 
+                                namecol = '__last_name', 
+                                cls, 
+                                VOCAB,
+                                RACE,
+                                MODEL,
+                                maxlen=FEATURE_LEN,
+                                num_iter=num_iter, 
+                                conf_int=conf_int)
 
         return rdf
 
-
 pred_census_ln = CensusLnModel.pred_census_ln
-
 
 def main(argv=sys.argv[1:]):
     title = 'Predict Race/Ethnicity by last name using Census model'

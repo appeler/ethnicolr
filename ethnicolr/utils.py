@@ -81,7 +81,7 @@ def find_ngrams(vocab, text, n):
 
 def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN, num_iter=100, conf_int=0.9):
 
-    df[namecol] = df[namecol].str.title()
+    df[namecol] = df[namecol].str.strip().str.title()
 
     if cls.model is None:
     #  sort n-gram by freq (highest -> lowest)
