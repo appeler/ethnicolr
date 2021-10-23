@@ -30,7 +30,7 @@ class FloridaRegNameFiveCatModel():
     model = None
 
     @classmethod
-    def pred_fl_reg_name(cls, df, lname_col, fname_col):
+    def pred_fl_reg_name(cls, df, lname_col, fname_col, num_iter=100, conf_int=0.9):
         """Predict the race/ethnicity by the full name using Florida voter model.
 
         Using the Florida voter full name model to predict the race/ethnicity of

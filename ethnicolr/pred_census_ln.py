@@ -31,7 +31,7 @@ class CensusLnModel():
     model_year = None
 
     @classmethod
-    def pred_census_ln(cls, df, namecol, year=2000):
+    def pred_census_ln(cls, df, namecol, year=2000, num_iter=100, conf_int=0.9):
         """Predict the race/ethnicity by the last name using Census model.
 
         Using the Census last name model to predict the race/ethnicity of the input
@@ -61,46 +61,19 @@ class CensusLnModel():
         if df[nn].shape[0] == 0:
             return df
 
-        df['__last_name'] = df[namecol].str.strip()
-        df['__last_name'] = df['__last_name'].str.title()
-
-        if cls.model is None and cls.model_year != year:
-            #  sort n-gram by freq (highest -> lowest)
-            vdf = pd.read_csv(VOCAB.format(year))
-            cls.vocab = vdf.vocab.tolist()
-
-            rdf = pd.read_csv(RACE.format(year))
-            cls.race = rdf.race.tolist()
-
-            cls.model = load_model(MODEL.format(year))
-
-        # build X from index of n-gram sequence
-        X = np.array(df[nn]['__last_name'].apply(lambda c:
-                                                 find_ngrams(cls.vocab,
-                                                             c, NGRAMS)))
-        X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
-
-        proba = cls.model.predict(X, verbose=2)
-
-        df.loc[nn, '__pred'] = np.argmax(proba, axis=-1)
-
-        df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
-                                                    cls.race[int(c)])
-
-        # take out temporary working columns
-        del df['__pred']
-        del df['__last_name']
-
-        pdf = pd.DataFrame(proba, columns=cls.race)
-        pdf.set_index(df[nn].index, inplace=True)
-
-        rdf = pd.concat([df, pdf], axis=1)
+        rdf = transform_and_pred(df = df, 
+                                namecol = '__last_name', 
+                                cls, 
+                                VOCAB,
+                                RACE,
+                                MODEL,
+                                maxlen=FEATURE_LEN,
+                                num_iter=num_iter, 
+                                conf_int=conf_int)
 
         return rdf
 
-
 pred_census_ln = CensusLnModel.pred_census_ln
-
 
 def main(argv=sys.argv[1:]):
     title = 'Predict Race/Ethnicity by last name using Census model'

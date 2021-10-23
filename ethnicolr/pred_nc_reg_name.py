@@ -30,7 +30,7 @@ class NCRegNameModel():
     model = None
 
     @classmethod
-    def pred_nc_reg_name(cls, df, lname_col, fname_col):
+    def pred_nc_reg_name(cls, df, lname_col, fname_col, num_iter=100, conf_int=0.9):
         """Predict the race+ethnicity by the full name using North Carolina 12 category voter model.
 
         Using the NC voter full name model to predict the race/ethnicity of
@@ -58,27 +58,24 @@ class NCRegNameModel():
             print("No column `{0!s}` in the DataFrame".format(fname_col))
             return df
 
-        df['__name'] = (df[lname_col] + ' ' + df[fname_col]).str.title()
+        df['__name'] = (df[lname_col].str.strip() + ' ' + df[fname_col].str.strip()).str.title()
 
         nn = df['__name'].notnull()
         if df[nn].shape[0] == 0:
             del df['__name']
             return df
 
-        if cls.model is None:
-            #  sort n-gram by freq (highest -> lowest)
-            vdf = pd.read_csv(VOCAB)
-            cls.vocab = vdf.vocab.tolist()
-
-            rdf = pd.read_csv(RACE)
-            cls.race = rdf.race.tolist()
-
-            cls.model = load_model(MODEL)
-
-        rdf = transform_and_pred(df = df, namecol = '__name', cls, maxlen=FEATURE_LEN)
+        rdf = transform_and_pred(df = df, 
+                                namecol = '__name', 
+                                cls, 
+                                VOCAB,
+                                RACE,
+                                MODEL,
+                                maxlen=FEATURE_LEN,
+                                num_iter=num_iter, 
+                                conf_int=conf_int)
 
         return rdf
-
 
 pred_nc_reg_name = NCRegNameModel.pred_nc_reg_name
 

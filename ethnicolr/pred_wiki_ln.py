@@ -30,7 +30,7 @@ class WikiLnModel():
     model = None
 
     @classmethod
-    def pred_wiki_ln(cls, df, namecol):
+    def pred_wiki_ln(cls, df, namecol, num_iter=100, conf_int=0.9):
         """Predict the race/ethnicity by the last name using Wiki model.
 
         Using the Wiki last name model to predict the race/ethnicity of the input
@@ -57,23 +57,17 @@ class WikiLnModel():
         if df[nn].shape[0] == 0:
             return df
 
-        df['__last_name'] = df[namecol].str.strip()
-        df['__last_name'] = df['__last_name'].str.title()
-
-        if cls.model is None:
-            #  sort n-gram by freq (highest -> lowest)
-            vdf = pd.read_csv(VOCAB)
-            cls.vocab = vdf.vocab.tolist()
-
-            rdf = pd.read_csv(RACE)
-            cls.race = rdf.race.tolist()
-
-            cls.model = load_model(MODEL)
-
-        rdf = transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN)
+        rdf = transform_and_pred(df = df, 
+                                namecol = '__last_name', 
+                                cls, 
+                                VOCAB,
+                                RACE,
+                                MODEL,
+                                maxlen=FEATURE_LEN,
+                                num_iter=num_iter, 
+                                conf_int=conf_int)
 
         return rdf
-
 
 pred_wiki_ln = WikiLnModel.pred_wiki_ln
 
