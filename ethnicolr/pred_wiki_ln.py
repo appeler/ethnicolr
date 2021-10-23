@@ -30,7 +30,7 @@ class WikiLnModel():
     model = None
 
     @classmethod
-    def pred_wiki_ln(cls, df, namecol):
+    def pred_wiki_ln(cls, df, namecol, num_iter=100, conf_int=0.9):
         """Predict the race/ethnicity by the last name using Wiki model.
 
         Using the Wiki last name model to predict the race/ethnicity of the input

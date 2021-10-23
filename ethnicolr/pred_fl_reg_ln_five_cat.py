@@ -30,7 +30,7 @@ class FloridaRegLnFiveCatModel():
     model = None
 
     @classmethod
-    def pred_fl_reg_ln(cls, df, namecol):
+    def pred_fl_reg_ln(cls, df, namecol, num_iter=100, conf_int=0.9):
         """Predict the race/ethnicity by the last name using Florida voter model.
 
         Using the Florida voter last name model to predict the race/ethnicity of

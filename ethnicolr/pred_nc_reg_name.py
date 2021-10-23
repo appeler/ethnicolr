@@ -30,7 +30,7 @@ class NCRegNameModel():
     model = None
 
     @classmethod
-    def pred_nc_reg_name(cls, df, lname_col, fname_col):
+    def pred_nc_reg_name(cls, df, lname_col, fname_col, num_iter=100, conf_int=0.9):
         """Predict the race+ethnicity by the full name using North Carolina 12 category voter model.
 
         Using the NC voter full name model to predict the race/ethnicity of

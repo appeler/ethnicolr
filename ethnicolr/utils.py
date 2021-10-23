@@ -79,21 +79,66 @@ def find_ngrams(vocab, text, n):
         wi.append(idx)
     return wi
 
-def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN):
+def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN, num_iter=100, conf_int=0.9):
 
+    df[namecol] = df[namecol].str.title()
+
+    if cls.model is None:
+    #  sort n-gram by freq (highest -> lowest)
+        vdf = pd.read_csv(VOCAB)
+        cls.vocab = vdf.vocab.tolist()
+
+        rdf = pd.read_csv(RACE)
+        cls.race = rdf.race.tolist()
+
+        cls.model = load_model(MODEL)
+    
     # build X from index of n-gram sequence
     X = np.array(df[nn][namecol].apply(lambda c:
                                                  find_ngrams(cls.vocab,
                                                              c, NGRAMS)))
     X = sequence.pad_sequences(X, maxlen=maxlen)
 
-    proba = cls.model.predict(X, verbose=2)
+    # define the quantile ranges for the confidence interval
+    low_quantile = 0.5 - (conf_int / 2)
+    high_quantile = 0.5 + (conf_int / 2)
+    
+    # Predict
+    proba = []
+    for _ in range(num_iter):
+        proba.append(cls.model.predict(X, verbose=2))
 
-    df.loc[nn, '__pred'] = np.argmax(proba, axis=-1)
+    # creating arrays for the confidence interval analysis:
+    #   1 - mean of the predictions
+    #   2 - std deviation of the predictions
+    #   3 - lower quantile of the predictions
+    #   4 - upper quantile of the predictions
+    proba = np.array(proba)
+    mean_arr = proba.mean(axis=0).reshape(-1, len(cls.race))
+    std_arr = proba.std(axis=0).reshape(-1, len(cls.race))
+    pct_low_arr = np.quantile(proba, low_quantile, axis=0).reshape(-1, len(cls.race))
+    pct_high_arr = np.quantile(proba, high_quantile, axis=0).reshape(-1, len(cls.race))
+
+    df.loc[nn, '__pred'] = np.argmax(mean_arr, axis=-1)
 
     df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
                                                     cls.race[int(c)])
+    stats = np.zeros((df.shape[0], 4))
+    conf_int = []
 
+    # selecting the statistics of the chosen class
+    for i in range(df.shape[0]):
+        select_class = np.argmax(mean_arr[i], axis=-1)
+        stats[i, 0] = mean_arr[i, select_class]
+        stats[i, 1] = std_arr[i, select_class]
+        stats[i, 2] = pct_low_arr[i, select_class]
+        stats[i, 3] = pct_high_arr[i, select_class]
+        conf_int.append(np.array([stats[i, 2], stats[i, 3]]).tolist())
+
+        df['proba'] = stats[:, 0]
+        df['std_err'] = stats[:, 1]
+        df['conf_int'] = conf_int
+    
     # take out temporary working columns
     del df['__pred']
     del df[namecol]
