@@ -152,7 +152,7 @@ def transform_and_pred(df = df,
     
     # take out temporary working columns
     del df['__pred']
-    del df[namecol]
+    del df[newnamecol]
 
     pdf = pd.DataFrame(proba, columns=cls.race)
     pdf.set_index(df.index, inplace=True)
