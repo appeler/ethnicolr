@@ -10,7 +10,7 @@ from tensorflow.keras.preprocessing import sequence
 
 from pkg_resources import resource_filename
 
-from .utils import column_exists, find_ngrams, fixup_columns, transform_and_pred
+from .utils import column_exists, fixup_columns, transform_and_pred
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_name_lstm.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_name_vocab.csv"
@@ -66,7 +66,7 @@ class FloridaRegNameModel():
             return df
 
         rdf = transform_and_pred(df = df, 
-                                namecol = '__name', 
+                                newnamecol = '__name', 
                                 cls, 
                                 VOCAB,
                                 RACE,

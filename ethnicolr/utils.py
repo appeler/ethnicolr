@@ -79,9 +79,9 @@ def find_ngrams(vocab, text, n):
         wi.append(idx)
     return wi
 
-def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN, num_iter=100, conf_int=0.9):
+def transform_and_pred(df = df, newnamecol, cls, maxlen=FEATURE_LEN, num_iter=100, conf_int=0.9):
 
-    df[namecol] = df[namecol].str.strip().str.title()
+    df[newnamecol] = df[newnamecol].str.strip().str.title()
 
     if cls.model is None:
     #  sort n-gram by freq (highest -> lowest)
@@ -94,7 +94,7 @@ def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN
         cls.model = load_model(MODEL)
     
     # build X from index of n-gram sequence
-    X = np.array(df[namecol].apply(lambda c:
+    X = np.array(df[newnamecol].apply(lambda c:
                                                  find_ngrams(cls.vocab,
                                                              c, NGRAMS)))
     X = sequence.pad_sequences(X, maxlen=maxlen)
