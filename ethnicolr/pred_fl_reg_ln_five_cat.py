@@ -53,8 +53,8 @@ class FloridaRegLnFiveCatModel():
             print("No column `{0!s}` in the DataFrame".format(namecol))
             return df
 
-        nn = df[namecol].notnull()
-        if df[nn].shape[0] == 0:
+        df.dropna(subset=[namecol])
+        if df.shape[0] == 0:
             return df
 
         rdf = transform_and_pred(df = df, 

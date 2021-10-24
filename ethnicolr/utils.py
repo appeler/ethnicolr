@@ -94,7 +94,7 @@ def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN
         cls.model = load_model(MODEL)
     
     # build X from index of n-gram sequence
-    X = np.array(df[nn][namecol].apply(lambda c:
+    X = np.array(df[namecol].apply(lambda c:
                                                  find_ngrams(cls.vocab,
                                                              c, NGRAMS)))
     X = sequence.pad_sequences(X, maxlen=maxlen)
@@ -119,9 +119,9 @@ def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN
     pct_low_arr = np.quantile(proba, low_quantile, axis=0).reshape(-1, len(cls.race))
     pct_high_arr = np.quantile(proba, high_quantile, axis=0).reshape(-1, len(cls.race))
 
-    df.loc[nn, '__pred'] = np.argmax(mean_arr, axis=-1)
+    df.loc[,'__pred'] = np.argmax(mean_arr, axis=-1)
 
-    df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
+    df.loc[,'race'] = df['__pred'].apply(lambda c:
                                                     cls.race[int(c)])
     stats = np.zeros((df.shape[0], 4))
     conf_int = []
@@ -144,7 +144,7 @@ def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN
     del df[namecol]
 
     pdf = pd.DataFrame(proba, columns=cls.race)
-    pdf.set_index(df[nn].index, inplace=True)
+    pdf.set_index(df.index, inplace=True)
 
     rdf = pd.concat([df, pdf], axis=1)
 

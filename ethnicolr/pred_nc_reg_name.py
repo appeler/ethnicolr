@@ -60,8 +60,8 @@ class NCRegNameModel():
 
         df['__name'] = (df[lname_col].str.strip() + ' ' + df[fname_col].str.strip()).str.title()
 
-        nn = df['__name'].notnull()
-        if df[nn].shape[0] == 0:
+        df.dropna(subset=['__name'])
+        if df.shape[0] == 0:
             del df['__name']
             return df
 
