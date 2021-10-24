@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import sequence
+from pkg_resources import resource_filename
 
 def isstring(s):
     # if we use Python 3
@@ -79,12 +82,19 @@ def find_ngrams(vocab, text, n):
         wi.append(idx)
     return wi
 
-def transform_and_pred(df = df, newnamecol, cls, maxlen=FEATURE_LEN, num_iter=100, conf_int=0.9):
+def transform_and_pred(df = df, 
+                       newnamecol, 
+                       cls, 
+                       VOCAB,
+                       RACE,
+                       MODEL,
+                       maxlen=FEATURE_LEN, 
+                       num_iter=100, 
+                       conf_int=0.9):
 
     df[newnamecol] = df[newnamecol].str.strip().str.title()
 
     if cls.model is None:
-    #  sort n-gram by freq (highest -> lowest)
         vdf = pd.read_csv(VOCAB)
         cls.vocab = vdf.vocab.tolist()
 

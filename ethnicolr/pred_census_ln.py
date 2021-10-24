@@ -62,10 +62,10 @@ class CensusLnModel():
 
         rdf = transform_and_pred(df = df, 
                                 newnamecol = namecol, 
-                                cls, 
-                                VOCAB,
-                                RACE,
-                                MODEL,
+                                cls = cls, 
+                                VOCAB = VOCAB,
+                                RACE = RACE,
+                                MODEL = MODEL,
                                 maxlen=FEATURE_LEN,
                                 num_iter=num_iter, 
                                 conf_int=conf_int)
