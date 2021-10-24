@@ -88,6 +88,7 @@ def transform_and_pred(df = df,
                        VOCAB,
                        RACE,
                        MODEL,
+                       NGRAMS,
                        maxlen, 
                        num_iter, 
                        conf_int):

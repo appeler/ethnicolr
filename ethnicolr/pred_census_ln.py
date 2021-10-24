@@ -66,6 +66,7 @@ class CensusLnModel():
                                 VOCAB = VOCAB,
                                 RACE = RACE,
                                 MODEL = MODEL,
+                                NGRAMS = NGRAMS,
                                 maxlen=FEATURE_LEN,
                                 num_iter=num_iter, 
                                 conf_int=conf_int)
