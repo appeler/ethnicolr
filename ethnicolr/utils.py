@@ -88,9 +88,9 @@ def transform_and_pred(df = df,
                        VOCAB,
                        RACE,
                        MODEL,
-                       maxlen=FEATURE_LEN, 
-                       num_iter=100, 
-                       conf_int=0.9):
+                       maxlen, 
+                       num_iter, 
+                       conf_int):
 
     df[newnamecol] = df[newnamecol].str.strip().str.title()
 
