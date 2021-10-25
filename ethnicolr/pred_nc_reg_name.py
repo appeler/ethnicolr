@@ -10,7 +10,7 @@ from tensorflow.keras.preprocessing import sequence
 
 from pkg_resources import resource_filename
 
-from .utils import column_exists, find_ngrams, fixup_columns, transform_and_pred
+from .utils import column_exists, fixup_columns, transform_and_pred
 
 MODELFN = "models/nc_voter_reg/lstm/nc_voter_name_lstm_oversample.h5"
 VOCABFN = "models/nc_voter_reg/lstm/nc_voter_name_vocab_oversample.csv"
@@ -60,17 +60,18 @@ class NCRegNameModel():
 
         df['__name'] = (df[lname_col].str.strip() + ' ' + df[fname_col].str.strip()).str.title()
 
-        nn = df['__name'].notnull()
-        if df[nn].shape[0] == 0:
+        df.dropna(subset=['__name'])
+        if df.shape[0] == 0:
             del df['__name']
             return df
 
         rdf = transform_and_pred(df = df, 
-                                namecol = '__name', 
-                                cls, 
-                                VOCAB,
-                                RACE,
-                                MODEL,
+                                newnamecol = '__name', 
+                                cls = cls, 
+                                VOCAB = VOCAB,
+                                RACE = RACE,
+                                MODEL = MODEL,
+                                NGRAMS = NGRAMS,
                                 maxlen=FEATURE_LEN,
                                 num_iter=num_iter, 
                                 conf_int=conf_int)

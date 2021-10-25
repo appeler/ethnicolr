@@ -10,7 +10,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
-from .utils import column_exists, find_ngrams, fixup_columns, transform_and_pred
+from .utils import column_exists, fixup_columns, transform_and_pred
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_fullname_lstm_5_cat.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_fullname_vocab_5_cat.csv"
@@ -60,22 +60,21 @@ class FloridaRegNameFiveCatModel():
 
         df['__name'] = (df[lname_col] + ' ' + df[fname_col]).str.title()
 
-        nn = df['__name'].notnull()
-        if df[nn].shape[0] == 0:
+        df.dropna(subset=['__name'])
+        if df.shape[0] == 0:
             del df['__name']
             return df
 
-        if cls.model is None:
-            #  sort n-gram by freq (highest -> lowest)
-            vdf = pd.read_csv(VOCAB)
-            cls.vocab = vdf.vocab.tolist()
-
-            rdf = pd.read_csv(RACE)
-            cls.race = rdf.race.tolist()
-
-            cls.model = load_model(MODEL)
-
-        rdf = transform_and_pred(df = df, namecol = '__name', cls, maxlen=FEATURE_LEN)
+        rdf = transform_and_pred(df = df, 
+                                newnamecol = '__name', 
+                                cls = cls, 
+                                VOCAB = VOCAB,
+                                RACE = RACE,
+                                MODEL = MODEL,
+                                NGRAMS = NGRAMS,
+                                maxlen=FEATURE_LEN,
+                                num_iter=num_iter, 
+                                conf_int=conf_int)
 
         return rdf
 

@@ -10,7 +10,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
-from .utils import column_exists, find_ngrams, fixup_columns, transform_and_pred
+from .utils import column_exists, fixup_columns, transform_and_pred
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_5_cat.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab_5_cat.csv"
@@ -53,16 +53,17 @@ class FloridaRegLnFiveCatModel():
             print("No column `{0!s}` in the DataFrame".format(namecol))
             return df
 
-        nn = df[namecol].notnull()
-        if df[nn].shape[0] == 0:
+        df.dropna(subset=[namecol])
+        if df.shape[0] == 0:
             return df
 
         rdf = transform_and_pred(df = df, 
-                                namecol = '__last_name', 
-                                cls, 
-                                VOCAB,
-                                RACE,
-                                MODEL,
+                                newnamecol = namecol, 
+                                cls = cls, 
+                                VOCAB = VOCAB,
+                                RACE = RACE,
+                                MODEL = MODEL,
+                                NGRAMS = NGRAMS,
                                 maxlen=FEATURE_LEN,
                                 num_iter=num_iter, 
                                 conf_int=conf_int)

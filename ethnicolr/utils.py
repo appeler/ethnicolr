@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import pandas as pd
+import numpy as np
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import sequence
+from pkg_resources import resource_filename
 
 def isstring(s):
     # if we use Python 3
@@ -79,12 +84,20 @@ def find_ngrams(vocab, text, n):
         wi.append(idx)
     return wi
 
-def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN, num_iter=100, conf_int=0.9):
+def transform_and_pred(df, 
+                       newnamecol, 
+                       cls, 
+                       VOCAB,
+                       RACE,
+                       MODEL,
+                       NGRAMS,
+                       maxlen, 
+                       num_iter, 
+                       conf_int):
 
-    df[namecol] = df[namecol].str.strip().str.title()
+    df[newnamecol] = df[newnamecol].str.strip().str.title()
 
     if cls.model is None:
-    #  sort n-gram by freq (highest -> lowest)
         vdf = pd.read_csv(VOCAB)
         cls.vocab = vdf.vocab.tolist()
 
@@ -94,7 +107,7 @@ def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN
         cls.model = load_model(MODEL)
     
     # build X from index of n-gram sequence
-    X = np.array(df[nn][namecol].apply(lambda c:
+    X = np.array(df[newnamecol].apply(lambda c:
                                                  find_ngrams(cls.vocab,
                                                              c, NGRAMS)))
     X = sequence.pad_sequences(X, maxlen=maxlen)
@@ -119,9 +132,9 @@ def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN
     pct_low_arr = np.quantile(proba, low_quantile, axis=0).reshape(-1, len(cls.race))
     pct_high_arr = np.quantile(proba, high_quantile, axis=0).reshape(-1, len(cls.race))
 
-    df.loc[nn, '__pred'] = np.argmax(mean_arr, axis=-1)
+    df.loc['__pred'] = np.argmax(mean_arr, axis=-1)
 
-    df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
+    df.loc['race'] = df['__pred'].apply(lambda c:
                                                     cls.race[int(c)])
     stats = np.zeros((df.shape[0], 4))
     conf_int = []
@@ -141,10 +154,10 @@ def transform_and_pred(df = df, namecol = '__last_name', cls, maxlen=FEATURE_LEN
     
     # take out temporary working columns
     del df['__pred']
-    del df[namecol]
+    del df[newnamecol]
 
     pdf = pd.DataFrame(proba, columns=cls.race)
-    pdf.set_index(df[nn].index, inplace=True)
+    pdf.set_index(df.index, inplace=True)
 
     rdf = pd.concat([df, pdf], axis=1)
 

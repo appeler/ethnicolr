@@ -12,3 +12,4 @@ build/
 venv/
 dist/
 ethnicolr.egg-info/
+dev/
