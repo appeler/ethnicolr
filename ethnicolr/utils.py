@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import pandas as pd
+import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
@@ -82,7 +84,7 @@ def find_ngrams(vocab, text, n):
         wi.append(idx)
     return wi
 
-def transform_and_pred(df = df, 
+def transform_and_pred(df, 
                        newnamecol, 
                        cls, 
                        VOCAB,
@@ -130,9 +132,9 @@ def transform_and_pred(df = df,
     pct_low_arr = np.quantile(proba, low_quantile, axis=0).reshape(-1, len(cls.race))
     pct_high_arr = np.quantile(proba, high_quantile, axis=0).reshape(-1, len(cls.race))
 
-    df.loc[,'__pred'] = np.argmax(mean_arr, axis=-1)
+    df.loc['__pred'] = np.argmax(mean_arr, axis=-1)
 
-    df.loc[,'race'] = df['__pred'].apply(lambda c:
+    df.loc['race'] = df['__pred'].apply(lambda c:
                                                     cls.race[int(c)])
     stats = np.zeros((df.shape[0], 4))
     conf_int = []
