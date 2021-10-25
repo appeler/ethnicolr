@@ -96,6 +96,7 @@ def transform_and_pred(df,
                        conf_int):
 
     df[newnamecol] = df[newnamecol].str.strip().str.title()
+    df['rowindex'] = df.index
 
     if cls.model is None:
         vdf = pd.read_csv(VOCAB)
@@ -120,23 +121,23 @@ def transform_and_pred(df,
     pdf = pd.DataFrame()
 
     for _ in range(num_iter):
-        df = df.append(pd.DataFrame(cls.model.predict(X, verbose=1)))
+        pdf = pdf.append(pd.DataFrame(cls.model.predict(X, verbose=1)))
     print(cls.race)
     pdf.columns = cls.race
     pdf['rowindex'] = pdf.index
 
-    res = df.groupby('rowindex').agg([np.mean, 
+    res = pdf.groupby('rowindex').agg([np.mean, 
                                     np.std, 
                                     lambda x: np.percentile(x, q =lower_perc), 
                                     lambda x: np.percentile(x, q = upper_perc)]).reset_index()
-    res.columns = [f'{i}_{j}' for i, j in a.columns]
-    res.columns = a.columns.str.replace('<lambda_0>', 'lb')
-    res.columns = a.columns.str.replace('<lambda_1>', 'ub')
-    res.columns = a.columns.str.replace('rowindex_', 'rowindex')
+    res.columns = [f'{i}_{j}' for i, j in res.columns]
+    res.columns = res.columns.str.replace('<lambda_0>', 'lb')
+    res.columns = res.columns.str.replace('<lambda_1>', 'ub')
+    res.columns = res.columns.str.replace('rowindex_', 'rowindex')
 
-    means = list(filter(lambda x:'_mean' in x, a.columns))
+    means = list(filter(lambda x:'_mean' in x, res.columns))
     res['race'] = res[means].idxmax(axis = 1).str.replace("_mean", "")
    
-    final_df = df.merge(a, on='rowindex', how='left')
+    final_df = df.merge(res, on='rowindex', how='left')
 
     return final_df
