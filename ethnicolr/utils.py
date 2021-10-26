@@ -96,6 +96,7 @@ def transform_and_pred(df,
                        conf_int):
 
     df[newnamecol] = df[newnamecol].str.strip().str.title()
+    df['rowindex'] = df.index
 
     if cls.model is None:
         vdf = pd.read_csv(VOCAB)
@@ -113,52 +114,30 @@ def transform_and_pred(df,
     X = sequence.pad_sequences(X, maxlen=maxlen)
 
     # define the quantile ranges for the confidence interval
-    low_quantile = 0.5 - (conf_int / 2)
-    high_quantile = 0.5 + (conf_int / 2)
+    lower_perc = 0.5 - (conf_int / 2)
+    upper_perc = 0.5 + (conf_int / 2)
     
-    # Predict
-    proba = []
+    # Predict 
+    pdf = pd.DataFrame()
+
     for _ in range(num_iter):
-        proba.append(cls.model.predict(X, verbose=2))
+        pdf = pdf.append(pd.DataFrame(cls.model.predict(X, verbose=1)))
+    print(cls.race)
+    pdf.columns = cls.race
+    pdf['rowindex'] = pdf.index
 
-    # creating arrays for the confidence interval analysis:
-    #   1 - mean of the predictions
-    #   2 - std deviation of the predictions
-    #   3 - lower quantile of the predictions
-    #   4 - upper quantile of the predictions
-    proba = np.array(proba)
-    mean_arr = proba.mean(axis=0).reshape(-1, len(cls.race))
-    std_arr = proba.std(axis=0).reshape(-1, len(cls.race))
-    pct_low_arr = np.quantile(proba, low_quantile, axis=0).reshape(-1, len(cls.race))
-    pct_high_arr = np.quantile(proba, high_quantile, axis=0).reshape(-1, len(cls.race))
+    res = pdf.groupby('rowindex').agg([np.mean, 
+                                    np.std, 
+                                    lambda x: np.percentile(x, q =lower_perc), 
+                                    lambda x: np.percentile(x, q = upper_perc)]).reset_index()
+    res.columns = [f'{i}_{j}' for i, j in res.columns]
+    res.columns = res.columns.str.replace('<lambda_0>', 'lb')
+    res.columns = res.columns.str.replace('<lambda_1>', 'ub')
+    res.columns = res.columns.str.replace('rowindex_', 'rowindex')
 
-    df.loc['__pred'] = np.argmax(mean_arr, axis=-1)
+    means = list(filter(lambda x:'_mean' in x, res.columns))
+    res['race'] = res[means].idxmax(axis = 1).str.replace("_mean", "")
+   
+    final_df = df.merge(res, on='rowindex', how='left')
 
-    df.loc['race'] = df['__pred'].apply(lambda c:
-                                                    cls.race[int(c)])
-    stats = np.zeros((df.shape[0], 4))
-    conf_int = []
-
-    # selecting the statistics of the chosen class
-    for i in range(df.shape[0]):
-        select_class = np.argmax(mean_arr[i], axis=-1)
-        stats[i, 0] = mean_arr[i, select_class]
-        stats[i, 1] = std_arr[i, select_class]
-        stats[i, 2] = pct_low_arr[i, select_class]
-        stats[i, 3] = pct_high_arr[i, select_class]
-        conf_int.append(np.array([stats[i, 2], stats[i, 3]]).tolist())
-
-        df['proba'] = stats[:, 0]
-        df['std_err'] = stats[:, 1]
-        df['conf_int'] = conf_int
-    
-    # take out temporary working columns
-    del df['__pred']
-    del df[newnamecol]
-
-    pdf = pd.DataFrame(proba, columns=cls.race)
-    pdf.set_index(df.index, inplace=True)
-
-    rdf = pd.concat([df, pdf], axis=1)
-
-    return rdf
+    return final_df

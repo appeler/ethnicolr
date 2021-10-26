@@ -60,6 +60,10 @@ class CensusLnModel():
         if df.shape[0] == 0:
             return df
 
+        VOCAB = VOCAB.format(year)
+        MODEL = MODEL.format(year)
+        RACE  = RACE.format(year)
+
         rdf = transform_and_pred(df = df, 
                                 newnamecol = namecol, 
                                 cls = cls, 
