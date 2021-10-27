@@ -35,22 +35,42 @@ class TestPredFL(unittest.TestCase):
 
     def test_pred_fl_reg_ln(self):
         odf = pred_fl_reg_ln(self.df, "last")
-        self.assertTrue(all(odf[[col for col in df.columns if col in race]].sum(axis=1).round(1) == 1.0))
+        self.assertTrue(
+            all(
+                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
+                == 1.0
+            )
+        )
         self.assertTrue(all(odf.true_race == odf.race))
 
     def test_pred_fl_reg_name(self):
         odf = pred_fl_reg_name(self.df, "last", "first")
-        self.assertTrue(all(odf[[col for col in df.columns if col in race]].sum(axis=1).round(1) == 1.0))
+        self.assertTrue(
+            all(
+                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
+                == 1.0
+            )
+        )
         self.assertTrue(all(odf.true_race == odf.race))
 
     def test_pred_fl_reg_ln_five_cat(self):
         odf = pred_fl_reg_ln_five_cat(self.df, "last")
-        self.assertTrue(all(odf[[col for col in df.columns if col in race5].sum(axis=1).round(1) == 1.0))
+        self.assertTrue(
+            all(
+                odf[[col for col in odf.columns if col in race5]].sum(axis=1).round(1)
+                == 1.0
+            )
+        )
         self.assertTrue(all(odf.true_race == odf.race))
 
     def test_pred_fl_reg_name_five_cat(self):
         odf = pred_fl_reg_name_five_cat(self.df, "last", "first")
-        self.assertTrue(all(odf[[col for col in df.columns if col in race5]].sum(axis=1).round(1) == 1.0))
+        self.assertTrue(
+            all(
+                odf[[col for col in odf.columns if col in race5]].sum(axis=1).round(1)
+                == 1.0
+            )
+        )
         self.assertTrue(all(odf.true_race == odf.race))
 
 
