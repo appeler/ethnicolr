@@ -24,7 +24,7 @@ NGRAMS = 2
 FEATURE_LEN = 20
 
 
-class FloridaRegLnModel():
+class FloridaRegLnModel:
     vocab = None
     race = None
     model = None
@@ -57,16 +57,18 @@ class FloridaRegLnModel():
         if df.shape[0] == 0:
             return df
 
-        rdf = transform_and_pred(df = df, 
-                                newnamecol = namecol, 
-                                cls = cls, 
-                                VOCAB = VOCAB,
-                                RACE = RACE,
-                                MODEL = MODEL,
-                                NGRAMS = NGRAMS,
-                                maxlen=FEATURE_LEN,
-                                num_iter=num_iter, 
-                                conf_int=conf_int)
+        rdf = transform_and_pred(
+            df=df,
+            newnamecol=namecol,
+            cls=cls,
+            VOCAB=VOCAB,
+            RACE=RACE,
+            MODEL=MODEL,
+            NGRAMS=NGRAMS,
+            maxlen=FEATURE_LEN,
+            num_iter=num_iter,
+            conf_int=conf_int,
+        )
 
         return rdf
 
@@ -75,15 +77,21 @@ pred_fl_reg_ln = FloridaRegLnModel.pred_fl_reg_ln
 
 
 def main(argv=sys.argv[1:]):
-    title = 'Predict Race/Ethnicity by name using Florida registration model'
+    title = "Predict Race/Ethnicity by name using Florida registration model"
     parser = argparse.ArgumentParser(description=title)
-    parser.add_argument('input', default=None,
-                        help='Input file')
-    parser.add_argument('-o', '--output', default='fl-pred-ln-output.csv',
-                        help='Output file with prediction data')
-    parser.add_argument('-l', '--last', required=True,
-                        help='Name or index location of column contains '
-                             'the last name')
+    parser.add_argument("input", default=None, help="Input file")
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="fl-pred-ln-output.csv",
+        help="Output file with prediction data",
+    )
+    parser.add_argument(
+        "-l",
+        "--last",
+        required=True,
+        help="Name or index location of column contains " "the last name",
+    )
 
     args = parser.parse_args(argv)
 
