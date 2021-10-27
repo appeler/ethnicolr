@@ -23,7 +23,7 @@ NGRAMS = 2
 FEATURE_LEN = 20
 
 
-class CensusLnModel():
+class CensusLnModel:
     vocab = None
     race = None
     model = None
@@ -60,38 +60,53 @@ class CensusLnModel():
         if df.shape[0] == 0:
             return df
 
-        VOCAB = VOCAB.format(year)
-        MODEL = MODEL.format(year)
-        RACE  = RACE.format(year)
+        VOCAB = VOCABFN.format(year)
+        MODEL = MODELFN.format(year)
+        RACE = RACEFN.format(year)
 
-        rdf = transform_and_pred(df = df, 
-                                newnamecol = namecol, 
-                                cls = cls, 
-                                VOCAB = VOCAB,
-                                RACE = RACE,
-                                MODEL = MODEL,
-                                NGRAMS = NGRAMS,
-                                maxlen=FEATURE_LEN,
-                                num_iter=num_iter, 
-                                conf_int=conf_int)
+        rdf = transform_and_pred(
+            df=df,
+            newnamecol=namecol,
+            cls=cls,
+            VOCAB=VOCAB,
+            RACE=RACE,
+            MODEL=MODEL,
+            NGRAMS=NGRAMS,
+            maxlen=FEATURE_LEN,
+            num_iter=num_iter,
+            conf_int=conf_int,
+        )
 
         return rdf
 
+
 pred_census_ln = CensusLnModel.pred_census_ln
 
+
 def main(argv=sys.argv[1:]):
-    title = 'Predict Race/Ethnicity by last name using Census model'
+    title = "Predict Race/Ethnicity by last name using Census model"
     parser = argparse.ArgumentParser(description=title)
-    parser.add_argument('input', default=None,
-                        help='Input file')
-    parser.add_argument('-y', '--year', type=int, default=2000,
-                        choices=[2000, 2010],
-                        help='Year of Census data (default=2000)')
-    parser.add_argument('-o', '--output', default='census-pred-ln-output.csv',
-                        help='Output file with prediction data')
-    parser.add_argument('-l', '--last', required=True,
-                        help='Name or index location of column contains '
-                             'the last name')
+    parser.add_argument("input", default=None, help="Input file")
+    parser.add_argument(
+        "-y",
+        "--year",
+        type=int,
+        default=2000,
+        choices=[2000, 2010],
+        help="Year of Census data (default=2000)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="census-pred-ln-output.csv",
+        help="Output file with prediction data",
+    )
+    parser.add_argument(
+        "-l",
+        "--last",
+        required=True,
+        help="Name or index location of column contains " "the last name",
+    )
 
     args = parser.parse_args(argv)
 
