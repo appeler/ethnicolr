@@ -26,7 +26,7 @@ class TestPredFL(unittest.TestCase):
     def setUp(self):
         names = [
             {"last": "sawyer", "first": "john", "true_race": "nh_white"},
-            {"last": "zhang", "first": "simon", "true_race": "asian"},
+            {"last": "torres", "first": "jose", "true_race": "hispanic"},
         ]
         self.df = pd.DataFrame(names)
 
