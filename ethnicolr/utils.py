@@ -139,6 +139,10 @@ def transform_and_pred(
     means = list(filter(lambda x: "_mean" in x, res.columns))
     res["race"] = res[means].idxmax(axis=1).str.replace("_mean", "")
 
+    for suffix in ["_lb", "ub"]:
+        conv_filt = list(filter(lambda x: suffix in x, res.columns))
+        res[conv_filt] = res[conv_filt].to_numpy().astype(float)
+
     final_df = df.merge(res, on="rowindex", how="left")
 
     return final_df
