@@ -50,7 +50,9 @@ We strongly recommend installing `ethnicolor` inside a Python virtual environmen
 
     pip install ethnicolr
 
-Or ::
+Or 
+
+::
    
    conda install -c soodoku ethnicolr 
 
@@ -117,199 +119,280 @@ And to predict race/ethnicity using `Wikipedia full name model <ethnicolr/models
 Functions
 ----------
 
-We expose 6 functions, each of which either take a pandas DataFrame or a CSV. If the CSV doesn't have a header,
-we make some assumptions about where the data is
+We expose 6 functions, each of which either take a pandas DataFrame or a
+CSV. If the CSV doesn't have a header, we make some assumptions about
+where the data is:
 
--  **census\_ln**
+- **census\_ln(df, namecol, year=2000)**
 
-   -  Input: pandas DataFrame or CSV and a string or list of the name or
-      location of the column containing the last name.
+  -  What it does:
+
+     - Removes extra space
+     - For names in the `census file <ethnicolr/data/census>`__, it appends 
+       relevant data of what probability the name provided is of a certain race/ethnicity
+
+
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ | Parameters |                                                                                                                          |
+ +============+==========================================================================================================================+
+ |            | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred             |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ |            | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name        |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+ |            | **Year** : *{2000, 2010}, default=2000* year of census to use                                                            |
+ +------------+--------------------------------------------------------------------------------------------------------------------------+
+
+
+-  Output: Appends the following columns to the pandas DataFrame or CSV: 
+   pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic. 
+   See `here <https://github.com/appeler/ethnicolr/blob/master/ethnicolr/data/census/census_2000.pdf>`__ 
+   for what the column names mean.
+
+
+-  **pred\_census\_ln(df, namecol, year=2000, num\_iter=100, conf\_int=0.9)**
 
    -  What it does:
 
       -  Removes extra space.
-      -  For names in the `census file <ethnicolr/data/census>`__, it appends relevant data.
-
-   -  Options:
-
-      -  year: 2000 or 2010
-      -  if no year is given, data from the 2000 census is appended
-
-   -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic. See 
-      `here <https://github.com/appeler/ethnicolr/blob/master/ethnicolr/data/census/census_2000.pdf>`__ for what the column names mean.
-
--  **pred\_census\_ln**
-
-   -  Input: pandas DataFrame or CSV and string or list of the name or
-      location of the column containing the last name.
-
-   -  What it does:
-
-      -  Removes extra space.
-      -  Uses the `last name census 2000
-         model <ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb>`__
-         or `last name census 2010
-         model <ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb>`__
+      -  Uses the `last name census 2000 
+         model <ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb>`__ or 
+         `last name census 2010 model <ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb>`__ 
          to predict the race and ethnicity.
 
-   -  Options:
 
-      -  year: 2000 or 2010
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   | Parameters   |                                                                                                                     |
+   +==============+=====================================================================================================================+
+   |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred        |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **year** : *{2000, 2010}, default=2000* year of census to use                                                       |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **nun\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                         |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (white, black, asian, or hispanic), api (percentage chance asian),
-      black, hispanic, white. 
+      race (white, black, asian, or hispanic), api (percentage chance
+      asian), black, hispanic, white. For each race it will provide the
+      mean, standard error, lower & upper bound of confidence interval
 
--  **pred\_wiki\_ln**
-
-   -  Input: pandas DataFrame or CSV and string or list of the name or
-      location of the column containing the last name.
+-  **pred\_wiki\_ln( df, namecol, num\_iter=100, conf\_int=0.9)**
 
    -  What it does:
 
       -  Removes extra space.
-      -  Uses the `last name wiki model <ethnicolr/models/ethnicolr_keras_lstm_wiki_ln.ipynb>`__
-         to predict the race and ethnicity.
+      -  Uses the `last name wiki
+         model <ethnicolr/models/ethnicolr_keras_lstm_wiki_ln.ipynb>`__ to
+         predict the race and ethnicity.
+
+
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   | Parameters   |                                                                                                                     |
+   +==============+=====================================================================================================================+
+   |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred        |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **nun\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                         |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (categorical variable --- category with the highest probability), 
-      "Asian,GreaterEastAsian,EastAsian", "Asian,GreaterEastAsian,Japanese", 
-      "Asian,IndianSubContinent", "GreaterAfrican,Africans", "GreaterAfrican,Muslim",
-      "GreaterEuropean,British","GreaterEuropean,EastEuropean", 
+      race (categorical variable --- category with the highest
+      probability), "Asian,GreaterEastAsian,EastAsian",
+      "Asian,GreaterEastAsian,Japanese", "Asian,IndianSubContinent",
+      "GreaterAfrican,Africans", "GreaterAfrican,Muslim",
+      "GreaterEuropean,British","GreaterEuropean,EastEuropean",
       "GreaterEuropean,Jewish","GreaterEuropean,WestEuropean,French",
       "GreaterEuropean,WestEuropean,Germanic","GreaterEuropean,WestEuropean,Hispanic",
-      "GreaterEuropean,WestEuropean,Italian","GreaterEuropean,WestEuropean,Nordic"
+      "GreaterEuropean,WestEuropean,Italian","GreaterEuropean,WestEuropean,Nordic".
+      For each race it will provide the mean, standard error, lower & upper
+      bound of confidence interval
 
--  **pred\_wiki\_name**
-
-   -  Input: pandas DataFrame or CSV and string or list containing the name or
-      location of the column containing the first name, last name, middle
-      name, and suffix, if there. The first name and last name columns are
-      required. If no middle name of suffix columns are there, it is
-      assumed that there are no middle names or suffixes.
+-  **pred\_wiki\_name(df, namecol, num\_iter=100, conf\_int=0.9)**
 
    -  What it does:
 
       -  Removes extra space.
       -  Uses the `full name wiki
-         model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__ to predict the
-         race and ethnicity.
+         model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__
+         to predict the race and ethnicity.
+
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Parameters   |                                                                                                                                                                                                                                                                                                                            |
+   +==============+============================================================================================================================================================================================================================================================================================================================+
+   |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred                                                                                                                                                                                                               |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **namecol** : *{string, list}* string or list of the name or location of the column containing the first name, last name, middle name, and suffix, if there. The first name and last name columns are required. If no middle name of suffix columns are there, it is assumed that there are no middle names or suffixes.   |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **nun\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                                                                                                                                                                                                                                |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (categorical variable---category with the highest probability), 
-      "Asian,GreaterEastAsian,EastAsian", "Asian,GreaterEastAsian,Japanese", 
-      "Asian,IndianSubContinent", "GreaterAfrican,Africans", "GreaterAfrican,Muslim",
-      "GreaterEuropean,British","GreaterEuropean,EastEuropean", 
+      race (categorical variable---category with the highest probability),
+      "Asian,GreaterEastAsian,EastAsian",
+      "Asian,GreaterEastAsian,Japanese", "Asian,IndianSubContinent",
+      "GreaterAfrican,Africans", "GreaterAfrican,Muslim",
+      "GreaterEuropean,British","GreaterEuropean,EastEuropean",
       "GreaterEuropean,Jewish","GreaterEuropean,WestEuropean,French",
       "GreaterEuropean,WestEuropean,Germanic","GreaterEuropean,WestEuropean,Hispanic",
-      "GreaterEuropean,WestEuropean,Italian","GreaterEuropean,WestEuropean,Nordic"
+      "GreaterEuropean,WestEuropean,Italian","GreaterEuropean,WestEuropean,Nordic".
+      For each race it will provide the mean, standard error, lower & upper
+      bound of confidence interval
 
--  **pred\_fl\_reg\_ln**
-
-   -  Input: pandas DataFrame or CSV and string or list of the name or location
-      of the column containing the last name.
-
-   -  What it does?:
-
-      -  Removes extra space, if there.
-      -  Uses the `last name FL registration
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln.ipynb>`__ to predict the race
-         and ethnicity.
-
-   -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (white, black, asian, or hispanic), asian (percentage chance Asian),
-      hispanic, nh_black, nh_white
-
--  **pred\_fl\_reg\_ln\_cn\_int**
-
-   -  Input: pandas DataFrame or CSV, string or list of the name or location
-      of the column containing the last name,  the number of iterations to calculate uncertainty
-      and the confidence interval for the model's prediction
+-  **pred\_fl\_reg\_ln(df, namecol, num\_iter=100, conf\_int=0.9)**
 
    -  What it does?:
 
       -  Removes extra space, if there.
       -  Uses the `last name FL registration
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_conf_int.ipynb>`__ to predict the race
-         and ethnicity.
+         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln.ipynb>`__
+         to predict the race and ethnicity.
+
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   | Parameters   |                                                                                                                     |
+   +==============+=====================================================================================================================+
+   |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred        |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **nun\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                         |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+
+
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (white, black, asian, or hispanic), probability of that prediction, the standard error
-      of the prediction, the confidence interval requested as a list (lower, upper quantile) and
-      asian (percentage chance Asian), hispanic, nh_black, nh_white
+      race (white, black, asian, or hispanic), asian (percentage chance
+      Asian), hispanic, nh\_black, nh\_white. For each race it will provide
+      the mean, standard error, lower & upper bound of confidence interval
 
--  **pred\_fl\_reg\_name**
 
-   -  Input: pandas DataFrame or CSV and string or list containing the name or
-      location of the column containing the first name, last name, middle
-      name, and suffix, if there. The first name and last name columns are
-      required. If no middle name of suffix columns are there, it is
-      assumed that there are no middle names or suffixes.
+-  **pred\_fl\_reg\_name(df, namecol, num\_iter=100, conf\_int=0.9)**
 
    -  What it does:
 
       -  Removes extra space.
       -  Uses the `full name FL
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_name.ipynb>`__ to predict the
-         race and ethnicity.
+         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_name.ipynb>`__
+         to predict the race and ethnicity.
+
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Parameters   |                                                                                                                                                                                                                                                                                                                            |
+   +==============+============================================================================================================================================================================================================================================================================================================================+
+   |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred                                                                                                                                                                                                               |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **namecol** : *{string, list}* string or list of the name or location of the column containing the first name, last name, middle name, and suffix, if there. The first name and last name columns are required. If no middle name of suffix columns are there, it is assumed that there are no middle names or suffixes.   |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **nun\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                                                                                                                                                                                                                                |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (white, black, asian, or hispanic), asian (percentage chance Asian),
-      hispanic, nh_black, nh_white
+      race (white, black, asian, or hispanic), asian (percentage chance
+      Asian), hispanic, nh\_black, nh\_white. For each race it will provide
+      the mean, standard error, lower & upper bound of confidence interval
 
--  **pred\_fl\_reg\_ln\_five\_cat**
 
-   -  Input: pandas DataFrame or CSV and string or list of the name or location
-      of the column containing the last name.
+-  **pred\_fl\_reg\_ln\_five\_cat(df, namecol, num\_iter=100, conf\_int=0.9)**
 
    -  What it does?:
 
       -  Removes extra space, if there.
       -  Uses the `last name FL registration
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb>`__ to predict the race
-         and ethnicity.
+         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb>`__
+         to predict the race and ethnicity.
+
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   | Parameters   |                                                                                                                     |
+   +==============+=====================================================================================================================+
+   |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred        |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **nun\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                         |
+   +--------------+---------------------------------------------------------------------------------------------------------------------+
+
+
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (white, black, asian, hispanic or other), asian (percentage chance Asian),
-      hispanic, nh_black, nh_white, other
+      race (white, black, asian, hispanic or other), asian (percentage
+      chance Asian), hispanic, nh\_black, nh\_white, other. For each race
+      it will provide the mean, standard error, lower & upper bound of
+      confidence interval
 
--  **pred\_fl\_reg\_name\_five\_cat**
 
-   -  Input: pandas DataFrame or CSV and string or list containing the name or
-      location of the column containing the first name, last name, middle
-      name, and suffix, if there. The first name and last name columns are
-      required. If no middle name of suffix columns are there, it is
-      assumed that there are no middle names or suffixes.
+-  **pred\_fl\_reg\_name\_five\_cat(df, namecol, num\_iter=100, conf\_int=0.9)**
 
    -  What it does:
 
       -  Removes extra space.
       -  Uses the `full name FL
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb>`__ to predict the
-         race and ethnicity.
+         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb>`__
+         to predict the race and ethnicity.
+
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Parameters   |                                                                                                                                                                                                                                                                                                                            |
+   +==============+============================================================================================================================================================================================================================================================================================================================+
+   |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred                                                                                                                                                                                                               |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **namecol** : *{string, list}* string or list of the name or location of the column containing the first name, last name, middle name, and suffix, if there. The first name and last name columns are required. If no middle name of suffix columns are there, it is assumed that there are no middle names or suffixes.   |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **nun\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                                                                                                                                                                                                                                |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (white, black, asian, hispanic, or other), asian (percentage chance Asian),
-      hispanic, nh_black, nh_white, other
+      race (white, black, asian, hispanic, or other), asian (percentage
+      chance Asian), hispanic, nh\_black, nh\_white, other. For each race
+      it will provide the mean, standard error, lower & upper bound of
+      confidence interval
 
--  **pred\_nc\_reg\_name**
 
-   -  Input: pandas DataFrame or CSV and string or list containing the name or
-      location of the column containing the first name, last name, middle
-      name, and suffix, if there. The first name and last name columns are
-      required. If no middle name of suffix columns are there, it is
-      assumed that there are no middle names or suffixes.
+-  **pred\_nc\_reg\_name(df, namecol, num\_iter=100, conf\_int=0.9)**
 
    -  What it does:
 
       -  Removes extra space.
       -  Uses the `full name NC
-         model <ethnicolr/models/ethnicolr_keras_lstm_nc_12_cat_model.ipynb>`__ to predict the
-         race and ethnicity.
+         model <ethnicolr/models/ethnicolr_keras_lstm_nc_12_cat_model.ipynb>`__
+         to predict the race and ethnicity.
+
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   | Parameters   |                                                                                                                                                                                                                                                                                                                            |
+   +==============+============================================================================================================================================================================================================================================================================================================================+
+   |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred                                                                                                                                                                                                               |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **namecol** : *{string, list}* string or list of the name or location of the column containing the first name, last name, middle name, and suffix, if there. The first name and last name columns are required. If no middle name of suffix columns are there, it is assumed that there are no middle names or suffixes.   |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **nun\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                                                                                                                                                                                                                                |
+   +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race + ethnicity. The codebook is `here <https://github.com/appeler/nc_race_ethnicity>`__
+      race + ethnicity. The codebook is
+      `here <https://github.com/appeler/nc_race_ethnicity>`__. For each
+      race it will provide the mean, standard error, lower & upper bound of
+      confidence interval
 
 
 Using ethnicolr
