@@ -691,10 +691,11 @@ where the data is:
 
       >>> odf = pred_nc_reg_name(df, 'last','first')
       ['HL+A', 'HL+B', 'HL+I', 'HL+M', 'HL+O', 'HL+W', 'NL+A', 'NL+B', 'NL+I', 'NL+M', 'NL+O', 'NL+W']
+      
       >>> odf
-         last  first true_race       __name  rowindex     HL+A_mean  HL+A_std       HL+A_lb  ...  NL+O_std   NL+O_lb   NL+O_ub  NL+W_mean  NL+W_std   NL+W_lb   NL+W_ub  race
-      0  smith   john      NL+M   Smith John         0  9.757530e-10       0.0  9.757535e-10  ...       0.0  0.016189  0.016189   0.012901       0.0  0.012901  0.012901  NL+M
-      1  zhang  simon      NL+A  Zhang Simon         1  5.970308e-10       0.0  5.970316e-10  ...       0.0  0.020623  0.020623   0.000295       0.0  0.000295  0.000295  NL+A
+         last  first true_race       __name  rowindex  HL+A_mean  HL+A_std       HL+A_lb       HL+A_ub  ...  NL+O_mean  NL+O_std   NL+O_lb   NL+O_ub  NL+W_mean  NL+W_std   NL+W_lb   NL+W_ub  race
+      0  smith   john      NL+M   Smith John         0   0.000108  0.000260  4.009455e-07  5.188456e-07  ...   0.217948  0.053598  0.057489  0.080001   0.025746  0.014352  0.005419  0.005710  HL+O
+      1  zhang  simon      NL+A  Zhang Simon         1   0.000688  0.003427  1.705903e-07  4.138717e-07  ...   0.130775  0.041340  0.065176  0.067057   0.002783  0.002169  0.000129  0.000303  NL+A
 
       [2 rows x 54 columns]
 
@@ -704,55 +705,55 @@ where the data is:
       true_race          NL+M
       __name       Smith John
       rowindex              0
-      HL+A_mean           0.0
-      HL+A_std            0.0
+      HL+A_mean      0.000108
+      HL+A_std        0.00026
       HL+A_lb             0.0
-      HL+A_ub             0.0
-      HL+B_mean      0.000094
-      HL+B_std            0.0
-      HL+B_lb        0.000094
-      HL+B_ub        0.000094
-      HL+I_mean           0.0
-      HL+I_std            0.0
-      HL+I_lb             0.0
-      HL+I_ub             0.0
-      HL+M_mean      0.000001
-      HL+M_std            0.0
-      HL+M_lb        0.000001
-      HL+M_ub        0.000001
-      HL+O_mean       0.00053
-      HL+O_std            0.0
-      HL+O_lb         0.00053
-      HL+O_ub         0.00053
-      HL+W_mean      0.005049
-      HL+W_std            0.0
-      HL+W_lb        0.005049
-      HL+W_ub        0.005049
-      NL+A_mean      0.000393
-      NL+A_std            0.0
-      NL+A_lb        0.000393
-      NL+A_ub        0.000393
-      NL+B_mean      0.013246
-      NL+B_std            0.0
-      NL+B_lb        0.013246
-      NL+B_ub        0.013246
-      NL+I_mean      0.000255
-      NL+I_std            0.0
-      NL+I_lb        0.000255
-      NL+I_ub        0.000255
-      NL+M_mean      0.951342
-      NL+M_std            0.0
-      NL+M_lb        0.951342
-      NL+M_ub        0.951342
-      NL+O_mean      0.016189
-      NL+O_std            0.0
-      NL+O_lb        0.016189
-      NL+O_ub        0.016189
-      NL+W_mean      0.012901
-      NL+W_std            0.0
-      NL+W_lb        0.012901
-      NL+W_ub        0.012901
-      race               NL+M
+      HL+A_ub        0.000001
+      HL+B_mean      0.009594
+      HL+B_std       0.022921
+      HL+B_lb        0.000019
+      HL+B_ub        0.000043
+      HL+I_mean      0.004083
+      HL+I_std       0.020216
+      HL+I_lb        0.000001
+      HL+I_ub        0.000002
+      HL+M_mean      0.094076
+      HL+M_std       0.102733
+      HL+M_lb        0.002494
+      HL+M_ub        0.003496
+      HL+O_mean      0.296781
+      HL+O_std       0.043606
+      HL+O_lb        0.129958
+      HL+O_ub        0.211606
+      HL+W_mean      0.275642
+      HL+W_std       0.052453
+      HL+W_lb        0.086156
+      HL+W_ub        0.130344
+      NL+A_mean       0.03219
+      NL+A_std       0.017552
+      NL+A_lb        0.007462
+      NL+A_ub         0.00762
+      NL+B_mean      0.017348
+      NL+B_std       0.010997
+      NL+B_lb         0.00246
+      NL+B_ub        0.002692
+      NL+I_mean      0.014689
+      NL+I_std       0.014118
+      NL+I_lb        0.000646
+      NL+I_ub        0.000739
+      NL+M_mean      0.011795
+      NL+M_std       0.013731
+      NL+M_lb        0.000606
+      NL+M_ub         0.00084
+      NL+O_mean      0.217948
+      NL+O_std       0.053598
+      NL+O_lb        0.057489
+      NL+O_ub        0.080001
+      NL+W_mean      0.025746
+      NL+W_std       0.014352
+      NL+W_lb        0.005419
+      NL+W_ub         0.00571
+      race               HL+O
       Name: 0, dtype: object
 
 
