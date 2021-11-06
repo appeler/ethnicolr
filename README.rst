@@ -791,7 +791,7 @@ Evaluation
 Authors
 ----------
 
-Suriyan Laohaprapanon and Gaurav Sood
+Suriyan Laohaprapanon, Gaurav Sood and Bashar Naji
 
 Contributor Code of Conduct
 ---------------------------------
