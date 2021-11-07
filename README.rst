@@ -681,79 +681,77 @@ where the data is:
       >>> import pandas as pd
 
       >>> names = [
-      ...             {"last": "smith", "first": "john", "true_race": "NL+M"},
+      ...             {"last": "hernandez", "first": "hector", "true_race": "HL+O"},
       ...             {"last": "zhang", "first": "simon", "true_race": "NL+A"},
-      ...         ]     
+      ...         ]
 
       >>> df = pd.DataFrame(names)
-
-      >>> from ethnicolr import pred_nc_reg_name
 
       >>> odf = pred_nc_reg_name(df, 'last','first')
       ['HL+A', 'HL+B', 'HL+I', 'HL+M', 'HL+O', 'HL+W', 'NL+A', 'NL+B', 'NL+I', 'NL+M', 'NL+O', 'NL+W']
       
       >>> odf
-         last  first true_race       __name  rowindex  HL+A_mean  HL+A_std       HL+A_lb       HL+A_ub  ...  NL+O_mean  NL+O_std   NL+O_lb   NL+O_ub  NL+W_mean  NL+W_std   NL+W_lb   NL+W_ub  race
-      0  smith   john      NL+M   Smith John         0   0.000108  0.000260  4.009455e-07  5.188456e-07  ...   0.217948  0.053598  0.057489  0.080001   0.025746  0.014352  0.005419  0.005710  HL+O
-      1  zhang  simon      NL+A  Zhang Simon         1   0.000688  0.003427  1.705903e-07  4.138717e-07  ...   0.130775  0.041340  0.065176  0.067057   0.002783  0.002169  0.000129  0.000303  NL+A
+            last   first true_race            __name  rowindex  HL+A_mean  HL+A_std       HL+A_lb       HL+A_ub  HL+B_mean  ...   NL+M_ub  NL+O_mean  NL+O_std   NL+O_lb   NL+O_ub  NL+W_mean  NL+W_std   NL+W_lb   NL+W_ub  race
+      0  hernandez  hector      HL+O  Hernandez Hector         0   0.000054  0.000354  5.833132e-10  4.291366e-09   0.009606  ...  0.000416   0.090123  0.036310  0.000705  0.003757   0.021228  0.021222  0.000368  0.001230  HL+O
+      1      zhang   simon      NL+A       Zhang Simon         1   0.000603  0.002808  1.988648e-07  2.766486e-07   0.000026  ...  0.000086   0.125159  0.042818  0.050547  0.057208   0.003149  0.005437  0.000210  0.000225  NL+A
 
       [2 rows x 54 columns]
-
+      
       >>> odf.iloc[0]
-      last              smith
-      first              john
-      true_race          NL+M
-      __name       Smith John
-      rowindex              0
-      HL+A_mean      0.000108
-      HL+A_std        0.00026
-      HL+A_lb             0.0
-      HL+A_ub        0.000001
-      HL+B_mean      0.009594
-      HL+B_std       0.022921
-      HL+B_lb        0.000019
-      HL+B_ub        0.000043
-      HL+I_mean      0.004083
-      HL+I_std       0.020216
-      HL+I_lb        0.000001
-      HL+I_ub        0.000002
-      HL+M_mean      0.094076
-      HL+M_std       0.102733
-      HL+M_lb        0.002494
-      HL+M_ub        0.003496
-      HL+O_mean      0.296781
-      HL+O_std       0.043606
-      HL+O_lb        0.129958
-      HL+O_ub        0.211606
-      HL+W_mean      0.275642
-      HL+W_std       0.052453
-      HL+W_lb        0.086156
-      HL+W_ub        0.130344
-      NL+A_mean       0.03219
-      NL+A_std       0.017552
-      NL+A_lb        0.007462
-      NL+A_ub         0.00762
-      NL+B_mean      0.017348
-      NL+B_std       0.010997
-      NL+B_lb         0.00246
-      NL+B_ub        0.002692
-      NL+I_mean      0.014689
-      NL+I_std       0.014118
-      NL+I_lb        0.000646
-      NL+I_ub        0.000739
-      NL+M_mean      0.011795
-      NL+M_std       0.013731
-      NL+M_lb        0.000606
-      NL+M_ub         0.00084
-      NL+O_mean      0.217948
-      NL+O_std       0.053598
-      NL+O_lb        0.057489
-      NL+O_ub        0.080001
-      NL+W_mean      0.025746
-      NL+W_std       0.014352
-      NL+W_lb        0.005419
-      NL+W_ub         0.00571
-      race               HL+O
+      last                hernandez
+      first                  hector
+      true_race                HL+O
+      __name       Hernandez Hector
+      rowindex                    0
+      HL+A_mean            0.000054
+      HL+A_std             0.000354
+      HL+A_lb                   0.0
+      HL+A_ub                   0.0
+      HL+B_mean            0.009606
+      HL+B_std             0.040739
+      HL+B_lb                   0.0
+      HL+B_ub              0.000003
+      HL+I_mean            0.001605
+      HL+I_std             0.004569
+      HL+I_lb                   0.0
+      HL+I_ub                   0.0
+      HL+M_mean            0.147628
+      HL+M_std             0.215733
+      HL+M_lb              0.001253
+      HL+M_ub              0.001297
+      HL+O_mean             0.36902
+      HL+O_std             0.132249
+      HL+O_lb              0.002289
+      HL+O_ub              0.019187
+      HL+W_mean            0.264246
+      HL+W_std             0.090536
+      HL+W_lb              0.001782
+      HL+W_ub              0.015628
+      NL+A_mean            0.012004
+      NL+A_std             0.010873
+      NL+A_lb              0.000121
+      NL+A_ub              0.000281
+      NL+B_mean            0.010891
+      NL+B_std              0.01404
+      NL+B_lb              0.000094
+      NL+B_ub              0.000383
+      NL+I_mean            0.005182
+      NL+I_std             0.008259
+      NL+I_lb              0.000009
+      NL+I_ub              0.000068
+      NL+M_mean            0.068412
+      NL+M_std              0.08564
+      NL+M_lb              0.000172
+      NL+M_ub              0.000416
+      NL+O_mean            0.090123
+      NL+O_std              0.03631
+      NL+O_lb              0.000705
+      NL+O_ub              0.003757
+      NL+W_mean            0.021228
+      NL+W_std             0.021222
+      NL+W_lb              0.000368
+      NL+W_ub               0.00123
+      race                     HL+O
       Name: 0, dtype: object
 
 
