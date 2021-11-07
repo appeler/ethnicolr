@@ -33,7 +33,7 @@ race = [
 class TestPredNC(unittest.TestCase):
     def setUp(self):
         names = [
-            {"last": "smith", "first": "john", "true_race": "NL+M"},
+            {"last": "hernandez", "first": "hector", "true_race": "HL+O"},
             {"last": "zhang", "first": "simon", "true_race": "NL+A"},
         ]
         self.df = pd.DataFrame(names)

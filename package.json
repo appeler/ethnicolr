@@ -13,11 +13,13 @@
     "type": "git",
     "url": "git+https://github.com/appeler/ethnicolr.git"
   },
-  "author": "suriyan laohaprapanon and gaurav sood",
+  "author": "suriyan laohaprapanon, gaurav sood and bashar naji",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/appeler/ethnicolr/issues"
   },
   "homepage": "https://github.com/appeler/ethnicolr#readme",
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" }
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  }
 }
