@@ -95,6 +95,10 @@ def main(argv=sys.argv[1:]):
     parser.add_argument('-l', '--last', required=True,
                         help='Name or index location of column contains '
                              'the last name')
+    parser.add_argument('-i', '--iter', default=100, type=int,
+                        help='Number of iterations to measure uncertainty')
+    parser.add_argument('-c', '--conf', default=0.9, type=float,
+                         help='Confidence interval of Predictions')
 
     args = parser.parse_args(argv)
 
@@ -112,7 +116,8 @@ def main(argv=sys.argv[1:]):
     if not column_exists(df, args.first):
         return -1
 
-    rdf = pred_fl_reg_name_five_cat(df, args.last, args.first)
+    rdf = pred_fl_reg_name_five_cat(df, args.last, args.first, args.iter,
+                                    args.conf)
 
     print("Saving output to file: `{0:s}`".format(args.output))
     rdf.columns = fixup_columns(rdf.columns)
