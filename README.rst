@@ -687,6 +687,8 @@ where the data is:
 
       >>> df = pd.DataFrame(names)
 
+      >>> from ethnicolr import pred_nc_reg_name
+
       >>> odf = pred_nc_reg_name(df, 'last','first')
       ['HL+A', 'HL+B', 'HL+I', 'HL+M', 'HL+O', 'HL+W', 'NL+A', 'NL+B', 'NL+I', 'NL+M', 'NL+O', 'NL+W']
       
