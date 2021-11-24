@@ -45,8 +45,7 @@ class CensusLnData():
             print("No column `{0!s}` in the DataFrame".format(namecol))
             return df
 
-        df['__last_name'] = df[namecol].str.strip()
-        df['__last_name'] = df['__last_name'].str.upper()
+        df['__last_name'] = df[namecol].str.strip().str.upper()
 
         if cls.census_df is None or cls.census_year != year:
             if year == 2000:

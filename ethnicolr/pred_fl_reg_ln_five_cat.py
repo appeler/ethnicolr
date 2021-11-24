@@ -10,7 +10,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
-from .utils import column_exists, find_ngrams, fixup_columns
+from .utils import column_exists, fixup_columns, transform_and_pred
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_5_cat.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab_5_cat.csv"
@@ -30,7 +30,7 @@ class FloridaRegLnFiveCatModel():
     model = None
 
     @classmethod
-    def pred_fl_reg_ln(cls, df, namecol):
+    def pred_fl_reg_ln(cls, df, namecol, num_iter=100, conf_int=0.9):
         """Predict the race/ethnicity by the last name using Florida voter model.
 
         Using the Florida voter last name model to predict the race/ethnicity of
@@ -53,44 +53,20 @@ class FloridaRegLnFiveCatModel():
             print("No column `{0!s}` in the DataFrame".format(namecol))
             return df
 
-        nn = df[namecol].notnull()
-        if df[nn].shape[0] == 0:
+        df.dropna(subset=[namecol])
+        if df.shape[0] == 0:
             return df
 
-        df['__last_name'] = df[namecol].str.strip()
-        df['__last_name'] = df['__last_name'].str.title()
-
-        if cls.model is None:
-            #  sort n-gram by freq (highest -> lowest)
-            vdf = pd.read_csv(VOCAB)
-            cls.vocab = vdf.vocab.tolist()
-
-            rdf = pd.read_csv(RACE)
-            cls.race = rdf.race.tolist()
-
-            cls.model = load_model(MODEL)
-
-        # build X from index of n-gram sequence
-        X = np.array(df[nn]['__last_name'].apply(lambda c:
-                                                 find_ngrams(cls.vocab,
-                                                             c, NGRAMS)))
-        X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
-
-        proba = cls.model.predict(X, verbose=2)
-
-        df.loc[nn, '__pred'] = np.argmax(proba, axis=-1)
-
-        df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
-                                                    cls.race[int(c)])
-
-        # take out temporary working columns
-        del df['__pred']
-        del df['__last_name']
-
-        pdf = pd.DataFrame(proba, columns=cls.race)
-        pdf.set_index(df[nn].index, inplace=True)
-
-        rdf = pd.concat([df, pdf], axis=1)
+        rdf = transform_and_pred(df = df, 
+                                newnamecol = namecol, 
+                                cls = cls, 
+                                VOCAB = VOCAB,
+                                RACE = RACE,
+                                MODEL = MODEL,
+                                NGRAMS = NGRAMS,
+                                maxlen=FEATURE_LEN,
+                                num_iter=num_iter, 
+                                conf_int=conf_int)
 
         return rdf
 
@@ -108,6 +84,10 @@ def main(argv=sys.argv[1:]):
     parser.add_argument('-l', '--last', required=True,
                         help='Name or index location of column contains '
                              'the last name')
+    parser.add_argument('-i', '--iter', default=100, type=int,
+                        help='Number of iterations to measure uncertainty')
+    parser.add_argument('-c', '--conf', default=0.9, type=float,
+                         help='Confidence interval of Predictions')
 
     args = parser.parse_args(argv)
 
@@ -122,7 +102,7 @@ def main(argv=sys.argv[1:]):
     if not column_exists(df, args.last):
         return -1
 
-    rdf = pred_fl_reg_ln_five_cat(df, args.last)
+    rdf = pred_fl_reg_ln_five_cat(df, args.last, args.iter, args.conf)
 
     print("Saving output to file: `{0:s}`".format(args.output))
     rdf.columns = fixup_columns(rdf.columns)

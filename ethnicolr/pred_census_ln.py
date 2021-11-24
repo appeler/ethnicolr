@@ -7,10 +7,9 @@ import pandas as pd
 import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
-
 from pkg_resources import resource_filename
 
-from .utils import column_exists, find_ngrams, fixup_columns
+from .utils import column_exists, fixup_columns, transform_and_pred
 
 MODELFN = "models/census/lstm/census{0:d}_ln_lstm.h5"
 VOCABFN = "models/census/lstm/census{0:d}_ln_vocab.csv"
@@ -24,14 +23,14 @@ NGRAMS = 2
 FEATURE_LEN = 20
 
 
-class CensusLnModel():
+class CensusLnModel:
     vocab = None
     race = None
     model = None
     model_year = None
 
     @classmethod
-    def pred_census_ln(cls, df, namecol, year=2000):
+    def pred_census_ln(cls, df, namecol, year=2000, num_iter=100, conf_int=0.9):
         """Predict the race/ethnicity by the last name using Census model.
 
         Using the Census last name model to predict the race/ethnicity of the input
@@ -57,44 +56,26 @@ class CensusLnModel():
             print("No column `{0!s}` in the DataFrame".format(namecol))
             return df
 
-        nn = df[namecol].notnull()
-        if df[nn].shape[0] == 0:
+        df.dropna(subset=[namecol])
+        if df.shape[0] == 0:
             return df
 
-        df['__last_name'] = df[namecol].str.strip()
-        df['__last_name'] = df['__last_name'].str.title()
+        VOCAB = resource_filename(__name__, VOCABFN.format(year))
+        MODEL = resource_filename(__name__, MODELFN.format(year))
+        RACE = resource_filename(__name__, RACEFN.format(year))
 
-        if cls.model is None and cls.model_year != year:
-            #  sort n-gram by freq (highest -> lowest)
-            vdf = pd.read_csv(VOCAB.format(year))
-            cls.vocab = vdf.vocab.tolist()
-
-            rdf = pd.read_csv(RACE.format(year))
-            cls.race = rdf.race.tolist()
-
-            cls.model = load_model(MODEL.format(year))
-
-        # build X from index of n-gram sequence
-        X = np.array(df[nn]['__last_name'].apply(lambda c:
-                                                 find_ngrams(cls.vocab,
-                                                             c, NGRAMS)))
-        X = sequence.pad_sequences(X, maxlen=FEATURE_LEN)
-
-        proba = cls.model.predict(X, verbose=2)
-
-        df.loc[nn, '__pred'] = np.argmax(proba, axis=-1)
-
-        df.loc[nn, 'race'] = df[nn]['__pred'].apply(lambda c:
-                                                    cls.race[int(c)])
-
-        # take out temporary working columns
-        del df['__pred']
-        del df['__last_name']
-
-        pdf = pd.DataFrame(proba, columns=cls.race)
-        pdf.set_index(df[nn].index, inplace=True)
-
-        rdf = pd.concat([df, pdf], axis=1)
+        rdf = transform_and_pred(
+            df=df,
+            newnamecol=namecol,
+            cls=cls,
+            VOCAB=VOCAB,
+            RACE=RACE,
+            MODEL=MODEL,
+            NGRAMS=NGRAMS,
+            maxlen=FEATURE_LEN,
+            num_iter=num_iter,
+            conf_int=conf_int,
+        )
 
         return rdf
 
@@ -103,18 +84,33 @@ pred_census_ln = CensusLnModel.pred_census_ln
 
 
 def main(argv=sys.argv[1:]):
-    title = 'Predict Race/Ethnicity by last name using Census model'
+    title = "Predict Race/Ethnicity by last name using Census model"
     parser = argparse.ArgumentParser(description=title)
-    parser.add_argument('input', default=None,
-                        help='Input file')
-    parser.add_argument('-y', '--year', type=int, default=2000,
-                        choices=[2000, 2010],
-                        help='Year of Census data (default=2000)')
-    parser.add_argument('-o', '--output', default='census-pred-ln-output.csv',
-                        help='Output file with prediction data')
-    parser.add_argument('-l', '--last', required=True,
-                        help='Name or index location of column contains '
-                             'the last name')
+    parser.add_argument("input", default=None, help="Input file")
+    parser.add_argument(
+        "-y",
+        "--year",
+        type=int,
+        default=2000,
+        choices=[2000, 2010],
+        help="Year of Census data (default=2000)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="census-pred-ln-output.csv",
+        help="Output file with prediction data",
+    )
+    parser.add_argument(
+        "-l",
+        "--last",
+        required=True,
+        help="Name or index location of column contains " "the last name",
+    )
+    parser.add_argument('-i', '--iter', default=100, type=int,
+                        help='Number of iterations to measure uncertainty')
+    parser.add_argument('-c', '--conf', default=0.9, type=float,
+                         help='Confidence interval of Predictions')
 
     args = parser.parse_args(argv)
 
@@ -129,7 +125,7 @@ def main(argv=sys.argv[1:]):
     if not column_exists(df, args.last):
         return -1
 
-    rdf = pred_census_ln(df, args.last, args.year)
+    rdf = pred_census_ln(df, args.last, args.year, args.iter, args.conf)
 
     print("Saving output to file: `{0:s}`".format(args.output))
     rdf.columns = fixup_columns(rdf.columns)

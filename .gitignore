@@ -12,4 +12,6 @@ build/
 venv/
 dist/
 ethnicolr.egg-info/
-ethnicolr/data/fl_voter_reg/
+dev/
+docs/build
+docs/source/_build
