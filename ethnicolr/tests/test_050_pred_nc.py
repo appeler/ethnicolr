@@ -45,7 +45,8 @@ class TestPredNC(unittest.TestCase):
         odf = pred_nc_reg_name(self.df, "last", "first")
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns
+                     if col in race]].sum(axis=1).round(1)
                 == 1.0
             )
         )

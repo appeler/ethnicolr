@@ -31,7 +31,8 @@ class TestCensusLn(unittest.TestCase):
         odf = pred_census_ln(self.df, "last", 2000)
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns
+                     if col in race]].sum(axis=1).round(1)
                 == 1.0
             )
         )
@@ -41,7 +42,8 @@ class TestCensusLn(unittest.TestCase):
         odf = pred_census_ln(self.df, "last", 2010)
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns
+                     if col in race]].sum(axis=1).round(1)
                 == 1.0
             )
         )

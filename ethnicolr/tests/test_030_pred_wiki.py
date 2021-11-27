@@ -34,7 +34,8 @@ race = [
 class TestPredWiki(unittest.TestCase):
     def setUp(self):
         names = [
-            {"last": "smith", "first": "john", "true_race": "GreaterEuropean,British"},
+            {"last": "smith", "first": "john",
+             "true_race": "GreaterEuropean,British"},
             {
                 "last": "zhang",
                 "first": "simon",
@@ -50,7 +51,8 @@ class TestPredWiki(unittest.TestCase):
         odf = pred_wiki_ln(self.df, "last")
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns
+                     if col in race]].sum(axis=1).round(1)
                 == 1.0
             )
         )
@@ -60,7 +62,8 @@ class TestPredWiki(unittest.TestCase):
         odf = pred_wiki_name(self.df, "last", "first")
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns
+                     if col in race]].sum(axis=1).round(1)
                 == 1.0
             )
         )

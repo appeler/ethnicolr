@@ -19,7 +19,8 @@ from pkg_resources import resource_filename
 from . import capture
 
 race = ["asian_mean", "hispanic_mean", "nh_black_mean", "nh_white_mean"]
-race5 = ["asian_mean", "hispanic_mean", "nh_black_mean", "nh_white_mean", "other_mean"]
+race5 = ["asian_mean", "hispanic_mean", "nh_black_mean", "nh_white_mean",
+         "other_mean"]
 
 
 class TestPredFL(unittest.TestCase):
@@ -37,7 +38,8 @@ class TestPredFL(unittest.TestCase):
         odf = pred_fl_reg_ln(self.df, "last")
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns
+                     if col in race]].sum(axis=1).round(1)
                 == 1.0
             )
         )
@@ -47,7 +49,8 @@ class TestPredFL(unittest.TestCase):
         odf = pred_fl_reg_name(self.df, "last", "first")
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns
+                     if col in race]].sum(axis=1).round(1)
                 == 1.0
             )
         )
@@ -57,7 +60,8 @@ class TestPredFL(unittest.TestCase):
         odf = pred_fl_reg_ln_five_cat(self.df, "last")
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns if col in race5]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns
+                     if col in race5]].sum(axis=1).round(1)
                 == 1.0
             )
         )
@@ -67,7 +71,8 @@ class TestPredFL(unittest.TestCase):
         odf = pred_fl_reg_name_five_cat(self.df, "last", "first")
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns if col in race5]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns
+                     if col in race5]].sum(axis=1).round(1)
                 == 1.0
             )
         )
