@@ -66,7 +66,8 @@ setup(
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
     version="0.8.1",
-    description="Predict Race/Ethnicity Based on Sequence of Characters in the Name",
+    description=("Predict Race/Ethnicity Based on Sequence of Characters"
+                 " in the Name"),
     long_description=long_description,
     # The project's main homepage.
     url="https://github.com/appeler/ethnicolr",
@@ -112,7 +113,7 @@ setup(
     # dependencies). You can install these using the following syntax,
     # for example:
     # $ pip install -e .[dev,test]
-    extras_require={"dev": ["check-manifest"], "test": ["coverage"],},
+    extras_require={"dev": ["check-manifest"], "test": ["coverage"], },
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
@@ -155,7 +156,8 @@ setup(
             "pred_fl_reg_name=ethnicolr.pred_fl_reg_name:main",
             "pred_fl_reg_ln=ethnicolr.pred_fl_reg_ln:main",
             "pred_fl_reg_ln_five_cat=ethnicolr.pred_fl_reg_ln_five_cat:main",
-            "pred_fl_reg_name_five_cat=ethnicolr.pred_fl_reg_name_five_cat:main",
+            ("pred_fl_reg_name_five_cat="
+             "ethnicolr.pred_fl_reg_name_five_cat:main"),
             "pred_nc_reg_name=ethnicolr.pred_nc_reg_name:main",
         ],
     },

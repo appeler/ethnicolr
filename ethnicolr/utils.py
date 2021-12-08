@@ -29,7 +29,8 @@ def column_exists(df, col):
 
     """
     if col and (col not in df.columns):
-        print("The specify column `{0!s}` not found in the input file".format(col))
+        print("The specify column `{0!s}` not found in the input file"
+              .format(col))
         return False
     else:
         return True
@@ -103,7 +104,8 @@ def transform_and_pred(
         cls.model = load_model(MODEL)
 
     # build X from index of n-gram sequence
-    X = np.array(df[newnamecol].apply(lambda c: find_ngrams(cls.vocab, c, NGRAMS)))
+    X = np.array(df[newnamecol].apply(lambda c: find_ngrams(cls.vocab,
+                                                            c, NGRAMS)))
     X = sequence.pad_sequences(X, maxlen=maxlen)
 
     # define the quantile ranges for the confidence interval

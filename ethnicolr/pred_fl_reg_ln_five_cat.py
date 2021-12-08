@@ -31,10 +31,11 @@ class FloridaRegLnFiveCatModel():
 
     @classmethod
     def pred_fl_reg_ln(cls, df, namecol, num_iter=100, conf_int=0.9):
-        """Predict the race/ethnicity by the last name using Florida voter model.
+        """Predict the race/ethnicity by the last name using Florida voter
+        model.
 
-        Using the Florida voter last name model to predict the race/ethnicity of
-        the input DataFrame.
+        Using the Florida voter last name model to predict the race/ethnicity
+        of the input DataFrame.
 
         Args:
             df (:obj:`DataFrame`): Pandas DataFrame containing the last name
@@ -57,16 +58,16 @@ class FloridaRegLnFiveCatModel():
         if df.shape[0] == 0:
             return df
 
-        rdf = transform_and_pred(df = df, 
-                                newnamecol = namecol, 
-                                cls = cls, 
-                                VOCAB = VOCAB,
-                                RACE = RACE,
-                                MODEL = MODEL,
-                                NGRAMS = NGRAMS,
-                                maxlen=FEATURE_LEN,
-                                num_iter=num_iter, 
-                                conf_int=conf_int)
+        rdf = transform_and_pred(df=df,
+                                 newnamecol=namecol,
+                                 cls=cls,
+                                 VOCAB=VOCAB,
+                                 RACE=RACE,
+                                 MODEL=MODEL,
+                                 NGRAMS=NGRAMS,
+                                 maxlen=FEATURE_LEN,
+                                 num_iter=num_iter,
+                                 conf_int=conf_int)
 
         return rdf
 
@@ -75,11 +76,13 @@ pred_fl_reg_ln_five_cat = FloridaRegLnFiveCatModel.pred_fl_reg_ln
 
 
 def main(argv=sys.argv[1:]):
-    title = 'Predict Race/Ethnicity by last name using the Florida registration 5 cat. model'
+    title = ('Predict Race/Ethnicity by last name using the Florida'
+             ' registration 5 cat. model')
     parser = argparse.ArgumentParser(description=title)
     parser.add_argument('input', default=None,
                         help='Input file')
-    parser.add_argument('-o', '--output', default='fl-pred-ln-five-cat-output.csv',
+    parser.add_argument('-o', '--output',
+                        default='fl-pred-ln-five-cat-output.csv',
                         help='Output file with prediction data')
     parser.add_argument('-l', '--last', required=True,
                         help='Name or index location of column contains '
@@ -87,7 +90,7 @@ def main(argv=sys.argv[1:]):
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
     parser.add_argument('-c', '--conf', default=0.9, type=float,
-                         help='Confidence interval of Predictions')
+                        help='Confidence interval of Predictions')
 
     args = parser.parse_args(argv)
 
@@ -109,6 +112,7 @@ def main(argv=sys.argv[1:]):
     rdf.to_csv(args.output, index=False)
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

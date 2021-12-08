@@ -10,7 +10,8 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
-from ethnicolr.utils import column_exists, find_ngrams, fixup_columns, transform_and_pred
+from ethnicolr.utils import (column_exists, find_ngrams, fixup_columns,
+                             transform_and_pred)
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_uncrtn.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab.csv"
@@ -31,10 +32,11 @@ class FloridaRegLnCnIntModel():
 
     @classmethod
     def pred_fl_reg_ln_cn_int(cls, df, namecol, num_iter=100, conf_int=0.9):
-        """Predict the race/ethnicity by the last name using Florida voter model.
+        """Predict the race/ethnicity by the last name using Florida voter
+        model.
 
-        Using the Florida voter last name model to predict the race/ethnicity of
-        the input DataFrame.
+        Using the Florida voter last name model to predict the race/ethnicity
+        of the input DataFrame.
 
         Args:
             df (:obj:`DataFrame`): Pandas DataFrame containing the last name
@@ -99,8 +101,10 @@ class FloridaRegLnCnIntModel():
         proba = np.array(proba)
         mean_arr = proba.mean(axis=0).reshape(-1, len(cls.race))
         std_arr = proba.std(axis=0).reshape(-1, len(cls.race))
-        pct_low_arr = np.quantile(proba, low_quantile, axis=0).reshape(-1, len(cls.race))
-        pct_high_arr = np.quantile(proba, high_quantile, axis=0).reshape(-1, len(cls.race))
+        pct_low_arr = np.quantile(proba, low_quantile,
+                                  axis=0).reshape(-1, len(cls.race))
+        pct_high_arr = np.quantile(proba, high_quantile,
+                                   axis=0).reshape(-1, len(cls.race))
 
         df.loc[nn, '__pred'] = np.argmax(mean_arr, axis=-1)
 
@@ -138,7 +142,8 @@ pred_fl_reg_ln_cn_int = FloridaRegLnCnIntModel.pred_fl_reg_ln_cn_int
 
 
 def main(argv=sys.argv[1:]):
-    title = 'Predict Race/Ethnicity by name using Florida registration model with Confidence Interval'
+    title = ('Predict Race/Ethnicity by name using Florida registration model'
+             ' with Confidence Interval')
     parser = argparse.ArgumentParser(description=title)
     parser.add_argument('input', default=None,
                         help='Input file')
@@ -147,7 +152,7 @@ def main(argv=sys.argv[1:]):
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
     parser.add_argument('-c', '--conf', default=0.9, type=float,
-                         help='Confidence interval of Predictions')
+                        help='Confidence interval of Predictions')
     parser.add_argument('-l', '--last', required=True,
                         help='Name or index location of column contains '
                              'the last name')
