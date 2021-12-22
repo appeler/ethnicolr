@@ -26,7 +26,7 @@ race5 = ["asian_mean", "hispanic_mean", "nh_black_mean", "nh_white_mean",
 class TestPredFL(unittest.TestCase):
     def setUp(self):
         names = [
-            {"last": "sawyer", "first": "john", "true_race": "nh_white"},
+            {"last": "zhang", "first": "simon", "true_race": "asian"},
             {"last": "torres", "first": "raul", "true_race": "hispanic"},
         ]
         self.df = pd.DataFrame(names)
