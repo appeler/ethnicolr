@@ -20,7 +20,7 @@ MODEL = resource_filename(__name__, MODELFN)
 VOCAB = resource_filename(__name__, VOCABFN)
 RACE = resource_filename(__name__, RACEFN)
 
-NGRAMS = 2
+NGRAMS = (2, 3)
 FEATURE_LEN = 25
 
 

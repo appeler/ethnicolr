@@ -7,6 +7,7 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
+from itertools import chain
 
 
 def isstring(s):
@@ -55,6 +56,23 @@ def fixup_columns(cols):
     return out_cols
 
 
+def n_grams(seq, n=1):
+    """Returns an itirator over the n-grams given a listTokens"""
+    shiftToken = lambda i: (el for j,el in enumerate(seq) if j>=i)
+    shiftedTokens = (shiftToken(i) for i in range(n))
+    tupleNGrams = zip(*shiftedTokens)
+    return tupleNGrams
+
+
+def range_ngrams(listTokens, ngramRange=(1,2)):
+    """Returns an itirator over all n-grams for n in range(ngramRange)
+       given a listTokens.
+    """
+
+    ngrams = (ngramRange[0], ngramRange[1] + 1)
+    return chain(*(n_grams(listTokens, i) for i in range(*ngramRange)))
+
+
 def find_ngrams(vocab, text, n):
     """Find and return list of the index of n-grams in the vocabulary list.
 
@@ -64,7 +82,7 @@ def find_ngrams(vocab, text, n):
     Args:
         vocab (:obj:`list`): Vocabulary list.
         text (str): Input text
-        n (int): N-grams
+        n (int or tuple): N-grams or tuple of range N-grams
 
     Returns:
         list: List of the index of n-grams in the vocabulary list.
@@ -76,7 +94,11 @@ def find_ngrams(vocab, text, n):
     if not isstring(text):
         return wi
 
-    a = zip(*[text[i:] for i in range(n)])
+    if type(n) is tuple:
+        a = range_ngrams(text, n)
+    else:
+        a = zip(*[text[i:] for i in range(n)])
+
     for i in a:
         w = "".join(i)
         try:
