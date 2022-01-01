@@ -178,30 +178,3 @@ def transform_and_pred(
         final_df = df.merge(res, on="rowindex", how="left")
 
     return final_df
-
-def pred(
-    df, newnamecol, cls, VOCAB, RACE, MODEL, NGRAMS, maxlen):
-
-    df[newnamecol] = df[newnamecol].str.strip().str.title()
-
-    if cls.model is None:
-        vdf = pd.read_csv(VOCAB)
-        cls.vocab = vdf.vocab.tolist()
-
-        rdf = pd.read_csv(RACE)
-        cls.race = rdf.race.tolist()
-
-        cls.model = load_model(MODEL)
-
-    # build X from index of n-gram sequence
-    X = np.array(df[newnamecol].apply(lambda c: find_ngrams(cls.vocab,
-                                                            c, NGRAMS)))
-    X = sequence.pad_sequences(X, maxlen=maxlen)
-
-    # Predict
-    pdf = pd.DataFrame(cls.model(X, training=False).numpy(), columns = cls.race)
-    print(cls.race)
-
-    final_df = pd.concat([df.reset_index(drop=True),pdf.reset_index(drop=True)],axis=1 )
-
-    return final_df
