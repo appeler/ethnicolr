@@ -130,44 +130,52 @@ def transform_and_pred(
                                                             c, NGRAMS)))
     X = sequence.pad_sequences(X, maxlen=maxlen)
 
-    # define the quantile ranges for the confidence interval
-    lower_perc = 0.5 - (conf_int / 2)
-    upper_perc = 0.5 + (conf_int / 2)
+    if conf_int == 0:
+        # Predict
+        pdf = pd.DataFrame(cls.model(X, training=False).numpy(), columns = cls.race)
+        print(cls.race)
 
-    # Predict
-    pdf = pd.DataFrame()
+        final_df = pd.concat([df.reset_index(drop=True),pdf.reset_index(drop=True)],axis=1 )
 
-    for _ in range(num_iter):
-        pdf = pdf.append(pd.DataFrame(cls.model(X, training=True)))
-    print(cls.race)
-    pdf.columns = cls.race
-    pdf["rowindex"] = pdf.index
+    else:
+        # define the quantile ranges for the confidence interval
+        lower_perc = 0.5 - (conf_int / 2)
+        upper_perc = 0.5 + (conf_int / 2)
 
-    res = (
-        pdf.groupby("rowindex")
-        .agg(
-            [
-                np.mean,
-                np.std,
-                lambda x: np.percentile(x, q=lower_perc),
-                lambda x: np.percentile(x, q=upper_perc),
-            ]
+        # Predict
+        pdf = pd.DataFrame()
+
+        for _ in range(num_iter):
+            pdf = pdf.append(pd.DataFrame(cls.model(X, training=True)))
+        print(cls.race)
+        pdf.columns = cls.race
+        pdf["rowindex"] = pdf.index
+
+        res = (
+            pdf.groupby("rowindex")
+            .agg(
+                [
+                    np.mean,
+                    np.std,
+                    lambda x: np.percentile(x, q=lower_perc),
+                    lambda x: np.percentile(x, q=upper_perc),
+                ]
+            )
+            .reset_index()
         )
-        .reset_index()
-    )
-    res.columns = [f"{i}_{j}" for i, j in res.columns]
-    res.columns = res.columns.str.replace("<lambda_0>", "lb")
-    res.columns = res.columns.str.replace("<lambda_1>", "ub")
-    res.columns = res.columns.str.replace("rowindex_", "rowindex")
+        res.columns = [f"{i}_{j}" for i, j in res.columns]
+        res.columns = res.columns.str.replace("<lambda_0>", "lb")
+        res.columns = res.columns.str.replace("<lambda_1>", "ub")
+        res.columns = res.columns.str.replace("rowindex_", "rowindex")
 
-    means = list(filter(lambda x: "_mean" in x, res.columns))
-    res["race"] = res[means].idxmax(axis=1).str.replace("_mean", "")
+        means = list(filter(lambda x: "_mean" in x, res.columns))
+        res["race"] = res[means].idxmax(axis=1).str.replace("_mean", "")
 
-    for suffix in ["_lb", "ub"]:
-        conv_filt = list(filter(lambda x: suffix in x, res.columns))
-        res[conv_filt] = res[conv_filt].to_numpy().astype(float)
+        for suffix in ["_lb", "ub"]:
+            conv_filt = list(filter(lambda x: suffix in x, res.columns))
+            res[conv_filt] = res[conv_filt].to_numpy().astype(float)
 
-    final_df = df.merge(res, on="rowindex", how="left")
+        final_df = df.merge(res, on="rowindex", how="left")
 
     return final_df
 

@@ -57,18 +57,8 @@ class FloridaRegLnModel:
         df.dropna(subset=[namecol])
         if df.shape[0] == 0:
             return df
-
-        if conf_int==0:
-            rdf = pred(df=df,
-                newnamecol=namecol,
-                cls=cls,
-                VOCAB=VOCAB,
-                RACE=RACE,
-                MODEL=MODEL,
-                NGRAMS=NGRAMS,
-                maxlen=FEATURE_LEN)
-        else:
-            rdf = transform_and_pred(
+        
+        rdf = transform_and_pred(
                 df=df,
                 newnamecol=namecol,
                 cls=cls,
