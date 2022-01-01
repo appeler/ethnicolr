@@ -30,7 +30,7 @@ class FloridaRegLnModel:
     model = None
 
     @classmethod
-    def pred_fl_reg_ln(cls, df, namecol, num_iter=100, conf_int=0):
+    def pred_fl_reg_ln(cls, df, namecol, num_iter=100, conf_int=1):
         """Predict the race/ethnicity by the last name using Florida voter
         model.
 

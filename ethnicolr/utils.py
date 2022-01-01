@@ -130,10 +130,9 @@ def transform_and_pred(
                                                             c, NGRAMS)))
     X = sequence.pad_sequences(X, maxlen=maxlen)
 
-    if conf_int == 0:
+    if conf_int == 1:
         # Predict
         pdf = pd.DataFrame(cls.model(X, training=False).numpy(), columns = cls.race)
-        print(cls.race)
 
         final_df = pd.concat([df.reset_index(drop=True),pdf.reset_index(drop=True)],axis=1 )
 
