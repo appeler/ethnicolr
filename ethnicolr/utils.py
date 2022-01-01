@@ -172,7 +172,7 @@ def transform_and_pred(
     return final_df
 
 def pred(
-    df, newnamecol, cls, VOCAB, RACE, MODEL, NGRAMS, maxlen, num_iter, conf_int):
+    df, newnamecol, cls, VOCAB, RACE, MODEL, NGRAMS, maxlen):
 
     df[newnamecol] = df[newnamecol].str.strip().str.title()
 

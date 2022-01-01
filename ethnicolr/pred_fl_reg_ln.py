@@ -30,7 +30,7 @@ class FloridaRegLnModel:
     model = None
 
     @classmethod
-    def pred_fl_reg_ln(cls, df, namecol, num_iter=100, conf_int=0.9):
+    def pred_fl_reg_ln(cls, df, namecol, num_iter=100, conf_int=0):
         """Predict the race/ethnicity by the last name using Florida voter
         model.
 
@@ -58,21 +58,30 @@ class FloridaRegLnModel:
         if df.shape[0] == 0:
             return df
 
-        rdf = transform_and_pred(
-            df=df,
-            newnamecol=namecol,
-            cls=cls,
-            VOCAB=VOCAB,
-            RACE=RACE,
-            MODEL=MODEL,
-            NGRAMS=NGRAMS,
-            maxlen=FEATURE_LEN,
-            num_iter=num_iter,
-            conf_int=conf_int,
-        )
+        if conf_int==0:
+            rdf = pred(df=df,
+                newnamecol=namecol,
+                cls=cls,
+                VOCAB=VOCAB,
+                RACE=RACE,
+                MODEL=MODEL,
+                NGRAMS=NGRAMS,
+                maxlen=FEATURE_LEN)
+        else:
+            rdf = transform_and_pred(
+                df=df,
+                newnamecol=namecol,
+                cls=cls,
+                VOCAB=VOCAB,
+                RACE=RACE,
+                MODEL=MODEL,
+                NGRAMS=NGRAMS,
+                maxlen=FEATURE_LEN,
+                num_iter=num_iter,
+                conf_int=conf_int
+            )
 
         return rdf
-
 
 pred_fl_reg_ln = FloridaRegLnModel.pred_fl_reg_ln
 
