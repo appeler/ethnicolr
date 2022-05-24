@@ -108,7 +108,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=["tensorflow==2.5.3", "pandas>=1.3.0"],
+    install_requires=["tensorflow==2.6.4", "pandas>=1.3.0"],
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
