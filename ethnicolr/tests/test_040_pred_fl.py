@@ -35,7 +35,7 @@ class TestPredFL(unittest.TestCase):
         pass
 
     def test_pred_fl_reg_ln(self):
-        odf = pred_fl_reg_ln(self.df, "last")
+        odf = pred_fl_reg_ln(self.df, "last", conf_int=0.9)
         self.assertTrue(
             all(
                 odf[[col for col in odf.columns
