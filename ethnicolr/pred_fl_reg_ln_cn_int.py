@@ -31,7 +31,7 @@ class FloridaRegLnCnIntModel():
     model = None
 
     @classmethod
-    def pred_fl_reg_ln_cn_int(cls, df, namecol, num_iter=100, conf_int=0.9):
+    def pred_fl_reg_ln_cn_int(cls, df, namecol, num_iter=100, conf_int=1.0):
         """Predict the race/ethnicity by the last name using Florida voter
         model.
 
@@ -151,7 +151,7 @@ def main(argv=sys.argv[1:]):
                         help='Output file with prediction data')
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=0.9, type=float,
+    parser.add_argument('-c', '--conf', default=1.0, type=float,
                         help='Confidence interval of Predictions')
     parser.add_argument('-l', '--last', required=True,
                         help='Name or index location of column contains '

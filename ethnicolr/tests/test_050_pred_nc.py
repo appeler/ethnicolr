@@ -15,6 +15,21 @@ from ethnicolr.pred_nc_reg_name import pred_nc_reg_name
 from . import capture
 
 race = [
+    "HL+A",
+    "HL+B",
+    "HL+I",
+    "HL+M",
+    "HL+O",
+    "HL+W",
+    "NL+A",
+    "NL+B",
+    "NL+I",
+    "NL+M",
+    "NL+O",
+    "NL+W",
+]
+
+race_mean = [
     "HL+A_mean",
     "HL+B_mean",
     "HL+I_mean",
@@ -52,6 +67,16 @@ class TestPredNC(unittest.TestCase):
         )
         self.assertTrue(all(odf.true_race == odf.race))
 
+    def test_pred_nc_reg_name(self):
+        odf = pred_nc_reg_name(self.df, "last", "first", conf_int=0.9)
+        self.assertTrue(
+            all(
+                odf[[col for col in odf.columns
+                     if col in race_mean]].sum(axis=1).round(1)
+                == 1.0
+            )
+        )
+        self.assertTrue(all(odf.true_race == odf.race))
 
 if __name__ == "__main__":
     unittest.main()
