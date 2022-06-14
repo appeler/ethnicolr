@@ -132,10 +132,13 @@ def transform_and_pred(
 
     if conf_int == 1:
         # Predict
-        pdf = pd.DataFrame(cls.model(X, training=False).numpy(), columns = cls.race)
-
-        final_df = pd.concat([df.reset_index(drop=True),pdf.reset_index(drop=True)],axis=1 )
-
+        proba = cls.model(X, training=False).numpy()
+        pdf = pd.DataFrame(proba, columns=cls.race)
+        pdf["__race"] = np.argmax(proba, axis=-1)
+        pdf["race"] = pdf["__race"].apply(lambda c: cls.race[int(c)])
+        del pdf["__race"]
+        final_df = pd.concat([df.reset_index(drop=True),
+                              pdf.reset_index(drop=True)], axis=1 )
     else:
         # define the quantile ranges for the confidence interval
         lower_perc = 0.5 - (conf_int / 2)

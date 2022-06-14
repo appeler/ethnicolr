@@ -31,7 +31,7 @@ class WikiNameModel():
 
     @classmethod
     def pred_wiki_name(cls, df, lname_col, fname_col, num_iter=100,
-                       conf_int=0.9):
+                       conf_int=1.0):
         """Predict the race/ethnicity by the full name using Wiki model.
 
         Using the Wiki full name model to predict the race/ethnicity of
@@ -99,7 +99,7 @@ def main(argv=sys.argv[1:]):
                              'the last name')
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=0.9, type=float,
+    parser.add_argument('-c', '--conf', default=1.0, type=float,
                         help='Confidence interval of Predictions')
 
     args = parser.parse_args(argv)

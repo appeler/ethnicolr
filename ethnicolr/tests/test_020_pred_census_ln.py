@@ -13,7 +13,8 @@ import pandas as pd
 from ethnicolr.pred_census_ln import pred_census_ln
 from . import capture
 
-race = ["api_mean", "black_mean", "hispanic_mean", "white_mean"]
+race = ["api", "black", "hispanic", "white"]
+race_mean = ["api_mean", "black_mean", "hispanic_mean", "white_mean"]
 
 
 class TestCensusLn(unittest.TestCase):
@@ -49,6 +50,27 @@ class TestCensusLn(unittest.TestCase):
         )
         self.assertTrue(all(odf.true_race == odf.race))
 
+    def test_pred_census_ln_2000_mean(self):
+        odf = pred_census_ln(self.df, "last", 2000, conf_int=0.9)
+        self.assertTrue(
+            all(
+                odf[[col for col in odf.columns
+                     if col in race_mean]].sum(axis=1).round(1)
+                == 1.0
+            )
+        )
+        self.assertTrue(all(odf.true_race == odf.race))
+
+    def test_pred_census_ln_2010_mean(self):
+        odf = pred_census_ln(self.df, "last", 2010, conf_int=0.9)
+        self.assertTrue(
+            all(
+                odf[[col for col in odf.columns
+                     if col in race_mean]].sum(axis=1).round(1)
+                == 1.0
+            )
+        )
+        self.assertTrue(all(odf.true_race == odf.race))
 
 if __name__ == "__main__":
     unittest.main()

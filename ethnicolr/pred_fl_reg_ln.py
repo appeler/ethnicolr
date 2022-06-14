@@ -94,7 +94,7 @@ def main(argv=sys.argv[1:]):
     )
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=0.9, type=float,
+    parser.add_argument('-c', '--conf', default=1.0, type=float,
                         help='Confidence interval of Predictions')
 
     args = parser.parse_args(argv)

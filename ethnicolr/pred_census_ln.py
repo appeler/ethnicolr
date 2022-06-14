@@ -31,7 +31,7 @@ class CensusLnModel:
 
     @classmethod
     def pred_census_ln(cls, df, namecol, year=2000, num_iter=100,
-                       conf_int=0.9):
+                       conf_int=1.0):
         """Predict the race/ethnicity by the last name using Census model.
 
         Using the Census last name model to predict the race/ethnicity of the
@@ -110,7 +110,7 @@ def main(argv=sys.argv[1:]):
     )
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=0.9, type=float,
+    parser.add_argument('-c', '--conf', default=1.0, type=float,
                         help='Confidence interval of Predictions')
 
     args = parser.parse_args(argv)
