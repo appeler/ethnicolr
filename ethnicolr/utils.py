@@ -176,4 +176,7 @@ def transform_and_pred(
 
         final_df = df.merge(res, on="rowindex", how="left")
 
+    del final_df['rowindex']
+    del df['rowindex']
+
     return final_df

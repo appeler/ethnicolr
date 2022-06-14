@@ -63,6 +63,7 @@ class CensusLnData():
 
         rdf = pd.merge(df, cls.census_df, how='left', on='__last_name')
 
+        del df['__last_name']
         del rdf['__last_name']
 
         return rdf
