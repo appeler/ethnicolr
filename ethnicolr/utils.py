@@ -145,7 +145,7 @@ def transform_and_pred(
         pdf = pd.DataFrame()
 
         for _ in range(num_iter):
-            pdf = pdf.append(pd.DataFrame(cls.model(X, training=True)))
+            pdf = pd.concat([pdf, pd.DataFrame(cls.model(X, training=True))])
         print(cls.race)
         pdf.columns = cls.race
         pdf["rowindex"] = pdf.index
