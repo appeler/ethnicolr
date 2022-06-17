@@ -1,8 +1,8 @@
 ethnicolr: Predict Race and Ethnicity From Name
 ----------------------------------------------------
 
-.. image:: https://travis-ci.com/appeler/ethnicolr.svg?branch=master
-    :target: https://travis-ci.com/appeler/ethnicolr
+.. image:: https://github.com/appeler/ethnicolr/workflows/test/badge.svg
+    :target: https://github.com/appeler/ethnicolr/actions?query=workflow%3Atest
 .. image:: https://ci.appveyor.com/api/projects/status/u9fe72hn8nnhmaxt?svg=true
     :target: https://ci.appveyor.com/project/soodoku/ethnicolr-m6u1p
 .. image:: https://img.shields.io/pypi/v/ethnicolr.svg
@@ -195,7 +195,7 @@ where the data is:
    +--------------+---------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                         |
+   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                         |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
 
 
@@ -245,7 +245,7 @@ where the data is:
    +--------------+---------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                         |
+   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                         |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
 
 
@@ -291,7 +291,6 @@ where the data is:
       last                                                       Smith
       first                                                       john
       true_race                                GreaterEuropean,British
-      rowindex                                                       0
       Asian,GreaterEastAsian,EastAsian_mean                   0.004554
       Asian,GreaterEastAsian,EastAsian_std                    0.003358
       Asian,GreaterEastAsian,EastAsian_lb                     0.000535
@@ -318,7 +317,7 @@ where the data is:
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                                                                                                                                                                                                                                |
+   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                                                                                                                                                                                                                                |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -352,8 +351,6 @@ where the data is:
       last                                                                Zhang
       first                                                               simon
       true_race                                Asian,GreaterEastAsian,EastAsian
-      rowindex                                                                1
-      __name                                                        Zhang Simon
       Asian,GreaterEastAsian,EastAsian_mean                            0.890619
       Asian,GreaterEastAsian,EastAsian_std                             0.119097
       Asian,GreaterEastAsian,EastAsian_lb                              0.391496
@@ -378,7 +375,7 @@ where the data is:
    +--------------+---------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                         |
+   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                         |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
 
 
@@ -405,9 +402,9 @@ where the data is:
       ['asian', 'hispanic', 'nh_black', 'nh_white']
 
       >>> odf
-         last first true_race  rowindex  asian_mean  asian_std  ...  nh_black_ub  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub      race
-      0  Sawyer  john  nh_white         0    0.004004   0.004483  ...     0.015442       0.908452      0.035121     0.722879     0.804443  nh_white
-      1  Torres  raul  hispanic         1    0.005882   0.002249  ...     0.005305       0.182575      0.072142     0.074511     0.090856  hispanic
+         last first true_race  asian_mean  asian_std  ...  nh_black_ub  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub      race
+      0  Sawyer  john  nh_white    0.004004   0.004483  ...     0.015442       0.908452      0.035121     0.722879     0.804443  nh_white
+      1  Torres  raul  hispanic    0.005882   0.002249  ...     0.005305       0.182575      0.072142     0.074511     0.090856  hispanic
 
       [2 rows x 21 columns]
       
@@ -415,7 +412,6 @@ where the data is:
       last               Sawyer
       first                john
       true_race        nh_white
-      rowindex                0
       asian_mean       0.004004
       asian_std        0.004483
       asian_lb         0.000899
@@ -454,7 +450,7 @@ where the data is:
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                                                                                                                                                                                                                                |
+   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                                                                                                                                                                                                                                |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -471,9 +467,9 @@ where the data is:
       ['asian', 'hispanic', 'nh_black', 'nh_white']
 
       >>> odf
-         last first true_race  rowindex       __name  asian_mean  ...  nh_black_ub  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub      race
-      0  Sawyer  john  nh_white         0  Sawyer John    0.001196  ...     0.005450       0.971152      0.015757     0.915592     0.918630  nh_white
-      1  Torres  raul  hispanic         1  Torres Raul    0.004770  ...     0.000885       0.066303      0.028486     0.022593     0.024143  hispanic
+         last first true_race  asian_mean  ...  nh_black_ub  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub      race
+      0  Sawyer  john  nh_white    0.001196  ...     0.005450       0.971152      0.015757     0.915592     0.918630  nh_white
+      1  Torres  raul  hispanic    0.004770  ...     0.000885       0.066303      0.028486     0.022593     0.024143  hispanic
 
       [2 rows x 22 columns]
       
@@ -481,8 +477,6 @@ where the data is:
       last                  Torres
       first                   raul
       true_race           hispanic
-      rowindex                   1
-      __name           Torres Raul
       asian_mean           0.00477
       asian_std           0.002943
       asian_lb            0.000904
@@ -521,7 +515,7 @@ where the data is:
    +--------------+---------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                         |
+   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                         |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
 
 
@@ -538,9 +532,9 @@ where the data is:
       ['asian', 'hispanic', 'nh_black', 'nh_white', 'other']
 
       >>> odf
-         last first true_race  rowindex       __name  asian_mean  asian_std  ...  nh_white_lb  nh_white_ub  other_mean  other_std  other_lb  other_ub      race
-      0  Sawyer  john  nh_white         0  Sawyer John    0.142867   0.046145  ...     0.203204     0.221313    0.235889   0.023794  0.192840  0.193671  nh_white
-      1  Torres  raul  hispanic         1  Torres Raul    0.101397   0.028399  ...     0.090068     0.100212    0.238645   0.034070  0.136617  0.145928  hispanic
+         last first true_race  asian_mean  asian_std  ...  nh_white_lb  nh_white_ub  other_mean  other_std  other_lb  other_ub      race
+      0  Sawyer  john  nh_white    0.142867   0.046145  ...     0.203204     0.221313    0.235889   0.023794  0.192840  0.193671  nh_white
+      1  Torres  raul  hispanic    0.101397   0.028399  ...     0.090068     0.100212    0.238645   0.034070  0.136617  0.145928  hispanic
 
       [2 rows x 26 columns]
 
@@ -548,8 +542,6 @@ where the data is:
       last                  Sawyer
       first                   john
       true_race           nh_white
-      rowindex                   0
-      __name           Sawyer John
       asian_mean          0.142867
       asian_std           0.046145
       asian_lb            0.067382
@@ -594,7 +586,7 @@ where the data is:
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                                                                                                                                                                                                                                |
+   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                                                                                                                                                                                                                                |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -611,9 +603,9 @@ where the data is:
       ['asian', 'hispanic', 'nh_black', 'nh_white', 'other']
 
       >>> odf
-         last first true_race  rowindex       __name  asian_mean  asian_std  ...  nh_white_lb  nh_white_ub  other_mean  other_std  other_lb  other_ub      race
-      0  Sawyer  john  nh_white         0  Sawyer John    0.194250   0.120314  ...     0.126987     0.167742    0.259069   0.030386  0.142455  0.177375  nh_white
-      1  Torres  raul  hispanic         1  Torres Raul    0.081465   0.038318  ...     0.019312     0.020782    0.158614   0.039180  0.081994  0.083105  hispanic
+         last first true_race  asian_mean  asian_std  ...  nh_white_lb  nh_white_ub  other_mean  other_std  other_lb  other_ub      race
+      0  Sawyer  john  nh_white    0.194250   0.120314  ...     0.126987     0.167742    0.259069   0.030386  0.142455  0.177375  nh_white
+      1  Torres  raul  hispanic    0.081465   0.038318  ...     0.019312     0.020782    0.158614   0.039180  0.081994  0.083105  hispanic
 
       [2 rows x 26 columns]
 
@@ -621,8 +613,6 @@ where the data is:
       last                  Torres
       first                   raul
       true_race           hispanic
-      rowindex                   1
-      __name           Torres Raul
       asian_mean          0.081465
       asian_std           0.038318
       asian_lb            0.032789
@@ -666,7 +656,7 @@ where the data is:
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=0.9* confidence interval in predicted class                                                                                                                                                                                                                                                |
+   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                                                                                                                                                                                                                                |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -693,9 +683,9 @@ where the data is:
       ['HL+A', 'HL+B', 'HL+I', 'HL+M', 'HL+O', 'HL+W', 'NL+A', 'NL+B', 'NL+I', 'NL+M', 'NL+O', 'NL+W']
       
       >>> odf
-            last   first true_race            __name  rowindex  HL+A_mean  HL+A_std       HL+A_lb       HL+A_ub  HL+B_mean  ...   NL+M_ub  NL+O_mean  NL+O_std   NL+O_lb   NL+O_ub  NL+W_mean  NL+W_std   NL+W_lb   NL+W_ub  race
-      0  hernandez  hector      HL+O  Hernandez Hector         0   0.000054  0.000354  5.833132e-10  4.291366e-09   0.009606  ...  0.000416   0.090123  0.036310  0.000705  0.003757   0.021228  0.021222  0.000368  0.001230  HL+O
-      1      zhang   simon      NL+A       Zhang Simon         1   0.000603  0.002808  1.988648e-07  2.766486e-07   0.000026  ...  0.000086   0.125159  0.042818  0.050547  0.057208   0.003149  0.005437  0.000210  0.000225  NL+A
+            last   first true_race  HL+A_mean  HL+A_std       HL+A_lb       HL+A_ub  HL+B_mean  ...   NL+M_ub  NL+O_mean  NL+O_std   NL+O_lb   NL+O_ub  NL+W_mean  NL+W_std   NL+W_lb   NL+W_ub  race
+      0  hernandez  hector      HL+O   0.000054  0.000354  5.833132e-10  4.291366e-09   0.009606  ...  0.000416   0.090123  0.036310  0.000705  0.003757   0.021228  0.021222  0.000368  0.001230  HL+O
+      1      zhang   simon      NL+A   0.000603  0.002808  1.988648e-07  2.766486e-07   0.000026  ...  0.000086   0.125159  0.042818  0.050547  0.057208   0.003149  0.005437  0.000210  0.000225  NL+A
 
       [2 rows x 54 columns]
       
@@ -703,8 +693,6 @@ where the data is:
       last                hernandez
       first                  hector
       true_race                HL+O
-      __name       Hernandez Hector
-      rowindex                    0
       HL+A_mean            0.000054
       HL+A_std             0.000354
       HL+A_lb                   0.0

@@ -2,7 +2,7 @@ import sys
 from contextlib import contextmanager
 try:
     from StringIO import StringIO
-except:
+except Exception as e:
     from io import StringIO
 
 

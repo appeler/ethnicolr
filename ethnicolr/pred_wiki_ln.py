@@ -30,11 +30,11 @@ class WikiLnModel():
     model = None
 
     @classmethod
-    def pred_wiki_ln(cls, df, namecol, num_iter=100, conf_int=0.9):
+    def pred_wiki_ln(cls, df, namecol, num_iter=100, conf_int=1.0):
         """Predict the race/ethnicity by the last name using Wiki model.
 
-        Using the Wiki last name model to predict the race/ethnicity of the input
-        DataFrame.
+        Using the Wiki last name model to predict the race/ethnicity of
+        thE input DataFrame.
 
         Args:
             df (:obj:`DataFrame`): Pandas DataFrame containing the last name
@@ -57,18 +57,19 @@ class WikiLnModel():
         if df.shape[0] == 0:
             return df
 
-        rdf = transform_and_pred(df = df, 
-                                newnamecol = namecol, 
-                                cls = cls, 
-                                VOCAB = VOCAB,
-                                RACE = RACE,
-                                MODEL = MODEL,
-                                NGRAMS = NGRAMS,
-                                maxlen=FEATURE_LEN,
-                                num_iter=num_iter, 
-                                conf_int=conf_int)
+        rdf = transform_and_pred(df=df,
+                                 newnamecol=namecol,
+                                 cls=cls,
+                                 VOCAB=VOCAB,
+                                 RACE=RACE,
+                                 MODEL=MODEL,
+                                 NGRAMS=NGRAMS,
+                                 maxlen=FEATURE_LEN,
+                                 num_iter=num_iter,
+                                 conf_int=conf_int)
 
         return rdf
+
 
 pred_wiki_ln = WikiLnModel.pred_wiki_ln
 
@@ -85,8 +86,8 @@ def main(argv=sys.argv[1:]):
                              'the last name')
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=0.9, type=float,
-                         help='Confidence interval of Predictions')
+    parser.add_argument('-c', '--conf', default=1.0, type=float,
+                        help='Confidence interval of Predictions')
 
     args = parser.parse_args(argv)
 

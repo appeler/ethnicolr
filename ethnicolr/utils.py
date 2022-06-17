@@ -7,6 +7,7 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
+from itertools import chain
 
 
 def isstring(s):
@@ -29,7 +30,8 @@ def column_exists(df, col):
 
     """
     if col and (col not in df.columns):
-        print("The specify column `{0!s}` not found in the input file".format(col))
+        print("The specify column `{0!s}` not found in the input file"
+              .format(col))
         return False
     else:
         return True
@@ -54,6 +56,23 @@ def fixup_columns(cols):
     return out_cols
 
 
+def n_grams(seq, n=1):
+    """Returns an itirator over the n-grams given a listTokens"""
+    shiftToken = lambda i: (el for j,el in enumerate(seq) if j>=i)
+    shiftedTokens = (shiftToken(i) for i in range(n))
+    tupleNGrams = zip(*shiftedTokens)
+    return tupleNGrams
+
+
+def range_ngrams(listTokens, ngramRange=(1,2)):
+    """Returns an itirator over all n-grams for n in range(ngramRange)
+       given a listTokens.
+    """
+
+    ngrams = (ngramRange[0], ngramRange[1] + 1)
+    return chain(*(n_grams(listTokens, i) for i in range(*ngramRange)))
+
+
 def find_ngrams(vocab, text, n):
     """Find and return list of the index of n-grams in the vocabulary list.
 
@@ -63,7 +82,7 @@ def find_ngrams(vocab, text, n):
     Args:
         vocab (:obj:`list`): Vocabulary list.
         text (str): Input text
-        n (int): N-grams
+        n (int or tuple): N-grams or tuple of range N-grams
 
     Returns:
         list: List of the index of n-grams in the vocabulary list.
@@ -75,7 +94,11 @@ def find_ngrams(vocab, text, n):
     if not isstring(text):
         return wi
 
-    a = zip(*[text[i:] for i in range(n)])
+    if type(n) is tuple:
+        a = range_ngrams(text, n)
+    else:
+        a = zip(*[text[i:] for i in range(n)])
+
     for i in a:
         w = "".join(i)
         try:
@@ -103,46 +126,60 @@ def transform_and_pred(
         cls.model = load_model(MODEL)
 
     # build X from index of n-gram sequence
-    X = np.array(df[newnamecol].apply(lambda c: find_ngrams(cls.vocab, c, NGRAMS)))
+    X = np.array(df[newnamecol].apply(lambda c: find_ngrams(cls.vocab,
+                                                            c, NGRAMS)))
     X = sequence.pad_sequences(X, maxlen=maxlen)
 
-    # define the quantile ranges for the confidence interval
-    lower_perc = 0.5 - (conf_int / 2)
-    upper_perc = 0.5 + (conf_int / 2)
+    if conf_int == 1:
+        # Predict
+        proba = cls.model(X, training=False).numpy()
+        pdf = pd.DataFrame(proba, columns=cls.race)
+        pdf["__race"] = np.argmax(proba, axis=-1)
+        pdf["race"] = pdf["__race"].apply(lambda c: cls.race[int(c)])
+        del pdf["__race"]
+        final_df = pd.concat([df.reset_index(drop=True),
+                              pdf.reset_index(drop=True)], axis=1 )
+    else:
+        # define the quantile ranges for the confidence interval
+        lower_perc = 0.5 - (conf_int / 2)
+        upper_perc = 0.5 + (conf_int / 2)
 
-    # Predict
-    pdf = pd.DataFrame()
+        # Predict
+        pdf = pd.DataFrame()
 
-    for _ in range(num_iter):
-        pdf = pdf.append(pd.DataFrame(cls.model(X, training=True)))
-    print(cls.race)
-    pdf.columns = cls.race
-    pdf["rowindex"] = pdf.index
+        for _ in range(num_iter):
+            pdf = pd.concat([pdf, pd.DataFrame(cls.model(X, training=True))])
+        print(cls.race)
+        pdf.columns = cls.race
+        pdf["rowindex"] = pdf.index
 
-    res = (
-        pdf.groupby("rowindex")
-        .agg(
-            [
-                np.mean,
-                np.std,
-                lambda x: np.percentile(x, q=lower_perc),
-                lambda x: np.percentile(x, q=upper_perc),
-            ]
+        res = (
+            pdf.groupby("rowindex")
+            .agg(
+                [
+                    np.mean,
+                    np.std,
+                    lambda x: np.percentile(x, q=lower_perc),
+                    lambda x: np.percentile(x, q=upper_perc),
+                ]
+            )
+            .reset_index()
         )
-        .reset_index()
-    )
-    res.columns = [f"{i}_{j}" for i, j in res.columns]
-    res.columns = res.columns.str.replace("<lambda_0>", "lb")
-    res.columns = res.columns.str.replace("<lambda_1>", "ub")
-    res.columns = res.columns.str.replace("rowindex_", "rowindex")
+        res.columns = [f"{i}_{j}" for i, j in res.columns]
+        res.columns = res.columns.str.replace("<lambda_0>", "lb")
+        res.columns = res.columns.str.replace("<lambda_1>", "ub")
+        res.columns = res.columns.str.replace("rowindex_", "rowindex")
 
-    means = list(filter(lambda x: "_mean" in x, res.columns))
-    res["race"] = res[means].idxmax(axis=1).str.replace("_mean", "")
+        means = list(filter(lambda x: "_mean" in x, res.columns))
+        res["race"] = res[means].idxmax(axis=1).str.replace("_mean", "")
 
-    for suffix in ["_lb", "ub"]:
-        conv_filt = list(filter(lambda x: suffix in x, res.columns))
-        res[conv_filt] = res[conv_filt].to_numpy().astype(float)
+        for suffix in ["_lb", "ub"]:
+            conv_filt = list(filter(lambda x: suffix in x, res.columns))
+            res[conv_filt] = res[conv_filt].to_numpy().astype(float)
 
-    final_df = df.merge(res, on="rowindex", how="left")
+        final_df = df.merge(res, on="rowindex", how="left")
+
+    del final_df['rowindex']
+    del df['rowindex']
 
     return final_df

@@ -30,19 +30,20 @@ class WikiNameModel():
     model = None
 
     @classmethod
-    def pred_wiki_name(cls, df, lname_col, fname_col, num_iter=100, conf_int=0.9):
+    def pred_wiki_name(cls, df, lname_col, fname_col, num_iter=100,
+                       conf_int=1.0):
         """Predict the race/ethnicity by the full name using Wiki model.
 
-        Using the Wiki full name model to predict the race/ethnicity of the input
-        DataFrame.
+        Using the Wiki full name model to predict the race/ethnicity of
+        the input DataFrame.
 
         Args:
-            df (:obj:`DataFrame`): Pandas DataFrame containing the last name and
-                first name column.
-            lname_col (str or int): Column's name or location of the last name in
-                DataFrame.
-            fname_col (str or int): Column's name or location of the first name in
-                DataFrame.
+            df (:obj:`DataFrame`): Pandas DataFrame containing the last name
+                and first name column.
+            lname_col (str or int): Column's name or location of the last name
+                in DataFrame.
+            fname_col (str or int): Column's name or location of the first name
+                in DataFrame.
 
         Returns:
             DataFrame: Pandas DataFrame with additional columns:
@@ -58,23 +59,24 @@ class WikiNameModel():
             print("No column `{0!s}` in the DataFrame".format(fname_col))
             return df
 
-        df['__name'] = (df[lname_col].str.strip() + ' ' + df[fname_col].str.strip()).str.title()
+        df['__name'] = (df[lname_col].str.strip()
+                        + ' ' + df[fname_col].str.strip()).str.title()
 
         df.dropna(subset=['__name'])
         if df.shape[0] == 0:
             del df['__name']
             return df
 
-        rdf = transform_and_pred(df = df, 
-                                newnamecol = '__name', 
-                                cls = cls, 
-                                VOCAB = VOCAB,
-                                RACE = RACE,
-                                MODEL = MODEL,
-                                NGRAMS = NGRAMS,
-                                maxlen=FEATURE_LEN,
-                                num_iter=num_iter, 
-                                conf_int=conf_int)
+        rdf = transform_and_pred(df=df,
+                                 newnamecol='__name',
+                                 cls=cls,
+                                 VOCAB=VOCAB,
+                                 RACE=RACE,
+                                 MODEL=MODEL,
+                                 NGRAMS=NGRAMS,
+                                 maxlen=FEATURE_LEN,
+                                 num_iter=num_iter,
+                                 conf_int=conf_int)
 
         return rdf
 
@@ -97,8 +99,8 @@ def main(argv=sys.argv[1:]):
                              'the last name')
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=0.9, type=float,
-                         help='Confidence interval of Predictions')
+    parser.add_argument('-c', '--conf', default=1.0, type=float,
+                        help='Confidence interval of Predictions')
 
     args = parser.parse_args(argv)
 

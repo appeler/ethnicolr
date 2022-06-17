@@ -20,7 +20,7 @@ MODEL = resource_filename(__name__, MODELFN)
 VOCAB = resource_filename(__name__, VOCABFN)
 RACE = resource_filename(__name__, RACEFN)
 
-NGRAMS = 2
+NGRAMS = (2, 3)
 FEATURE_LEN = 25
 
 
@@ -30,19 +30,21 @@ class NCRegNameModel():
     model = None
 
     @classmethod
-    def pred_nc_reg_name(cls, df, lname_col, fname_col, num_iter=100, conf_int=0.9):
-        """Predict the race+ethnicity by the full name using North Carolina 12 category voter model.
+    def pred_nc_reg_name(cls, df, lname_col, fname_col, num_iter=100,
+                         conf_int=1.0):
+        """Predict the race+ethnicity by the full name using
+        North Carolina 12 category voter model.
 
         Using the NC voter full name model to predict the race/ethnicity of
         the input DataFrame.
 
         Args:
-            df (:obj:`DataFrame`): Pandas DataFrame containing the last name and
-                first name column.
-            lname_col (str or int): Column's name or location of the last name in
-                DataFrame.
-            fname_col (str or int): Column's name or location of the first name in
-                DataFrame.
+            df (:obj:`DataFrame`): Pandas DataFrame containing the last name
+                and first name column.
+            lname_col (str or int): Column's name or location of the last name
+                in DataFrame.
+            fname_col (str or int): Column's name or location of the first name
+                in DataFrame.
 
         Returns:
             DataFrame: Pandas DataFrame with additional columns:
@@ -58,31 +60,34 @@ class NCRegNameModel():
             print("No column `{0!s}` in the DataFrame".format(fname_col))
             return df
 
-        df['__name'] = (df[lname_col].str.strip() + ' ' + df[fname_col].str.strip()).str.title()
+        df['__name'] = (df[lname_col].str.strip()
+                        + ' ' + df[fname_col].str.strip()).str.title()
 
         df.dropna(subset=['__name'])
         if df.shape[0] == 0:
             del df['__name']
             return df
 
-        rdf = transform_and_pred(df = df, 
-                                newnamecol = '__name', 
-                                cls = cls, 
-                                VOCAB = VOCAB,
-                                RACE = RACE,
-                                MODEL = MODEL,
-                                NGRAMS = NGRAMS,
-                                maxlen=FEATURE_LEN,
-                                num_iter=num_iter, 
-                                conf_int=conf_int)
+        rdf = transform_and_pred(df=df,
+                                 newnamecol='__name',
+                                 cls=cls,
+                                 VOCAB=VOCAB,
+                                 RACE=RACE,
+                                 MODEL=MODEL,
+                                 NGRAMS=NGRAMS,
+                                 maxlen=FEATURE_LEN,
+                                 num_iter=num_iter,
+                                 conf_int=conf_int)
 
         return rdf
+
 
 pred_nc_reg_name = NCRegNameModel.pred_nc_reg_name
 
 
 def main(argv=sys.argv[1:]):
-    title = 'Predict Race/Ethnicity by name using NC 12 category voter registration model'
+    title = ('Predict Race/Ethnicity by name using NC 12 category'
+             ' voter registration model')
     parser = argparse.ArgumentParser(description=title)
     parser.add_argument('input', default=None,
                         help='Input file')
@@ -96,8 +101,8 @@ def main(argv=sys.argv[1:]):
                              'the last name')
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=0.9, type=float,
-                         help='Confidence interval of Predictions')
+    parser.add_argument('-c', '--conf', default=1.0, type=float,
+                        help='Confidence interval of Predictions')
 
     args = parser.parse_args(argv)
 

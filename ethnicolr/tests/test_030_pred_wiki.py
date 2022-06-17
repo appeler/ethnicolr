@@ -15,6 +15,22 @@ from ethnicolr.pred_wiki_name import pred_wiki_name
 from . import capture
 
 race = [
+    "Asian,GreaterEastAsian,EastAsian",
+    "Asian,GreaterEastAsian,Japanese",
+    "Asian,IndianSubContinent",
+    "GreaterAfrican,Africans",
+    "GreaterAfrican,Muslim",
+    "GreaterEuropean,British",
+    "GreaterEuropean,EastEuropean",
+    "GreaterEuropean,Jewish",
+    "GreaterEuropean,WestEuropean,French",
+    "GreaterEuropean,WestEuropean,Germanic",
+    "GreaterEuropean,WestEuropean,Hispanic",
+    "GreaterEuropean,WestEuropean,Italian",
+    "GreaterEuropean,WestEuropean,Nordic",
+]
+
+race_mean = [
     "Asian,GreaterEastAsian,EastAsian_mean",
     "Asian,GreaterEastAsian,Japanese_mean",
     "Asian,IndianSubContinent_mean",
@@ -34,7 +50,8 @@ race = [
 class TestPredWiki(unittest.TestCase):
     def setUp(self):
         names = [
-            {"last": "smith", "first": "john", "true_race": "GreaterEuropean,British"},
+            {"last": "smith", "first": "john",
+             "true_race": "GreaterEuropean,British"},
             {
                 "last": "zhang",
                 "first": "simon",
@@ -50,7 +67,8 @@ class TestPredWiki(unittest.TestCase):
         odf = pred_wiki_ln(self.df, "last")
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns
+                     if col in race]].sum(axis=1).round(1)
                 == 1.0
             )
         )
@@ -60,12 +78,34 @@ class TestPredWiki(unittest.TestCase):
         odf = pred_wiki_name(self.df, "last", "first")
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns
+                     if col in race]].sum(axis=1).round(1)
                 == 1.0
             )
         )
         self.assertTrue(all(odf.true_race == odf.race))
 
+    def test_pred_wiki_ln_mean(self):
+        odf = pred_wiki_ln(self.df, "last", conf_int=0.9)
+        self.assertTrue(
+            all(
+                odf[[col for col in odf.columns
+                     if col in race_mean]].sum(axis=1).round(1)
+                == 1.0
+            )
+        )
+        self.assertTrue(all(odf.true_race == odf.race))
+
+    def test_pred_wiki_name_mean(self):
+        odf = pred_wiki_name(self.df, "last", "first", conf_int=0.9)
+        self.assertTrue(
+            all(
+                odf[[col for col in odf.columns
+                     if col in race_mean]].sum(axis=1).round(1)
+                == 1.0
+            )
+        )
+        self.assertTrue(all(odf.true_race == odf.race))
 
 if __name__ == "__main__":
     unittest.main()
