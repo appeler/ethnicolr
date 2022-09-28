@@ -79,6 +79,7 @@ class FloridaRegNameFiveCatModel():
                                  num_iter=num_iter,
                                  conf_int=conf_int)
 
+        del rdf['__name']
         return rdf
 
 
