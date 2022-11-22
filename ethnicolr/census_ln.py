@@ -49,11 +49,11 @@ class CensusLnData():
 
         if cls.census_df is None or cls.census_year != year:
             if year == 2000:
-                cls.census_df = pd.read_csv(CENSUS2000, usecols=['name'] +
-                                            CENSUS_COLS)
+                cls.census_df = pd.read_csv(CENSUS2000, usecols=['name']
+                                            + CENSUS_COLS)
             elif year == 2010:
-                cls.census_df = pd.read_csv(CENSUS2010, usecols=['name'] +
-                                        CENSUS_COLS)
+                cls.census_df = pd.read_csv(CENSUS2010, usecols=['name']
+                                            + CENSUS_COLS)
 
             cls.census_df.drop(cls.census_df[cls.census_df.name.isnull()]
                                .index, inplace=True)
@@ -63,6 +63,7 @@ class CensusLnData():
 
         rdf = pd.merge(df, cls.census_df, how='left', on='__last_name')
 
+        del df['__last_name']
         del rdf['__last_name']
 
         return rdf

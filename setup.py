@@ -65,8 +65,9 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version="0.7.0",
-    description="Predict Race/Ethnicity Based on Sequence of Characters in the Name",
+    version="0.9.1",
+    description=("Predict Race/Ethnicity Based on Sequence of Characters"
+                 " in the Name"),
     long_description=long_description,
     # The project's main homepage.
     url="https://github.com/appeler/ethnicolr",
@@ -81,7 +82,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         # Indicate who your project is intended for
         "Intended Audience :: Developers",
         # Pick your license as you wish (should match "license" above)
@@ -91,6 +92,8 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Scientific/Engineering :: Information Analysis",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Utilities",
@@ -107,12 +110,14 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=["tensorflow==2.5.1", "pandas>=1.1.5"],
+    install_requires=["tensorflow>=2.7.2,<3;platform_machine!='aarch64'",
+                      "tensorflow-aarch64>=2.7.2,<3;platform_machine=='aarch64'",
+                      "pandas>=1.3.0"],
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
     # $ pip install -e .[dev,test]
-    extras_require={"dev": ["check-manifest"], "test": ["coverage"],},
+    extras_require={"dev": ["check-manifest"], "test": ["coverage"], },
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
@@ -155,7 +160,8 @@ setup(
             "pred_fl_reg_name=ethnicolr.pred_fl_reg_name:main",
             "pred_fl_reg_ln=ethnicolr.pred_fl_reg_ln:main",
             "pred_fl_reg_ln_five_cat=ethnicolr.pred_fl_reg_ln_five_cat:main",
-            "pred_fl_reg_name_five_cat=ethnicolr.pred_fl_reg_name_five_cat:main",
+            ("pred_fl_reg_name_five_cat="
+             "ethnicolr.pred_fl_reg_name_five_cat:main"),
             "pred_nc_reg_name=ethnicolr.pred_nc_reg_name:main",
         ],
     },

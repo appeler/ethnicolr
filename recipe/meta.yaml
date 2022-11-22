@@ -5,7 +5,9 @@ package:
 source:
   fn: ethnicolr-0.1.3.tar.gz
   md5: 0c678deb2f722eec01ce5aa8b370f73e
-  url: https://pypi.python.org/packages/f8/89/0896f10f77a37be9b1b5e8ee2cc111c9977aa5d6f6573f2898e07dca975b/ethnicolr-0.1.3.tar.gz
+  url: "https://pypi.python.org/packages
+        /f8/89/0896f10f77a37be9b1b5e8ee2cc111c9977aa5d6f6573f2898e07dca975b
+        /ethnicolr-0.1.3.tar.gz"
 
 requirements:
   build:

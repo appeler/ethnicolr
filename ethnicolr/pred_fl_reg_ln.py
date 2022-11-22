@@ -30,11 +30,12 @@ class FloridaRegLnModel:
     model = None
 
     @classmethod
-    def pred_fl_reg_ln(cls, df, namecol, num_iter=100, conf_int=0.9):
-        """Predict the race/ethnicity by the last name using Florida voter model.
+    def pred_fl_reg_ln(cls, df, namecol, num_iter=100, conf_int=1):
+        """Predict the race/ethnicity by the last name using Florida voter
+        model.
 
-        Using the Florida voter last name model to predict the race/ethnicity of
-        the input DataFrame.
+        Using the Florida voter last name model to predict the race/ethnicity
+        oF the input DataFrame.
 
         Args:
             df (:obj:`DataFrame`): Pandas DataFrame containing the last name
@@ -56,22 +57,21 @@ class FloridaRegLnModel:
         df.dropna(subset=[namecol])
         if df.shape[0] == 0:
             return df
-
+        
         rdf = transform_and_pred(
-            df=df,
-            newnamecol=namecol,
-            cls=cls,
-            VOCAB=VOCAB,
-            RACE=RACE,
-            MODEL=MODEL,
-            NGRAMS=NGRAMS,
-            maxlen=FEATURE_LEN,
-            num_iter=num_iter,
-            conf_int=conf_int,
-        )
+                df=df,
+                newnamecol=namecol,
+                cls=cls,
+                VOCAB=VOCAB,
+                RACE=RACE,
+                MODEL=MODEL,
+                NGRAMS=NGRAMS,
+                maxlen=FEATURE_LEN,
+                num_iter=num_iter,
+                conf_int=conf_int
+            )
 
         return rdf
-
 
 pred_fl_reg_ln = FloridaRegLnModel.pred_fl_reg_ln
 
@@ -94,8 +94,8 @@ def main(argv=sys.argv[1:]):
     )
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=0.9, type=float,
-                         help='Confidence interval of Predictions')
+    parser.add_argument('-c', '--conf', default=1.0, type=float,
+                        help='Confidence interval of Predictions')
 
     args = parser.parse_args(argv)
 
