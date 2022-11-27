@@ -173,7 +173,7 @@ where the data is:
       2  jackson    41.93    53.02   0.31    1.04      2.18        1.53
 
 
--  **pred\_census\_ln(df, namecol, year=2000, num\_iter=100, conf\_int=0.9)**
+-  **pred\_census\_ln(df, namecol, year=2000, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -226,7 +226,7 @@ where the data is:
          2  jackson  black  0.002797  0.528193  0.014605  0.454405
 
 
--  **pred\_wiki\_ln( df, namecol, num\_iter=100, conf\_int=0.9)**
+-  **pred\_wiki\_ln( df, namecol, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -277,29 +277,31 @@ where the data is:
 
       >>> from ethnicolr import pred_wiki_ln, pred_wiki_name
 
-      >>> odf = pred_wiki_ln(df,'last')
+      >>> odf = pred_wiki_ln(df,'last', conf_int=0.9)
       ['Asian,GreaterEastAsian,EastAsian', 'Asian,GreaterEastAsian,Japanese', 'Asian,IndianSubContinent', 'GreaterAfrican,Africans', 'GreaterAfrican,Muslim', 'GreaterEuropean,British', 'GreaterEuropean,EastEuropean', 'GreaterEuropean,Jewish', 'GreaterEuropean,WestEuropean,French', 'GreaterEuropean,WestEuropean,Germanic', 'GreaterEuropean,WestEuropean,Hispanic', 'GreaterEuropean,WestEuropean,Italian', 'GreaterEuropean,WestEuropean,Nordic']
-      
+
       >>> odf
-         last  first  ... GreaterEuropean,WestEuropean,Nordic_ub                              race
-      0  Smith   john  ...                               0.004559           GreaterEuropean,British
-      1  Zhang  simon  ...                               0.004076  Asian,GreaterEastAsian,EastAsian
+         last  first                         true_race  ...  GreaterEuropean,WestEuropean,Nordic_lb  GreaterEuropean,WestEuropean,Nordic_ub                              race
+      0  Smith   john           GreaterEuropean,British  ...                                0.005248                                0.034912           GreaterEuropean,British
+      1  Zhang  simon  Asian,GreaterEastAsian,EastAsian  ...                                0.002145                                0.068731  Asian,GreaterEastAsian,EastAsian
 
-      [2 rows x 57 columns]
+      [2 rows x 56 columns]
 
-      >>> odf.iloc[0,:8]
+      >>> odf.iloc[0, :8]
       last                                                       Smith
       first                                                       john
       true_race                                GreaterEuropean,British
-      Asian,GreaterEastAsian,EastAsian_mean                   0.004554
-      Asian,GreaterEastAsian,EastAsian_std                    0.003358
-      Asian,GreaterEastAsian,EastAsian_lb                     0.000535
-      Asian,GreaterEastAsian,EastAsian_ub                     0.000705
+      Asian,GreaterEastAsian,EastAsian_mean                   0.015033
+      Asian,GreaterEastAsian,EastAsian_std                    0.009354
+      Asian,GreaterEastAsian,EastAsian_lb                     0.005062
+      Asian,GreaterEastAsian,EastAsian_ub                     0.036501
+      Asian,GreaterEastAsian,Japanese_mean                    0.003411
       Name: 0, dtype: object
 
 
 
--  **pred\_wiki\_name(df, namecol, num\_iter=100, conf\_int=0.9)**
+
+-  **pred\_wiki\_name(df, namecol, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -337,27 +339,29 @@ where the data is:
    *(Using the same dataframe from example above)*
    ::
 
-      >>> odf = pred_wiki_name(df, 'last', 'first')
+      >>> odf = pred_wiki_name(df,'last', 'first', conf_int=0.9)
       ['Asian,GreaterEastAsian,EastAsian', 'Asian,GreaterEastAsian,Japanese', 'Asian,IndianSubContinent', 'GreaterAfrican,Africans', 'GreaterAfrican,Muslim', 'GreaterEuropean,British', 'GreaterEuropean,EastEuropean', 'GreaterEuropean,Jewish', 'GreaterEuropean,WestEuropean,French', 'GreaterEuropean,WestEuropean,Germanic', 'GreaterEuropean,WestEuropean,Hispanic', 'GreaterEuropean,WestEuropean,Italian', 'GreaterEuropean,WestEuropean,Nordic']
-      
+
       >>> odf
-         last  first  ... GreaterEuropean,WestEuropean,Nordic_ub                              race
-      0  Smith   john  ...                               0.000236           GreaterEuropean,British
-      1  Zhang  simon  ...                               0.000021  Asian,GreaterEastAsian,EastAsian
+         last  first                         true_race  ... GreaterEuropean,WestEuropean,Nordic_lb  GreaterEuropean,WestEuropean,Nordic_ub                              race
+      0  Smith   john           GreaterEuropean,British  ...                               0.001280                                0.019053           GreaterEuropean,British
+      1  Zhang  simon  Asian,GreaterEastAsian,EastAsian  ...                               0.000043                                0.001708  Asian,GreaterEastAsian,EastAsian
 
-      [2 rows x 58 columns]
-      
-      >>> odf.iloc[1,:8]
-      last                                                                Zhang
-      first                                                               simon
-      true_race                                Asian,GreaterEastAsian,EastAsian
-      Asian,GreaterEastAsian,EastAsian_mean                            0.890619
-      Asian,GreaterEastAsian,EastAsian_std                             0.119097
-      Asian,GreaterEastAsian,EastAsian_lb                              0.391496
-      Name: 1, dtype: object
+      [2 rows x 57 columns]
+
+      >>> odf.iloc[0,:8]
+      last                                                       Smith
+      first                                                       john
+      true_race                                GreaterEuropean,British
+      __name                                                Smith John
+      Asian,GreaterEastAsian,EastAsian_mean                   0.003466
+      Asian,GreaterEastAsian,EastAsian_std                     0.00158
+      Asian,GreaterEastAsian,EastAsian_lb                     0.001343
+      Asian,GreaterEastAsian,EastAsian_ub                     0.006278
+      Name: 0, dtype: object
 
 
--  **pred\_fl\_reg\_ln(df, namecol, num\_iter=100, conf\_int=0.9)**
+-  **pred\_fl\_reg\_ln(df, namecol, num\_iter=100, conf\_int=1.0)**
 
    -  What it does?:
 
@@ -398,41 +402,41 @@ where the data is:
 
       >>> from ethnicolr import pred_fl_reg_ln, pred_fl_reg_name, pred_fl_reg_ln_five_cat, pred_fl_reg_name_five_cat
 
-      >>> odf = pred_fl_reg_ln(df, 'last')
+      >>> odf = pred_fl_reg_ln(df, 'last', conf_int=0.9)
       ['asian', 'hispanic', 'nh_black', 'nh_white']
 
       >>> odf
-         last first true_race  asian_mean  asian_std  ...  nh_black_ub  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub      race
-      0  Sawyer  john  nh_white    0.004004   0.004483  ...     0.015442       0.908452      0.035121     0.722879     0.804443  nh_white
-      1  Torres  raul  hispanic    0.005882   0.002249  ...     0.005305       0.182575      0.072142     0.074511     0.090856  hispanic
+         last first true_race  asian_mean  asian_std  asian_lb  asian_ub  hispanic_mean  ...  nh_black_std  nh_black_lb  nh_black_ub  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub      race
+      0  Sawyer  john  nh_white    0.009093   0.003401  0.005307  0.015345       0.022212  ...      0.049869     0.116214     0.280148       0.775057      0.048677     0.692295     0.847054  nh_white
+      1  Torres  raul  hispanic    0.006580   0.002218  0.003549  0.010928       0.874953  ...      0.005776     0.006483     0.020168       0.106233      0.021872     0.071461     0.149506  hispanic
 
-      [2 rows x 21 columns]
-      
+      [2 rows x 20 columns]
+
       >>> odf.iloc[0]
       last               Sawyer
       first                john
       true_race        nh_white
-      asian_mean       0.004004
-      asian_std        0.004483
-      asian_lb         0.000899
-      asian_ub          0.00103
-      hispanic_mean    0.034227
-      hispanic_std      0.01294
-      hispanic_lb      0.017406
-      hispanic_ub      0.017625
-      nh_black_mean    0.053317
-      nh_black_std     0.028634
-      nh_black_lb      0.010537
-      nh_black_ub      0.015442
-      nh_white_mean    0.908452
-      nh_white_std     0.035121
-      nh_white_lb      0.722879
-      nh_white_ub      0.804443
+      asian_mean       0.009093
+      asian_std        0.003401
+      asian_lb         0.005307
+      asian_ub         0.015345
+      hispanic_mean    0.022212
+      hispanic_std     0.005254
+      hispanic_lb       0.01498
+      hispanic_ub      0.030114
+      nh_black_mean    0.193638
+      nh_black_std     0.049869
+      nh_black_lb      0.116214
+      nh_black_ub      0.280148
+      nh_white_mean    0.775057
+      nh_white_std     0.048677
+      nh_white_lb      0.692295
+      nh_white_ub      0.847054
       race             nh_white
       Name: 0, dtype: object
 
 
--  **pred\_fl\_reg\_name(df, namecol, num\_iter=100, conf\_int=0.9)**
+-  **pred\_fl\_reg\_name(df, namecol, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -463,41 +467,41 @@ where the data is:
    *(Using the same dataframe from example above)*
    ::
 
-      >>> odf = pred_fl_reg_name(df, 'last', 'first')
+      >>> odf = pred_fl_reg_name(df, 'last', 'first', conf_int=0.9)
       ['asian', 'hispanic', 'nh_black', 'nh_white']
 
       >>> odf
-         last first true_race  asian_mean  ...  nh_black_ub  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub      race
-      0  Sawyer  john  nh_white    0.001196  ...     0.005450       0.971152      0.015757     0.915592     0.918630  nh_white
-      1  Torres  raul  hispanic    0.004770  ...     0.000885       0.066303      0.028486     0.022593     0.024143  hispanic
+         last first true_race  asian_mean  asian_std  asian_lb  asian_ub  hispanic_mean  ...  nh_black_std  nh_black_lb  nh_black_ub  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub      race
+      0  Sawyer  john  nh_white     0.00142   0.000826  0.000607  0.003163       0.006704  ...      0.013759     0.009763     0.051053       0.963650      0.014840     0.936385     0.982274  nh_white
+      1  Torres  raul  hispanic     0.00635   0.003612  0.002263  0.012572       0.888118  ...      0.005181     0.006091     0.021166       0.093334      0.031507     0.051153     0.156381  hispanic
 
-      [2 rows x 22 columns]
-      
+      [2 rows x 20 columns]
+
       >>> odf.iloc[1]
-      last                  Torres
-      first                   raul
-      true_race           hispanic
-      asian_mean           0.00477
-      asian_std           0.002943
-      asian_lb            0.000904
-      asian_ub            0.001056
-      hispanic_mean         0.9251
-      hispanic_std        0.032224
-      hispanic_lb         0.829494
-      hispanic_ub           0.8385
-      nh_black_mean       0.003826
-      nh_black_std        0.002735
-      nh_black_lb         0.000838
-      nh_black_ub         0.000885
-      nh_white_mean       0.066303
-      nh_white_std        0.028486
-      nh_white_lb         0.022593
-      nh_white_ub         0.024143
-      race                hispanic
+      last               Torres
+      first                raul
+      true_race        hispanic
+      asian_mean        0.00635
+      asian_std        0.003612
+      asian_lb         0.002263
+      asian_ub         0.012572
+      hispanic_mean    0.888118
+      hispanic_std     0.034588
+      hispanic_lb      0.817893
+      hispanic_ub      0.928268
+      nh_black_mean    0.012199
+      nh_black_std     0.005181
+      nh_black_lb      0.006091
+      nh_black_ub      0.021166
+      nh_white_mean    0.093334
+      nh_white_std     0.031507
+      nh_white_lb      0.051153
+      nh_white_ub      0.156381
+      race             hispanic
       Name: 1, dtype: object
 
 
--  **pred\_fl\_reg\_ln\_five\_cat(df, namecol, num\_iter=100, conf\_int=0.9)**
+-  **pred\_fl\_reg\_ln\_five\_cat(df, namecol, num\_iter=100, conf\_int=1.0)**
 
    -  What it does?:
 
@@ -532,43 +536,41 @@ where the data is:
       ['asian', 'hispanic', 'nh_black', 'nh_white', 'other']
 
       >>> odf
-         last first true_race  asian_mean  asian_std  ...  nh_white_lb  nh_white_ub  other_mean  other_std  other_lb  other_ub      race
-      0  Sawyer  john  nh_white    0.142867   0.046145  ...     0.203204     0.221313    0.235889   0.023794  0.192840  0.193671  nh_white
-      1  Torres  raul  hispanic    0.101397   0.028399  ...     0.090068     0.100212    0.238645   0.034070  0.136617  0.145928  hispanic
+         last first true_race  asian_mean  asian_std  asian_lb  asian_ub  hispanic_mean  hispanic_std  ...  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub  other_mean  other_std  other_lb  other_ub      race
+      0  Sawyer  john  nh_white    0.100038   0.020539  0.073266  0.143334       0.044263      0.013077  ...       0.376639      0.048289     0.296989     0.452834    0.248466   0.021040  0.219721  0.283785  nh_white
+      1  Torres  raul  hispanic    0.062390   0.021863  0.033837  0.103737       0.774414      0.043238  ...       0.030393      0.009591     0.019713     0.046483    0.117761   0.019524  0.089418  0.150615  hispanic
 
-      [2 rows x 26 columns]
+      [2 rows x 24 columns]
 
       >>> odf.iloc[0]
-      last                  Sawyer
-      first                   john
-      true_race           nh_white
-      asian_mean          0.142867
-      asian_std           0.046145
-      asian_lb            0.067382
-      asian_ub            0.073285
-      hispanic_mean       0.068199
-      hispanic_std        0.020641
-      hispanic_lb          0.02565
-      hispanic_ub         0.030017
-      nh_black_mean       0.239793
-      nh_black_std        0.076287
-      nh_black_lb         0.084239
-      nh_black_ub         0.085626
-      nh_white_mean       0.313252
-      nh_white_std        0.046173
-      nh_white_lb         0.203204
-      nh_white_ub         0.221313
-      other_mean          0.235889
-      other_std           0.023794
-      other_lb             0.19284
-      other_ub            0.193671
-      race                nh_white
+      last               Sawyer
+      first                john
+      true_race        nh_white
+      asian_mean       0.100038
+      asian_std        0.020539
+      asian_lb         0.073266
+      asian_ub         0.143334
+      hispanic_mean    0.044263
+      hispanic_std     0.013077
+      hispanic_lb       0.02476
+      hispanic_ub      0.067965
+      nh_black_mean    0.230593
+      nh_black_std     0.063948
+      nh_black_lb      0.130577
+      nh_black_ub      0.343513
+      nh_white_mean    0.376639
+      nh_white_std     0.048289
+      nh_white_lb      0.296989
+      nh_white_ub      0.452834
+      other_mean       0.248466
+      other_std         0.02104
+      other_lb         0.219721
+      other_ub         0.283785
+      race             nh_white
       Name: 0, dtype: object
 
 
-
-
--  **pred\_fl\_reg\_name\_five\_cat(df, namecol, num\_iter=100, conf\_int=0.9)**
+-  **pred\_fl\_reg\_name\_five\_cat(df, namecol, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -603,42 +605,41 @@ where the data is:
       ['asian', 'hispanic', 'nh_black', 'nh_white', 'other']
 
       >>> odf
-         last first true_race  asian_mean  asian_std  ...  nh_white_lb  nh_white_ub  other_mean  other_std  other_lb  other_ub      race
-      0  Sawyer  john  nh_white    0.194250   0.120314  ...     0.126987     0.167742    0.259069   0.030386  0.142455  0.177375  nh_white
-      1  Torres  raul  hispanic    0.081465   0.038318  ...     0.019312     0.020782    0.158614   0.039180  0.081994  0.083105  hispanic
+         last first true_race  asian_mean  asian_std  asian_lb  asian_ub  hispanic_mean  hispanic_std  ...  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub  other_mean  other_std  other_lb  other_ub      race
+      0  Sawyer  john  nh_white    0.039310   0.011657  0.025982  0.059719       0.019737      0.005813  ...       0.650306      0.059327     0.553913     0.733201    0.192242   0.021004  0.160185  0.226063  nh_white
+      1  Torres  raul  hispanic    0.020086   0.011765  0.008240  0.041741       0.899110      0.042237  ...       0.019073      0.009901     0.010166     0.040081    0.055774   0.017897  0.036245  0.088741  hispanic
 
-      [2 rows x 26 columns]
+      [2 rows x 24 columns]
 
       >>> odf.iloc[1]
-      last                  Torres
-      first                   raul
-      true_race           hispanic
-      asian_mean          0.081465
-      asian_std           0.038318
-      asian_lb            0.032789
-      asian_ub            0.034667
-      hispanic_mean       0.646059
-      hispanic_std        0.144663
-      hispanic_lb         0.188246
-      hispanic_ub         0.219772
-      nh_black_mean       0.037737
-      nh_black_std        0.045439
-      nh_black_lb         0.006477
-      nh_black_ub         0.006603
-      nh_white_mean       0.076125
-      nh_white_std        0.059213
-      nh_white_lb         0.019312
-      nh_white_ub         0.020782
-      other_mean          0.158614
-      other_std            0.03918
-      other_lb            0.081994
-      other_ub            0.083105
-      race                hispanic
+      last               Torres
+      first                raul
+      true_race        hispanic
+      asian_mean       0.020086
+      asian_std        0.011765
+      asian_lb          0.00824
+      asian_ub         0.041741
+      hispanic_mean     0.89911
+      hispanic_std     0.042237
+      hispanic_lb      0.823799
+      hispanic_ub      0.937612
+      nh_black_mean    0.005956
+      nh_black_std     0.006528
+      nh_black_lb      0.002686
+      nh_black_ub      0.010134
+      nh_white_mean    0.019073
+      nh_white_std     0.009901
+      nh_white_lb      0.010166
+      nh_white_ub      0.040081
+      other_mean       0.055774
+      other_std        0.017897
+      other_lb         0.036245
+      other_ub         0.088741
+      race             hispanic
       Name: 1, dtype: object
 
 
-
--  **pred\_nc\_reg\_name(df, namecol, num\_iter=100, conf\_int=0.9)**
+-  **pred\_nc\_reg\_name(df, namecol, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -679,70 +680,72 @@ where the data is:
 
       >>> from ethnicolr import pred_nc_reg_name
 
-      >>> odf = pred_nc_reg_name(df, 'last','first')
+      >>> odf = pred_nc_reg_name(df, 'last','first', conf_int=0.9)
       ['HL+A', 'HL+B', 'HL+I', 'HL+M', 'HL+O', 'HL+W', 'NL+A', 'NL+B', 'NL+I', 'NL+M', 'NL+O', 'NL+W']
-      
-      >>> odf
-            last   first true_race  HL+A_mean  HL+A_std       HL+A_lb       HL+A_ub  HL+B_mean  ...   NL+M_ub  NL+O_mean  NL+O_std   NL+O_lb   NL+O_ub  NL+W_mean  NL+W_std   NL+W_lb   NL+W_ub  race
-      0  hernandez  hector      HL+O   0.000054  0.000354  5.833132e-10  4.291366e-09   0.009606  ...  0.000416   0.090123  0.036310  0.000705  0.003757   0.021228  0.021222  0.000368  0.001230  HL+O
-      1      zhang   simon      NL+A   0.000603  0.002808  1.988648e-07  2.766486e-07   0.000026  ...  0.000086   0.125159  0.042818  0.050547  0.057208   0.003149  0.005437  0.000210  0.000225  NL+A
 
-      [2 rows x 54 columns]
-      
+      >>> odf
+            last   first true_race            __name     HL+A_mean  HL+A_std       HL+A_lb       HL+A_ub     HL+B_mean  ...  NL+O_mean  NL+O_std   NL+O_lb   NL+O_ub  NL+W_mean  NL+W_std   NL+W_lb   NL+W_ub  race
+      0  hernandez  hector      HL+O  Hernandez Hector  2.727371e-13       0.0  2.727374e-13  2.727374e-13  6.542198e-04  ...   0.184513       0.0  0.184513  0.184513   0.001256       0.0  0.001256  0.001256  HL+O
+      1      zhang   simon      NL+A       Zhang Simon  1.985419e-06       0.0  1.985417e-06  1.985417e-06  8.708256e-09  ...   0.003238       0.0  0.003238  0.003238   0.000154       0.0  0.000154  0.000154  NL+A
+
+      [2 rows x 53 columns]
+
       >>> odf.iloc[0]
       last                hernandez
       first                  hector
       true_race                HL+O
-      HL+A_mean            0.000054
-      HL+A_std             0.000354
+      __name       Hernandez Hector
+      HL+A_mean                 0.0
+      HL+A_std                  0.0
       HL+A_lb                   0.0
       HL+A_ub                   0.0
-      HL+B_mean            0.009606
-      HL+B_std             0.040739
-      HL+B_lb                   0.0
-      HL+B_ub              0.000003
-      HL+I_mean            0.001605
-      HL+I_std             0.004569
-      HL+I_lb                   0.0
-      HL+I_ub                   0.0
-      HL+M_mean            0.147628
-      HL+M_std             0.215733
-      HL+M_lb              0.001253
-      HL+M_ub              0.001297
-      HL+O_mean             0.36902
-      HL+O_std             0.132249
-      HL+O_lb              0.002289
-      HL+O_ub              0.019187
-      HL+W_mean            0.264246
-      HL+W_std             0.090536
-      HL+W_lb              0.001782
-      HL+W_ub              0.015628
-      NL+A_mean            0.012004
-      NL+A_std             0.010873
-      NL+A_lb              0.000121
-      NL+A_ub              0.000281
-      NL+B_mean            0.010891
-      NL+B_std              0.01404
-      NL+B_lb              0.000094
-      NL+B_ub              0.000383
-      NL+I_mean            0.005182
-      NL+I_std             0.008259
-      NL+I_lb              0.000009
-      NL+I_ub              0.000068
-      NL+M_mean            0.068412
-      NL+M_std              0.08564
-      NL+M_lb              0.000172
-      NL+M_ub              0.000416
-      NL+O_mean            0.090123
-      NL+O_std              0.03631
-      NL+O_lb              0.000705
-      NL+O_ub              0.003757
-      NL+W_mean            0.021228
-      NL+W_std             0.021222
-      NL+W_lb              0.000368
-      NL+W_ub               0.00123
+      HL+B_mean            0.000654
+      HL+B_std                  0.0
+      HL+B_lb              0.000654
+      HL+B_ub              0.000654
+      HL+I_mean            0.000032
+      HL+I_std                  0.0
+      HL+I_lb              0.000032
+      HL+I_ub              0.000032
+      HL+M_mean            0.000541
+      HL+M_std                  0.0
+      HL+M_lb              0.000541
+      HL+M_ub              0.000541
+      HL+O_mean             0.58944
+      HL+O_std                  0.0
+      HL+O_lb              0.589441
+      HL+O_ub              0.589441
+      HL+W_mean            0.221308
+      HL+W_std                  0.0
+      HL+W_lb              0.221309
+      HL+W_ub              0.221309
+      NL+A_mean            0.000044
+      NL+A_std                  0.0
+      NL+A_lb              0.000044
+      NL+A_ub              0.000044
+      NL+B_mean            0.002199
+      NL+B_std                  0.0
+      NL+B_lb              0.002199
+      NL+B_ub              0.002199
+      NL+I_mean            0.000004
+      NL+I_std                  0.0
+      NL+I_lb              0.000004
+      NL+I_ub              0.000004
+      NL+M_mean            0.000008
+      NL+M_std                  0.0
+      NL+M_lb              0.000008
+      NL+M_ub              0.000008
+      NL+O_mean            0.184513
+      NL+O_std                  0.0
+      NL+O_lb              0.184513
+      NL+O_ub              0.184513
+      NL+W_mean            0.001256
+      NL+W_std                  0.0
+      NL+W_lb              0.001256
+      NL+W_ub              0.001256
       race                     HL+O
       Name: 0, dtype: object
+
 
 
 Application

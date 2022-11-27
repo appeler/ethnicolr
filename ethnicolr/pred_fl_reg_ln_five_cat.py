@@ -12,13 +12,9 @@ from pkg_resources import resource_filename
 
 from .utils import column_exists, fixup_columns, transform_and_pred
 
-MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_5_cat.h5"
-VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab_5_cat.csv"
-RACEFN = "models/fl_voter_reg/lstm/fl_ln_five_cat_race.csv"
-
-MODEL = resource_filename(__name__, MODELFN)
-VOCAB = resource_filename(__name__, VOCABFN)
-RACE = resource_filename(__name__, RACEFN)
+MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_5_cat{0:s}.h5"
+VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab_5_cat{0:s}.csv"
+RACEFN = "models/fl_voter_reg/lstm/fl_ln_five_cat_race{0:s}.csv"
 
 NGRAMS = 2
 FEATURE_LEN = 20
@@ -30,7 +26,7 @@ class FloridaRegLnFiveCatModel():
     model = None
 
     @classmethod
-    def pred_fl_reg_ln(cls, df, namecol, num_iter=100, conf_int=1.0):
+    def pred_fl_reg_ln(cls, df, namecol, num_iter=100, conf_int=1.0, year=2022):
         """Predict the race/ethnicity by the last name using Florida voter
         model.
 
@@ -57,6 +53,11 @@ class FloridaRegLnFiveCatModel():
         df.dropna(subset=[namecol])
         if df.shape[0] == 0:
             return df
+
+        year = '_2022' if year == 2022 else ''
+        VOCAB = resource_filename(__name__, VOCABFN.format(year))
+        MODEL = resource_filename(__name__, MODELFN.format(year))
+        RACE = resource_filename(__name__, RACEFN.format(year))
 
         rdf = transform_and_pred(df=df,
                                  newnamecol=namecol,
@@ -91,7 +92,14 @@ def main(argv=sys.argv[1:]):
                         help='Number of iterations to measure uncertainty')
     parser.add_argument('-c', '--conf', default=1.0, type=float,
                         help='Confidence interval of Predictions')
-
+    parser.add_argument(
+        "-y",
+        "--year",
+        type=int,
+        default=2022,
+        choices=[2017, 2022],
+        help="Year of FL voter data (default=2022)",
+    )
     args = parser.parse_args(argv)
 
     print(args)
@@ -105,7 +113,8 @@ def main(argv=sys.argv[1:]):
     if not column_exists(df, args.last):
         return -1
 
-    rdf = pred_fl_reg_ln_five_cat(df, args.last, args.iter, args.conf)
+    rdf = pred_fl_reg_ln_five_cat(df, args.last, args.iter, args.conf,
+                                  args.year)
 
     print("Saving output to file: `{0:s}`".format(args.output))
     rdf.columns = fixup_columns(rdf.columns)

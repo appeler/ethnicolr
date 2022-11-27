@@ -141,8 +141,8 @@ def transform_and_pred(
                               pdf.reset_index(drop=True)], axis=1 )
     else:
         # define the quantile ranges for the confidence interval
-        lower_perc = 0.5 - (conf_int / 2)
-        upper_perc = 0.5 + (conf_int / 2)
+        lower_perc = (0.5 - (conf_int / 2)) * 100
+        upper_perc = (0.5 + (conf_int / 2)) * 100
 
         # Predict
         pdf = pd.DataFrame()
