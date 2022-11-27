@@ -250,16 +250,19 @@ where the data is:
 
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (categorical variable --- category with the highest
-      probability), "Asian,GreaterEastAsian,EastAsian",
+      race (categorical variable --- category with the highest probability). 
+      For each race it will provide the mean, standard error, lower & upper
+      bound of confidence interval
+      
+   ::
+      "Asian,GreaterEastAsian,EastAsian",
       "Asian,GreaterEastAsian,Japanese", "Asian,IndianSubContinent",
       "GreaterAfrican,Africans", "GreaterAfrican,Muslim",
       "GreaterEuropean,British","GreaterEuropean,EastEuropean",
       "GreaterEuropean,Jewish","GreaterEuropean,WestEuropean,French",
       "GreaterEuropean,WestEuropean,Germanic","GreaterEuropean,WestEuropean,Hispanic",
       "GreaterEuropean,WestEuropean,Italian","GreaterEuropean,WestEuropean,Nordic".
-      For each race it will provide the mean, standard error, lower & upper
-      bound of confidence interval
+      
 
    ::
 
