@@ -30,7 +30,7 @@ def column_exists(df: pd.DataFrame, col: str) -> bool:
 
     """
     if col and (col not in df.columns):
-        print("The specify column `{0!s}` not found in the input file"
+        print("Column `{0!s}` not found in the input file"
               .format(col))
         return False
     else:
