@@ -10,7 +10,7 @@ from pkg_resources import resource_filename
 from itertools import chain
 
 
-def isstring(s):
+def isstring(s: str):
     # if we use Python 3
     if sys.version_info[0] >= 3:
         return isinstance(s, str)
@@ -18,7 +18,7 @@ def isstring(s):
     return isinstance(s, basestring)
 
 
-def column_exists(df, col):
+def column_exists(df: pd.DataFrame, col: str) -> bool:
     """Check the column name exists in the DataFrame.
 
     Args:
@@ -37,7 +37,7 @@ def column_exists(df, col):
         return True
 
 
-def fixup_columns(cols):
+def fixup_columns(cols: list) -> list:
     """Replace index location column to name with `col` prefix
 
     Args:
@@ -110,8 +110,8 @@ def find_ngrams(vocab, text, n):
 
 
 def transform_and_pred(
-    df, newnamecol, cls, VOCAB, RACE, MODEL, NGRAMS, maxlen, num_iter, conf_int
-):
+    df: pd.DataFrame, newnamecol: str, cls, VOCAB, RACE, MODEL, NGRAMS, maxlen: int, num_iter: int, conf_int: float
+) -> pd.DataFrame:
 
     df[newnamecol] = df[newnamecol].str.strip().str.title()
     df["rowindex"] = df.index

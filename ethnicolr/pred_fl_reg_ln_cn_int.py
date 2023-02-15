@@ -31,7 +31,7 @@ class FloridaRegLnCnIntModel():
     model = None
 
     @classmethod
-    def pred_fl_reg_ln_cn_int(cls, df, namecol, num_iter=100, conf_int=1.0):
+    def pred_fl_reg_ln_cn_int(cls, df: pd.DataFrame, namecol: str, num_iter: int=100, conf_int: float=1.0) -> pd.DataFrame:
         """Predict the race/ethnicity by the last name using Florida voter
         model.
 
