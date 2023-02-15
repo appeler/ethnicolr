@@ -30,8 +30,8 @@ class WikiNameModel():
     model = None
 
     @classmethod
-    def pred_wiki_name(cls, df, lname_col, fname_col, num_iter=100,
-                       conf_int=1.0):
+    def pred_wiki_name(cls, df: pd.DataFrame, lname_col: str, fname_col: str, num_iter: int=100,
+                       conf_int: float=1.0):
         """Predict the race/ethnicity by the full name using Wiki model.
 
         Using the Wiki full name model to predict the race/ethnicity of

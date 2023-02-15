@@ -30,8 +30,8 @@ class FloridaRegNameModel():
     model = None
 
     @classmethod
-    def pred_fl_reg_name(cls, df, lname_col, fname_col, num_iter=100,
-                         conf_int=1.0):
+    def pred_fl_reg_name(cls, df: pd.DataFrame, lname_col: str, fname_col: str, num_iter: int=100,
+                         conf_int: float=1.0) -> pd.DataFrame:
         """Predict the race/ethnicity by the full name using Florida voter
         model.
 
