@@ -30,8 +30,8 @@ class CensusLnModel:
     model_year = None
 
     @classmethod
-    def pred_census_ln(cls, df: PandasDataFrame, namecol: str, year=2000: int, num_iter=100: int,
-                       conf_int=1.0: float) -> PandasDataFrame:
+    def pred_census_ln(cls, df: pd.DataFrame, namecol: str, year: int=2000, num_iter: int=100,
+                       conf_int: float=1.0) -> pd.DataFrame:
         """Predict the race/ethnicity by the last name using Census model.
 
         Using the Census last name model to predict the race/ethnicity of the
