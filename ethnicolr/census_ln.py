@@ -20,7 +20,7 @@ class CensusLnData():
     census_df = None
 
     @classmethod
-    def census_ln(cls, df, namecol, year=2000):
+    def census_ln(cls, df: pd.DataFrame, namecol: str, year: int=2000) -> pd.DataFrame:
         """Appends additional columns from Census data to the input DataFrame
         based on the last name.
 

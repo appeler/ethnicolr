@@ -26,8 +26,8 @@ class FloridaRegNameFiveCatModel():
     model = None
 
     @classmethod
-    def pred_fl_reg_name(cls, df, lname_col, fname_col, num_iter=100,
-                         conf_int=1.0, year=2022):
+    def pred_fl_reg_name(cls, df: pd.DataFrame, lname_col: str, fname_col: str, num_iter: int=100,
+                         conf_int: float=1.0, year: int=2022):
         """Predict the race/ethnicity by the full name using Florida voter
         model.
 
