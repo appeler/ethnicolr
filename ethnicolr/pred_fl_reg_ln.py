@@ -51,7 +51,7 @@ class FloridaRegLnModel:
         """
 
         if namecol not in df.columns:
-            print("No column `{0!s}` in the DataFrame".format(namecol))
+            print(f"No column `{namecol}` in the DataFrame")
             return df
 
         df.dropna(subset=[namecol])
@@ -112,7 +112,7 @@ def main(argv=sys.argv[1:]):
 
     rdf = pred_fl_reg_ln(df, args.last, args.iter, args.conf)
 
-    print("Saving output to file: `{0:s}`".format(args.output))
+    print(f"Saving output to file: `{args.output}`")
     rdf.columns = fixup_columns(rdf.columns)
     rdf.to_csv(args.output, index=False)
 

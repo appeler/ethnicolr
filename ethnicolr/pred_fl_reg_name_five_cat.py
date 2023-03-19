@@ -50,10 +50,10 @@ class FloridaRegNameFiveCatModel():
         """
 
         if lname_col not in df.columns:
-            print("No column `{0!s}` in the DataFrame".format(lname_col))
+            print(f"No column `{lname_col}` in the DataFrame")
             return df
         if fname_col not in df.columns:
-            print("No column `{0!s}` in the DataFrame".format(fname_col))
+            print(f"No column `{fname_col}` in the DataFrame")
             return df
 
         df['__name'] = (df[lname_col] + ' ' + df[fname_col]).str.title()
@@ -133,7 +133,7 @@ def main(argv=sys.argv[1:]):
     rdf = pred_fl_reg_name_five_cat(df, args.last, args.first, args.iter,
                                     args.conf, args.year)
 
-    print("Saving output to file: `{0:s}`".format(args.output))
+    print(f"Saving output to file: `{args.output}`")
     rdf.columns = fixup_columns(rdf.columns)
     rdf.to_csv(args.output, index=False)
 
