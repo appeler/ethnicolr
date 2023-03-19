@@ -10,7 +10,7 @@ from pkg_resources import resource_filename
 from itertools import chain
 
 
-def isstring(s: str):
+def isstring(s: str) -> bool:
     # if we use Python 3
     if sys.version_info[0] >= 3:
         return isinstance(s, str)
@@ -30,8 +30,7 @@ def column_exists(df: pd.DataFrame, col: str) -> bool:
 
     """
     if col and (col not in df.columns):
-        print("Column `{0!s}` not found in the input file"
-              .format(col))
+        print(f"Column `{col}` not found in the input file")
         return False
     else:
         return True
@@ -50,13 +49,13 @@ def fixup_columns(cols: list) -> list:
     out_cols = []
     for col in cols:
         if type(col) == int:
-            out_cols.append("col{:d}".format(col))
+            out_cols.append(f"col{col}")
         else:
             out_cols.append(col)
     return out_cols
 
 
-def n_grams(seq, n=1):
+def n_grams(seq, n:int=1):
     """Returns an itirator over the n-grams given a listTokens"""
     shiftToken = lambda i: (el for j,el in enumerate(seq) if j>=i)
     shiftedTokens = (shiftToken(i) for i in range(n))
@@ -73,7 +72,7 @@ def range_ngrams(listTokens, ngramRange=(1,2)):
     return chain(*(n_grams(listTokens, i) for i in range(*ngramRange)))
 
 
-def find_ngrams(vocab, text, n):
+def find_ngrams(vocab, text: str, n) -> list:
     """Find and return list of the index of n-grams in the vocabulary list.
 
     Generate the n-grams of the specific text, find them in the vocabulary list
