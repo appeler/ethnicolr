@@ -9,7 +9,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
-from .utils import column_exists, fixup_columns, transform_and_pred
+from .utils import column_exists, fixup_columns, transform_and_pred, arg_parser
 
 MODELFN = "models/census/lstm/census{0:d}_ln_lstm.h5"
 VOCABFN = "models/census/lstm/census{0:d}_ln_vocab.csv"
@@ -80,42 +80,14 @@ class CensusLnModel:
 
         return rdf
 
-
 pred_census_ln = CensusLnModel.pred_census_ln
 
-
 def main(argv=sys.argv[1:]):
-    title = "Predict Race/Ethnicity by last name using Census model"
-    parser = argparse.ArgumentParser(description=title)
-    parser.add_argument("input", default=None, help="Input file")
-    parser.add_argument(
-        "-y",
-        "--year",
-        type=int,
-        default=2000,
-        choices=[2000, 2010],
-        help="Year of Census data (default=2000)",
-    )
-    parser.add_argument(
-        "-o",
-        "--output",
-        default="census-pred-ln-output.csv",
-        help="Output file with prediction data",
-    )
-    parser.add_argument(
-        "-l",
-        "--last",
-        required=True,
-        help="Name or index location of column contains " "the last name",
-    )
-    parser.add_argument('-i', '--iter', default=100, type=int,
-                        help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=1.0, type=float,
-                        help='Confidence interval of Predictions')
-
-    args = parser.parse_args(argv)
-
-    print(args)
+    args = arg_parser(argv, 
+                title = "Predict Race/Ethnicity by last name using Census model", 
+                default_out: "census-pred-ln-output.csv", 
+                default_year = 2010, 
+                year_choices = [2000, 2010])
 
     if not args.last.isdigit():
         df = pd.read_csv(args.input)
@@ -133,7 +105,6 @@ def main(argv=sys.argv[1:]):
     rdf.to_csv(args.output, index=False)
 
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

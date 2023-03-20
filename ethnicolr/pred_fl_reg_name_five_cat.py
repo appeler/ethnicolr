@@ -10,7 +10,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
-from .utils import column_exists, fixup_columns, transform_and_pred
+from .utils import column_exists, fixup_columns, transform_and_pred, arg_parser
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_fullname_lstm_5_cat{0:s}.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_fullname_vocab_5_cat{0:s}.csv"
@@ -87,36 +87,12 @@ pred_fl_reg_name_five_cat = FloridaRegNameFiveCatModel.pred_fl_reg_name
 
 
 def main(argv=sys.argv[1:]):
-    title = ('Predict Race/Ethnicity by name using Florida registration model'
-             ' (Five Cat)')
-    parser = argparse.ArgumentParser(description=title)
-    parser.add_argument('input', default=None,
-                        help='Input file')
-    parser.add_argument('-o', '--output',
-                        default='fl-pred-name-five-cat-output.csv',
-                        help='Output file with prediction data')
-    parser.add_argument('-f', '--first', required=True,
-                        help='Name or index location of column contains '
-                             'the first name')
-    parser.add_argument('-l', '--last', required=True,
-                        help='Name or index location of column contains '
-                             'the last name')
-    parser.add_argument('-i', '--iter', default=100, type=int,
-                        help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=1.0, type=float,
-                        help='Confidence interval of Predictions')
-    parser.add_argument(
-        "-y",
-        "--year",
-        type=int,
-        default=2022,
-        choices=[2017, 2022],
-        help="Year of FL voter data (default=2022)",
-    )
-
-    args = parser.parse_args(argv)
-
-    print(args)
+    args = arg_parser(argv, 
+                title = "Predict Race/Ethnicity by name using Florida registration model (Five Cat)", 
+                default_out: "fl-pred-name-five-cat-output.csv", 
+                default_year = 2022, 
+                year_choices = [2017, 2022],
+                first = True)
 
     if not args.last.isdigit() and not args.first.isdigit():
         df = pd.read_csv(args.input)

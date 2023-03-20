@@ -10,7 +10,7 @@ from tensorflow.keras.preprocessing import sequence
 
 from pkg_resources import resource_filename
 
-from .utils import column_exists, fixup_columns, transform_and_pred
+from .utils import column_exists, fixup_columns, transform_and_pred, arg_parser
 
 MODELFN = "models/nc_voter_reg/lstm/nc_voter_name_lstm_oversample.h5"
 VOCABFN = "models/nc_voter_reg/lstm/nc_voter_name_vocab_oversample.csv"
@@ -86,27 +86,12 @@ pred_nc_reg_name = NCRegNameModel.pred_nc_reg_name
 
 
 def main(argv=sys.argv[1:]):
-    title = ('Predict Race/Ethnicity by name using NC 12 category'
-             ' voter registration model')
-    parser = argparse.ArgumentParser(description=title)
-    parser.add_argument('input', default=None,
-                        help='Input file')
-    parser.add_argument('-o', '--output', default='nc-pred-name-output.csv',
-                        help='Output file with prediction data')
-    parser.add_argument('-f', '--first', required=True,
-                        help='Name or index location of column contains '
-                             'the first name')
-    parser.add_argument('-l', '--last', required=True,
-                        help='Name or index location of column contains '
-                             'the last name')
-    parser.add_argument('-i', '--iter', default=100, type=int,
-                        help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=1.0, type=float,
-                        help='Confidence interval of Predictions')
-
-    args = parser.parse_args(argv)
-
-    print(args)
+    args = arg_parser(argv, 
+                title = "Predict Race/Ethnicity by name using NC 12 category voter registration model", 
+                default_out: "fl-pred-name-output.csv", 
+                default_year = 2017, 
+                year_choices = [2017],
+                first = True)
 
     if not args.last.isdigit() and not args.first.isdigit():
         df = pd.read_csv(args.input)

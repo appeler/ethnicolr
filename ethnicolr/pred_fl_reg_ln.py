@@ -10,7 +10,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
-from .utils import column_exists, fixup_columns, transform_and_pred
+from .utils import column_exists, fixup_columns, transform_and_pred, arg_parser
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab.csv"
@@ -77,29 +77,11 @@ pred_fl_reg_ln = FloridaRegLnModel.pred_fl_reg_ln
 
 
 def main(argv=sys.argv[1:]):
-    title = "Predict Race/Ethnicity by name using Florida registration model"
-    parser = argparse.ArgumentParser(description=title)
-    parser.add_argument("input", default=None, help="Input file")
-    parser.add_argument(
-        "-o",
-        "--output",
-        default="fl-pred-ln-output.csv",
-        help="Output file with prediction data",
-    )
-    parser.add_argument(
-        "-l",
-        "--last",
-        required=True,
-        help="Name or index location of column contains " "the last name",
-    )
-    parser.add_argument('-i', '--iter', default=100, type=int,
-                        help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=1.0, type=float,
-                        help='Confidence interval of Predictions')
-
-    args = parser.parse_args(argv)
-
-    print(args)
+    args = arg_parser(argv, 
+                title = "Predict Race/Ethnicity by name using Florida registration model", 
+                default_out: "fl-pred-ln-output.csv", 
+                default_year = 2017, 
+                year_choices = [2017])
 
     if not args.last.isdigit():
         df = pd.read_csv(args.input)
