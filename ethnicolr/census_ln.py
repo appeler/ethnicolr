@@ -42,7 +42,7 @@ class CensusLnData():
         """
 
         if namecol not in df.columns:
-            print("No column `{0!s}` in the DataFrame".format(namecol))
+            print(f"No column `{namecol}` in the DataFrame")
             return df
 
         df['__last_name'] = df[namecol].str.strip().str.upper()
