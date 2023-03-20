@@ -90,7 +90,7 @@ def main(argv=sys.argv[1:]):
 
     rdf = census_ln(df, args.last, args.year)
 
-    print("Saving output to file: `{0:s}`".format(args.output))
+    print(f"Saving output to file: `{args.output}`")
     rdf.columns = fixup_columns(rdf.columns)
     rdf.to_csv(args.output, index=False)
 
