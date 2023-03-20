@@ -73,22 +73,11 @@ census_ln = CensusLnData.census_ln
 
 
 def main(argv=sys.argv[1:]):
-    title = 'Appends Census columns by last name'
-    parser = argparse.ArgumentParser(description=title)
-    parser.add_argument('input', default=None,
-                        help='Input file')
-    parser.add_argument('-y', '--year', type=int, default=2000,
-                        choices=[2000, 2010],
-                        help='Year of Census data (default=2000)')
-    parser.add_argument('-o', '--output', default='census-output.csv',
-                        help='Output file with Census data columns')
-    parser.add_argument('-l', '--last', required=True,
-                        help='Name or index location of column contains '
-                             'the last name')
-
-    args = parser.parse_args(argv)
-
-    print(args)
+    args = arg_parser(argv, 
+                title = "Appends Census columns by last name", 
+                default_out = "census-output.csv", 
+                default_year = 2010, 
+                year_choices = [2000, 2010])
 
     if not args.last.isdigit():
         df = pd.read_csv(args.input)
