@@ -208,7 +208,7 @@ def arg_parser(argv, title: str, default_out: str, default_year: int, year_choic
         type=int,
         default=default_year,
         choices=year_choices,
-        help=f"Year of FL voter data (default={default_year})",
+        help=f"Year of data (default={default_year})",
     )
     args = parser.parse_args(argv)
 
