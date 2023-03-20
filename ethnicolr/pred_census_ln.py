@@ -85,7 +85,7 @@ pred_census_ln = CensusLnModel.pred_census_ln
 def main(argv=sys.argv[1:]):
     args = arg_parser(argv, 
                 title = "Predict Race/Ethnicity by last name using Census model", 
-                default_out: "census-pred-ln-output.csv", 
+                default_out = "census-pred-ln-output.csv", 
                 default_year = 2010, 
                 year_choices = [2000, 2010])
 

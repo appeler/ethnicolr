@@ -89,7 +89,7 @@ pred_fl_reg_name = FloridaRegNameModel.pred_fl_reg_name
 def main(argv=sys.argv[1:]):
     args = arg_parser(argv, 
                 title = "Predict Race/Ethnicity by name using Florida registration model", 
-                default_out: "fl-pred-name-output.csv", 
+                default_out = "fl-pred-name-output.csv", 
                 default_year = 2017, 
                 year_choices = [2017],
                 first = True)

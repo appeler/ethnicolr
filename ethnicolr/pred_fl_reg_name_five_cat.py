@@ -89,7 +89,7 @@ pred_fl_reg_name_five_cat = FloridaRegNameFiveCatModel.pred_fl_reg_name
 def main(argv=sys.argv[1:]):
     args = arg_parser(argv, 
                 title = "Predict Race/Ethnicity by name using Florida registration model (Five Cat)", 
-                default_out: "fl-pred-name-five-cat-output.csv", 
+                default_out = "fl-pred-name-five-cat-output.csv", 
                 default_year = 2022, 
                 year_choices = [2017, 2022],
                 first = True)

@@ -87,7 +87,7 @@ pred_wiki_name = WikiNameModel.pred_wiki_name
 def main(argv=sys.argv[1:]):
     args = arg_parser(argv, 
                 title = "Predict Race/Ethnicity by name using Wiki model", 
-                default_out: "wiki-pred-name-output.csv", 
+                default_out = "wiki-pred-name-output.csv", 
                 default_year = 2017, 
                 year_choices = [2017],
                 first = True)
