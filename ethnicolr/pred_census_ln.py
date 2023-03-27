@@ -9,7 +9,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
-from .utils import column_exists, fixup_columns, transform_and_pred, arg_parser
+from .utils import test_and_norm_df, transform_and_pred, arg_parser
 
 MODELFN = "models/census/lstm/census{0:d}_ln_lstm.h5"
 VOCABFN = "models/census/lstm/census{0:d}_ln_vocab.csv"
@@ -54,12 +54,8 @@ class CensusLnModel:
 
         """
 
-        if not column_exists(df, lname_col):
-            return df
+        df = test_and_norm_df(df, lname_col)
 
-        df.dropna(subset=[lname_col], inplace = True)
-        if df.shape[0] == 0:
-            return df
 
         VOCAB = resource_filename(__name__, VOCABFN.format(year))
         MODEL = resource_filename(__name__, MODELFN.format(year))

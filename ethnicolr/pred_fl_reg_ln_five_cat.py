@@ -10,7 +10,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
-from .utils import column_exists, fixup_columns, transform_and_pred, arg_parser
+from .utils import test_and_norm_df, transform_and_pred, arg_parser
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_5_cat{0:s}.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab_5_cat{0:s}.csv"
@@ -43,7 +43,7 @@ class FloridaRegLnFiveCatModel():
             num_iter (int): Number of iterations do calculate the confidence interval. Default is 100.
             conf_int (float): What confidence interval? Default is 1, which means just the point estimate.
             year (int): the year of the model. Default = 2022. 
-            
+
         Returns:
             DataFrame: Pandas DataFrame with additional columns:
                 - `race` the predict result
@@ -51,7 +51,7 @@ class FloridaRegLnFiveCatModel():
 
         """
 
-        df = test_and_norm_df(df)
+        df = test_and_norm_df(df, lname_col)
 
         year = '_2022' if year == 2022 else ''
         VOCAB = resource_filename(__name__, VOCABFN.format(year))

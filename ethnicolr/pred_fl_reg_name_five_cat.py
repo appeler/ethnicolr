@@ -10,7 +10,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 
-from .utils import column_exists, fixup_columns, transform_and_pred, arg_parser
+from .utils import test_and_norm_df, transform_and_pred, arg_parser
 
 MODELFN = "models/fl_voter_reg/lstm/fl_all_fullname_lstm_5_cat{0:s}.h5"
 VOCABFN = "models/fl_voter_reg/lstm/fl_all_fullname_vocab_5_cat{0:s}.csv"

@@ -10,7 +10,7 @@ from tensorflow.keras.preprocessing import sequence
 
 from pkg_resources import resource_filename
 
-from .utils import column_exists, fixup_columns, transform_and_pred, arg_parser
+from .utils import test_and_norm_df, transform_and_pred, arg_parser
 
 MODELFN = "models/wiki/lstm/wiki_ln_lstm.h5"
 VOCABFN = "models/wiki/lstm/wiki_ln_vocab.csv"
@@ -51,7 +51,7 @@ class WikiLnModel():
 
         """
 
-        df = test_and_norm_df(df)
+        df = test_and_norm_df(df, lname_col)
 
         rdf = transform_and_pred(df=df,
                                  newnamecol=lname_col,

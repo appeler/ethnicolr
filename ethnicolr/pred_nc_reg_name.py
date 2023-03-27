@@ -10,7 +10,7 @@ from tensorflow.keras.preprocessing import sequence
 
 from pkg_resources import resource_filename
 
-from .utils import column_exists, fixup_columns, transform_and_pred, arg_parser
+from .utils import test_and_norm_df, transform_and_pred, arg_parser
 
 MODELFN = "models/nc_voter_reg/lstm/nc_voter_name_lstm_oversample.h5"
 VOCABFN = "models/nc_voter_reg/lstm/nc_voter_name_vocab_oversample.csv"
