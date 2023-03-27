@@ -28,19 +28,14 @@ class FloridaRegNameFiveCatModel():
     @classmethod
     def pred_fl_reg_name(cls, df: pd.DataFrame, lname_col: str, fname_col: str, num_iter: int=100,
                          conf_int: float=1.0, year: int=2022):
-        """Predict the race/ethnicity by the full name using Florida voter
-        model.
-
-        Using the Florida voter full name model to predict the race/ethnicity
-        of the input DataFrame.
+        """Predict the race/ethnicity of the full name using the Florida voter registration
+        5 category model.
 
         Args:
-            df (:obj:`DataFrame`): Pandas DataFrame containing the last name
-                and first name column.
-            lname_col (str or int): Column's name or location of the last name
-                in DataFrame.
-            fname_col (str or int): Column's name or location of the first name
-                in DataFrame.
+            df (:obj:`DataFrame`): Pandas DataFrame containing the first and last name
+                columns.
+            lname_col (str): Column name for the last name.
+            fname_col (str or int): Column name for the first name.
 
         Returns:
             DataFrame: Pandas DataFrame with additional columns:

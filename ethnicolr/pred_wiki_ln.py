@@ -30,17 +30,13 @@ class WikiLnModel():
     model = None
 
     @classmethod
-    def pred_wiki_ln(cls, df: pd.DataFrame, namecol: str, num_iter: int=100, conf_int: float=1.0) -> pd.DataFrame:
-        """Predict the race/ethnicity by the last name using Wiki model.
-
-        Using the Wiki last name model to predict the race/ethnicity of
-        thE input DataFrame.
+    def pred_wiki_ln(cls, df: pd.DataFrame, lname_col: str, num_iter: int=100, conf_int: float=1.0) -> pd.DataFrame:
+        """Predict the race/ethnicity of the last name using the Wikipedia model.
 
         Args:
             df (:obj:`DataFrame`): Pandas DataFrame containing the last name
                 column.
-            namecol (str or int): Column's name or location of the name in
-                DataFrame.
+            lname_col (str): Column name for the last name.
 
         Returns:
             DataFrame: Pandas DataFrame with additional columns:
@@ -49,15 +45,15 @@ class WikiLnModel():
 
         """
 
-        if not column_exists(df, namecol):
+        if not column_exists(df, lname_col):
             return df
 
-        df.dropna(subset=[namecol], inplace = True)
+        df.dropna(subset=[lname_col], inplace = True)
         if df.shape[0] == 0:
             return df
 
         rdf = transform_and_pred(df=df,
-                                 newnamecol=namecol,
+                                 newnamecol=lname_col,
                                  cls=cls,
                                  VOCAB=VOCAB,
                                  RACE=RACE,

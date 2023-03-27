@@ -29,14 +29,14 @@ class CensusLnModel:
     model_year = None
 
     @classmethod
-    def pred_census_ln(cls, df: pd.DataFrame, namecol: str, year: int=2010, num_iter: int=100,
+    def pred_census_ln(cls, df: pd.DataFrame, lname_col: str, year: int=2010, num_iter: int=100,
                        conf_int: float=1.0) -> pd.DataFrame:
-        """Predict the race/ethnicity of the last name using Census model.
+        """Predict the race/ethnicity of the last name using the Census model.
 
         Args:
             df (:obj:`DataFrame`): Pandas DataFrame containing the last name
                 column.
-            namecol (str): Column name for the last name.
+            lname_col (str): Column name for the last name.
             year (int): The year of Census model to be used. (2000 or 2010)
                 (default is 2010)
 
@@ -48,10 +48,10 @@ class CensusLnModel:
 
         """
 
-        if not column_exists(df, namecol):
+        if not column_exists(df, lname_col):
             return df
 
-        df.dropna(subset=[namecol], inplace = True)
+        df.dropna(subset=[lname_col], inplace = True)
         if df.shape[0] == 0:
             return df
 
@@ -61,7 +61,7 @@ class CensusLnModel:
 
         rdf = transform_and_pred(
             df=df,
-            newnamecol=namecol,
+            newnamecol=lname_col,
             cls=cls,
             VOCAB=VOCAB,
             RACE=RACE,
