@@ -193,11 +193,9 @@ def arg_parser(argv, title: str, default_out: str, default_year: int, year_choic
                         help='Output file with prediction data')
     if first:
         parser.add_argument('-f', '--first', required=True,
-                        help='Name or index location of column contains '
-                             'the first name')
+                        help='Column name for the column with the first name')
     parser.add_argument('-l', '--last', required=True,
-                        help='Name or index location of column contains '
-                             'the last name')
+                        help='Column name for the column with the last name')
     parser.add_argument('-i', '--iter', default=100, type=int,
                         help='Number of iterations to measure uncertainty')
     parser.add_argument('-c', '--conf', default=1.0, type=float,

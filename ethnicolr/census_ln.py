@@ -41,10 +41,13 @@ class CensusLnData():
 
         """
 
-        if namecol not in df.columns:
-            print(f"No column `{namecol}` in the DataFrame")
+        if not column_exists(df, namecol):
             return df
 
+        df.dropna(subset=[namecol], inplace = True)
+        if df.shape[0] == 0:
+            return df
+        
         df['__last_name'] = df[namecol].str.strip().str.upper()
 
         if cls.census_df is None or cls.census_year != year:
@@ -79,11 +82,7 @@ def main(argv=sys.argv[1:]):
                 default_year = 2010, 
                 year_choices = [2000, 2010])
 
-    if not args.last.isdigit():
-        df = pd.read_csv(args.input)
-    else:
-        df = pd.read_csv(args.input, header=None)
-        args.last = int(args.last)
+    df = pd.read_csv(args.input)
 
     if not column_exists(df, args.last):
         return -1

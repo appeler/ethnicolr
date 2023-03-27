@@ -53,17 +53,15 @@ class NCRegNameModel():
 
         """
 
-        if lname_col not in df.columns:
-            print(f"No column `{lname_col}` in the DataFrame")
+        if not column_exists(df, lname_col):
             return df
-        if fname_col not in df.columns:
-            print(f"No column `{fname_col}` in the DataFrame")
+        if not column_exists(df, fname_col):
             return df
 
         df['__name'] = (df[lname_col].str.strip()
                         + ' ' + df[fname_col].str.strip()).str.title()
 
-        df.dropna(subset=['__name'])
+        df.dropna(subset=['__name'], inplace = True)
         if df.shape[0] == 0:
             del df['__name']
             return df
@@ -93,13 +91,8 @@ def main(argv=sys.argv[1:]):
                 year_choices = [2017],
                 first = True)
 
-    if not args.last.isdigit() and not args.first.isdigit():
-        df = pd.read_csv(args.input)
-    else:
-        df = pd.read_csv(args.input, header=None)
-        args.last = int(args.last)
-        args.first = int(args.first)
-
+    df = pd.read_csv(args.input)
+   
     if not column_exists(df, args.last):
         return -1
     if not column_exists(df, args.first):

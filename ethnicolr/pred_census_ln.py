@@ -22,7 +22,6 @@ RACE = resource_filename(__name__, RACEFN)
 NGRAMS = 2
 FEATURE_LEN = 20
 
-
 class CensusLnModel:
     vocab = None
     race = None
@@ -30,34 +29,29 @@ class CensusLnModel:
     model_year = None
 
     @classmethod
-    def pred_census_ln(cls, df: pd.DataFrame, namecol: str, year: int=2000, num_iter: int=100,
+    def pred_census_ln(cls, df: pd.DataFrame, namecol: str, year: int=2010, num_iter: int=100,
                        conf_int: float=1.0) -> pd.DataFrame:
-        """Predict the race/ethnicity by the last name using Census model.
-
-        Using the Census last name model to predict the race/ethnicity of the
-        input DataFrame.
+        """Predict the race/ethnicity of the last name using Census model.
 
         Args:
             df (:obj:`DataFrame`): Pandas DataFrame containing the last name
                 column.
-            namecol (str or int): Column's name or location of the name in
-                DataFrame.
+            namecol (str): Column name for the last name.
             year (int): The year of Census model to be used. (2000 or 2010)
-                (default is 2000)
+                (default is 2010)
 
         Returns:
             DataFrame: Pandas DataFrame with additional columns:
-                - `race` the predict result
-                - `black`, `api`, `white`, `hispanic` are the prediction
-                    probability.
+                - `race` contains predicted race/ethnicity
+                - `black`, `api`, `white`, `hispanic` contain the prediction
+                    probabilities.
 
         """
 
-        if namecol not in df.columns:
-            print(f"No column `{namecol}` in the DataFrame")
+        if not column_exists(df, namecol):
             return df
 
-        df.dropna(subset=[namecol])
+        df.dropna(subset=[namecol], inplace = True)
         if df.shape[0] == 0:
             return df
 
@@ -84,16 +78,12 @@ pred_census_ln = CensusLnModel.pred_census_ln
 
 def main(argv=sys.argv[1:]):
     args = arg_parser(argv, 
-                title = "Predict Race/Ethnicity by last name using Census model", 
+                title = "Predict Race/Ethnicity by last name using Census last name model", 
                 default_out = "census-pred-ln-output.csv", 
                 default_year = 2010, 
                 year_choices = [2000, 2010])
 
-    if not args.last.isdigit():
-        df = pd.read_csv(args.input)
-    else:
-        df = pd.read_csv(args.input, header=None)
-        args.last = int(args.last)
+    df = pd.read_csv(args.input)
 
     if not column_exists(df, args.last):
         return -1
