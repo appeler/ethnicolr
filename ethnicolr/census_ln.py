@@ -41,12 +41,7 @@ class CensusLnData():
 
         """
 
-        if not column_exists(df, namecol):
-            return df
-
-        df.dropna(subset=[namecol], inplace = True)
-        if df.shape[0] == 0:
-            return df
+        df = test_and_norm_df(df)
         
         df['__last_name'] = df[namecol].str.strip().str.upper()
 
@@ -75,7 +70,7 @@ class CensusLnData():
 census_ln = CensusLnData.census_ln
 
 
-def main(argv=sys.argv[1:]):
+def main(argv=sys.argv[1:]) -> None::
     args = arg_parser(argv, 
                 title = "Appends Census columns by last name", 
                 default_out = "census-output.csv", 
@@ -84,16 +79,10 @@ def main(argv=sys.argv[1:]):
 
     df = pd.read_csv(args.input)
 
-    if not column_exists(df, args.last):
-        return -1
-
     rdf = census_ln(df, args.last, args.year)
 
     print(f"Saving output to file: `{args.output}`")
-    rdf.columns = fixup_columns(rdf.columns)
     rdf.to_csv(args.output, index=False)
-
-    return 0
 
 
 if __name__ == "__main__":

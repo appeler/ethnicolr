@@ -79,7 +79,7 @@ class FloridaRegNameFiveCatModel():
 pred_fl_reg_name_five_cat = FloridaRegNameFiveCatModel.pred_fl_reg_name
 
 
-def main(argv=sys.argv[1:]):
+def main(argv=sys.argv[1:]) -> None:
     args = arg_parser(argv, 
                 title = "Predict Race/Ethnicity by name using Florida registration model (Five Cat)", 
                 default_out = "fl-pred-name-five-cat-output.csv", 
@@ -88,20 +88,16 @@ def main(argv=sys.argv[1:]):
                 first = True)
 
     df = pd.read_csv(args.input)
-    
-    if not column_exists(df, args.last):
-        return -1
-    if not column_exists(df, args.first):
-        return -1
 
-    rdf = pred_fl_reg_name_five_cat(df, args.last, args.first, args.iter,
-                                    args.conf, args.year)
+    rdf = pred_fl_reg_name_five_cat(df = df, 
+                                   lname_col = args.last, 
+                                   fname_col = args.first, 
+                                   num_iter = args.iter, 
+                                   conf_int = args.conf,
+                                   year = args.year)
 
     print(f"Saving output to file: `{args.output}`")
-    rdf.columns = fixup_columns(rdf.columns)
     rdf.to_csv(args.output, index=False)
-
-    return 0
 
 
 if __name__ == "__main__":

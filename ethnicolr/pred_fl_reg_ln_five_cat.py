@@ -43,12 +43,7 @@ class FloridaRegLnFiveCatModel():
 
         """
 
-        if not column_exists(df, lname_col):
-            return df
-
-        df.dropna(subset=[lname_col], inplace = True)
-        if df.shape[0] == 0:
-            return df
+        df = test_and_norm_df(df)
 
         year = '_2022' if year == 2022 else ''
         VOCAB = resource_filename(__name__, VOCABFN.format(year))
@@ -72,7 +67,7 @@ class FloridaRegLnFiveCatModel():
 pred_fl_reg_ln_five_cat = FloridaRegLnFiveCatModel.pred_fl_reg_ln
 
 
-def main(argv=sys.argv[1:]):
+def main(argv=sys.argv[1:]) -> None:
     args = arg_parser(argv, 
                 title = "Predict Race/Ethnicity by last name using the Florida registration 5 cat. model", 
                 default_out = "fl-pred-ln-five-cat-output.csv", 
@@ -81,17 +76,11 @@ def main(argv=sys.argv[1:]):
 
     df = pd.read_csv(args.input)
 
-    if not column_exists(df, args.last):
-        return -1
-
     rdf = pred_fl_reg_ln_five_cat(df, args.last, args.iter, args.conf,
                                   args.year)
 
     print(f"Saving output to file: `{args.output}`")
-    rdf.columns = fixup_columns(rdf.columns)
     rdf.to_csv(args.output, index=False)
-
-    return 0
 
 
 if __name__ == "__main__":

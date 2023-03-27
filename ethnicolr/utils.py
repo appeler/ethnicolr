@@ -17,43 +17,21 @@ def isstring(s: str) -> bool:
     # we use Python 2
     return isinstance(s, basestring)
 
-
-def column_exists(df: pd.DataFrame, col: str) -> bool:
-    """Check the column name exists in the DataFrame.
-
-    Args:
-        df (:obj:`DataFrame`): Pandas DataFrame.
-        col (str): Column name.
-
-    Returns:
-        bool: True if exists, False if not exists.
+def test_and_norm_df(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    """Handles cases like:
+        - column doesn't exist, nukes missing rows
 
     """
     if col and (col not in df.columns):
-        print(f"Column `{col}` not found in the input file")
-        return False
-    else:
-        return True
+        raise Exception("The column doesn't exist in the dataframe.")
 
+    df.dropna(subset=[col], inplace = True)
+    if df.shape[0] == 0:
+        raise Exception("The name column has no non-NaN values.")
 
-def fixup_columns(cols: list) -> list:
-    """Replace index location column to name with `col` prefix
+    df.drop_duplicates(subset = [col], inplace = True)
 
-    Args:
-        cols (list): List of original columns
-
-    Returns:
-        list: List of column names
-
-    """
-    out_cols = []
-    for col in cols:
-        if type(col) == int:
-            out_cols.append(f"col{col}")
-        else:
-            out_cols.append(col)
-    return out_cols
-
+    return df
 
 def n_grams(seq, n:int=1):
     """Returns an itirator over the n-grams given a listTokens"""

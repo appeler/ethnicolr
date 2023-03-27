@@ -46,12 +46,7 @@ class FloridaRegLnModel:
 
         """
 
-        if not column_exists(df, lname_col):
-            return df
-
-        df.dropna(subset=[lname_col], inplace = True)
-        if df.shape[0] == 0:
-            return df
+        df = test_and_norm_df(df)
         
         rdf = transform_and_pred(
                 df=df,
@@ -71,7 +66,7 @@ class FloridaRegLnModel:
 pred_fl_reg_ln = FloridaRegLnModel.pred_fl_reg_ln
 
 
-def main(argv=sys.argv[1:]):
+def main(argv=sys.argv[1:]) -> None:
     args = arg_parser(argv, 
                 title = "Predict Race/Ethnicity by name using Florida registration model", 
                 default_out = "fl-pred-ln-output.csv", 
@@ -80,16 +75,10 @@ def main(argv=sys.argv[1:]):
 
     df = pd.read_csv(args.input)
 
-    if not column_exists(df, args.last):
-        return -1
-
     rdf = pred_fl_reg_ln(df, args.last, args.iter, args.conf)
 
     print(f"Saving output to file: `{args.output}`")
-    rdf.columns = fixup_columns(rdf.columns)
     rdf.to_csv(args.output, index=False)
-
-    return 0
 
 
 if __name__ == "__main__":

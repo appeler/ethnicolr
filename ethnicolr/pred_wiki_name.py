@@ -87,18 +87,10 @@ def main(argv=sys.argv[1:]):
 
     df = pd.read_csv(args.input)
    
-    if not column_exists(df, args.last):
-        return -1
-    if not column_exists(df, args.first):
-        return -1
-
     rdf = pred_wiki_name(df, args.last, args.first, args.iter, args.conf)
 
     print(f"Saving output to file: `{args.output}`")
-    rdf.columns = fixup_columns(rdf.columns)
     rdf.to_csv(args.output, index=False)
-
-    return 0
 
 
 if __name__ == "__main__":

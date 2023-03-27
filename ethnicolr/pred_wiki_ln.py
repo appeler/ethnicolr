@@ -45,12 +45,7 @@ class WikiLnModel():
 
         """
 
-        if not column_exists(df, lname_col):
-            return df
-
-        df.dropna(subset=[lname_col], inplace = True)
-        if df.shape[0] == 0:
-            return df
+        df = test_and_norm_df(df)
 
         rdf = transform_and_pred(df=df,
                                  newnamecol=lname_col,
@@ -69,7 +64,7 @@ class WikiLnModel():
 pred_wiki_ln = WikiLnModel.pred_wiki_ln
 
 
-def main(argv=sys.argv[1:]):
+def main(argv=sys.argv[1:]) -> None:
     args = arg_parser(argv, 
                 title = "Predict Race/Ethnicity by last name using Wiki model", 
                 default_out = "wiki-pred-ln-output.csv", 
@@ -77,17 +72,11 @@ def main(argv=sys.argv[1:]):
                 year_choices = [2017])
 
     df = pd.read_csv(args.input)
-    
-    if not column_exists(df, args.last, args.iter, args.conf):
-        return -1
 
     rdf = pred_wiki_ln(df, args.last)
 
     print(f"Saving output to file: `{args.output}`")
-    rdf.columns = fixup_columns(rdf.columns)
     rdf.to_csv(args.output, index=False)
-
-    return 0
 
 
 if __name__ == "__main__":
