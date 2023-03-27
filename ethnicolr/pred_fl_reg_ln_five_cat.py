@@ -26,7 +26,12 @@ class FloridaRegLnFiveCatModel():
     model = None
 
     @classmethod
-    def pred_fl_reg_ln(cls, df: pd.DataFrame, lname_col: str, num_iter: int=100, conf_int: float=1.0, year: int=2022) -> pd.DataFrame:
+    def pred_fl_reg_ln(cls, 
+                       df: pd.DataFrame, 
+                       lname_col: str, 
+                       num_iter: int=100, 
+                       conf_int: float=1.0, 
+                       year: int=2022) -> pd.DataFrame:
 
         """Predict the race/ethnicity of the last name using the Florida voter
         registration data model.
@@ -35,7 +40,10 @@ class FloridaRegLnFiveCatModel():
             df (:obj:`DataFrame`): Pandas DataFrame containing the last name
                 column.
             lname_col (str): Column name for the last name.
-
+            num_iter (int): Number of iterations do calculate the confidence interval. Default is 100.
+            conf_int (float): What confidence interval? Default is 1, which means just the point estimate.
+            year (int): the year of the model. Default = 2022. 
+            
         Returns:
             DataFrame: Pandas DataFrame with additional columns:
                 - `race` the predict result

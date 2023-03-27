@@ -20,18 +20,20 @@ class CensusLnData():
     census_df = None
 
     @classmethod
-    def census_ln(cls, df: pd.DataFrame, namecol: str, year: int=2000) -> pd.DataFrame:
-        """Appends additional columns from Census data to the input DataFrame
+    def census_ln(cls, 
+                  df: pd.DataFrame,
+                  lname_col: str, 
+                  year: int=2000) -> pd.DataFrame:
+        """Appends columns from Census data to the input DataFrame
         based on the last name.
 
         Removes extra space. Checks if the name is the Census data.  If it is,
         outputs data from that row.
 
         Args:
-            df (:obj:`DataFrame`): Pandas DataFrame containing the last name
-                column.
-            namecol (str or int): Column's name or location of the name in
-                DataFrame.
+            df (:obj:`DataFrame`): Pandas DataFrame containing the first and last name
+                columns.
+            lname_col (str): Column name for the last name.
             year (int): The year of Census data to be used. (2000 or 2010)
                 (default is 2000)
 
@@ -43,7 +45,7 @@ class CensusLnData():
 
         df = test_and_norm_df(df)
         
-        df['__last_name'] = df[namecol].str.strip().str.upper()
+        df['__last_name'] = df[lname_col].str.strip().str.upper()
 
         if cls.census_df is None or cls.census_year != year:
             if year == 2000:
@@ -70,7 +72,7 @@ class CensusLnData():
 census_ln = CensusLnData.census_ln
 
 
-def main(argv=sys.argv[1:]) -> None::
+def main(argv=sys.argv[1:]) -> None:
     args = arg_parser(argv, 
                 title = "Appends Census columns by last name", 
                 default_out = "census-output.csv", 

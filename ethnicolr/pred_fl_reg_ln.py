@@ -30,7 +30,11 @@ class FloridaRegLnModel:
     model = None
 
     @classmethod
-    def pred_fl_reg_ln(cls, df: pd.DataFrame, lname_col: str, num_iter: int=100, conf_int: float=1.0):
+    def pred_fl_reg_ln(cls, 
+                       df: pd.DataFrame, 
+                       lname_col: str, 
+                       num_iter: int=100, 
+                       conf_int: float=1.0) -> pd.DataFrame:
         """Predict the race/ethnicity of the last name using the Florida voter
         registration data model.
 
@@ -38,6 +42,8 @@ class FloridaRegLnModel:
             df (:obj:`DataFrame`): Pandas DataFrame containing the last name
                 column.
             lname_col (str): Column name for the last name.
+            num_iter (int): Number of iterations do calculate the confidence interval. Default is 100.
+            conf_int (float): What confidence interval? Default is 1, which means just the point estimate.
 
         Returns:
             DataFrame: Pandas DataFrame with additional columns:

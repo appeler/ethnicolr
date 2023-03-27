@@ -29,7 +29,11 @@ class CensusLnModel:
     model_year = None
 
     @classmethod
-    def pred_census_ln(cls, df: pd.DataFrame, lname_col: str, year: int=2010, num_iter: int=100,
+    def pred_census_ln(cls, 
+                       df: pd.DataFrame,
+                       lname_col: str,
+                       year: int=2010,
+                       num_iter: int=100,
                        conf_int: float=1.0) -> pd.DataFrame:
         """Predict the race/ethnicity of the last name using the Census model.
 
@@ -37,8 +41,10 @@ class CensusLnModel:
             df (:obj:`DataFrame`): Pandas DataFrame containing the last name
                 column.
             lname_col (str): Column name for the last name.
-            year (int): The year of Census model to be used. (2000 or 2010)
-                (default is 2010)
+            year (int): The year of Census model to be used. 2000 or 2010.
+                Default is 2010.
+            num_iter (int): Number of iterations do calculate the confidence interval. Default is 100.
+            conf_int (float): What confidence interval? Default is 1, which means just the point estimate.
 
         Returns:
             DataFrame: Pandas DataFrame with additional columns:
