@@ -23,7 +23,7 @@ def test_and_norm_df(df: pd.DataFrame, col: str) -> pd.DataFrame:
 
     """
     if col and (col not in df.columns):
-        raise Exception("The column doesn't exist in the dataframe.")
+        raise Exception(f"The column {col} doesn't exist in the dataframe.")
 
     df.dropna(subset=[col], inplace = True)
     if df.shape[0] == 0:

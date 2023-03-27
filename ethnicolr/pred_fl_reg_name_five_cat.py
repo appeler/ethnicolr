@@ -52,17 +52,15 @@ class FloridaRegNameFiveCatModel():
 
         """
 
-        if not column_exists(df, lname_col):
-            return df
-        if not column_exists(df, fname_col):
-            return df
+        if lname_col not in df.columns:
+            raise Exception(f"The {lname_col} column doesn't exist in the dataframe.")
+        if fname_col not in df.columns:
+            raise Exception(f"The {fname_col} column doesn't exist in the dataframe.")
 
-        df['__name'] = (df[lname_col].str.strip() + ' ' + df[fname_col].str.strip())
+        df['__name'] = (df[lname_col].str.strip()
+                        + ' ' + df[fname_col].str.strip()).str.title()
 
-        df.dropna(subset=['__name'], inplace = True)
-        if df.shape[0] == 0:
-            del df['__name']
-            return df
+        df = test_and_norm_df(df, '__name')
 
         year = '_2022' if year == 2022 else ''
         VOCAB = resource_filename(__name__, VOCABFN.format(year))
