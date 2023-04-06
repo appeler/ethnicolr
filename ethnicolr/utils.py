@@ -9,14 +9,6 @@ from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 from itertools import chain
 
-
-def isstring(s: str) -> bool:
-    # if we use Python 3
-    if sys.version_info[0] >= 3:
-        return isinstance(s, str)
-    # we use Python 2
-    return isinstance(s, basestring)
-
 def test_and_norm_df(df: pd.DataFrame, col: str) -> pd.DataFrame:
     """Handles cases like:
         - column doesn't exist, nukes missing rows
@@ -67,9 +59,6 @@ def find_ngrams(vocab, text: str, n) -> list:
     """
 
     wi = []
-
-    if not isstring(text):
-        return wi
 
     if type(n) is tuple:
         a = range_ngrams(text, n)
