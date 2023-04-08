@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import argparse
 import pandas as pd
 
 from pkg_resources import resource_filename
 
-from .utils import test_and_norm_df
+from .ethnicolr_class import EthnicolrModelClass
+from .utils import arg_parser
 
 CENSUS2000 = resource_filename(__name__, "data/census/census_2000.csv")
 CENSUS2010 = resource_filename(__name__, "data/census/census_2010.csv")
@@ -43,7 +43,7 @@ class CensusLnData():
 
         """
 
-        df = test_and_norm_df(df, lname_col)
+        df = EthnicolrModelClass.test_and_norm_df(df, lname_col)
         
         df['__last_name'] = df[lname_col].str.strip().str.upper()
 

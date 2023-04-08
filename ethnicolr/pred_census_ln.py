@@ -4,29 +4,18 @@
 import sys
 import argparse
 import pandas as pd
-import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import sequence
-from pkg_resources import resource_filename
 
-from .utils import test_and_norm_df, transform_and_pred, arg_parser
+from .ethnicolr_class import EthnicolrModelClass
+from .utils import arg_parser
 
-MODELFN = "models/census/lstm/census{0:d}_ln_lstm.h5"
-VOCABFN = "models/census/lstm/census{0:d}_ln_vocab.csv"
-RACEFN = "models/census/lstm/census{0:d}_race.csv"
 
-MODEL = resource_filename(__name__, MODELFN)
-VOCAB = resource_filename(__name__, VOCABFN)
-RACE = resource_filename(__name__, RACEFN)
+class CensusLnModel(EthnicolrModelClass):
+    MODELFN = "models/census/lstm/census{0:d}_ln_lstm.h5"
+    VOCABFN = "models/census/lstm/census{0:d}_ln_vocab.csv"
+    RACEFN = "models/census/lstm/census{0:d}_race.csv"
 
-NGRAMS = 2
-FEATURE_LEN = 20
-
-class CensusLnModel:
-    vocab = None
-    race = None
-    model = None
-    model_year = None
+    NGRAMS = 2
+    FEATURE_LEN = 20
 
     @classmethod
     def pred_census_ln(cls, 
@@ -53,26 +42,15 @@ class CensusLnModel:
                     probabilities.
 
         """
-
-        df = test_and_norm_df(df, lname_col)
-
-
-        VOCAB = resource_filename(__name__, VOCABFN.format(year))
-        MODEL = resource_filename(__name__, MODELFN.format(year))
-        RACE = resource_filename(__name__, RACEFN.format(year))
-
-        rdf = transform_and_pred(
-            df=df,
-            newnamecol=lname_col,
-            cls=cls,
-            VOCAB=VOCAB,
-            RACE=RACE,
-            MODEL=MODEL,
-            NGRAMS=NGRAMS,
-            maxlen=FEATURE_LEN,
-            num_iter=num_iter,
-            conf_int=conf_int,
-        )
+        rdf = cls.transform_and_pred(df=df,
+                                     newnamecol=lname_col,
+                                     vocab_fn=cls.VOCABFN.format(year),
+                                     race_fn=cls.RACEFN.format(year),
+                                     model_fn=cls.MODELFN.format(year),
+                                     ngrams=cls.NGRAMS,
+                                     maxlen=cls.FEATURE_LEN,
+                                     num_iter=num_iter,
+                                     conf_int=conf_int)
 
         return rdf
 

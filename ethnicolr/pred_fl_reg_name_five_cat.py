@@ -1,29 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import argparse
 import sys
-
-import numpy as np
 import pandas as pd
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import sequence
-from pkg_resources import resource_filename
 
-from .utils import test_and_norm_df, transform_and_pred, arg_parser
-
-MODELFN = "models/fl_voter_reg/lstm/fl_all_fullname_lstm_5_cat{0:s}.h5"
-VOCABFN = "models/fl_voter_reg/lstm/fl_all_fullname_vocab_5_cat{0:s}.csv"
-RACEFN = "models/fl_voter_reg/lstm/fl_name_five_cat_race{0:s}.csv"
-
-NGRAMS = 2
-FEATURE_LEN = 20
+from .ethnicolr_class import EthnicolrModelClass
+from .utils import arg_parser
 
 
-class FloridaRegNameFiveCatModel():
-    vocab = None
-    race = None
-    model = None
+class FloridaRegNameFiveCatModel(EthnicolrModelClass):
+    MODELFN = "models/fl_voter_reg/lstm/fl_all_fullname_lstm_5_cat{0:s}.h5"
+    VOCABFN = "models/fl_voter_reg/lstm/fl_all_fullname_vocab_5_cat{0:s}.csv"
+    RACEFN = "models/fl_voter_reg/lstm/fl_name_five_cat_race{0:s}.csv"
+
+    NGRAMS = 2
+    FEATURE_LEN = 20
 
     @classmethod
     def pred_fl_reg_name(cls, 
@@ -60,23 +51,17 @@ class FloridaRegNameFiveCatModel():
         df['__name'] = (df[lname_col].str.strip()
                         + ' ' + df[fname_col].str.strip()).str.title()
 
-        df = test_and_norm_df(df, '__name')
-
         year = '_2022' if year == 2022 else ''
-        VOCAB = resource_filename(__name__, VOCABFN.format(year))
-        MODEL = resource_filename(__name__, MODELFN.format(year))
-        RACE = resource_filename(__name__, RACEFN.format(year))
 
-        rdf = transform_and_pred(df=df,
-                                 newnamecol='__name',
-                                 cls=cls,
-                                 VOCAB=VOCAB,
-                                 RACE=RACE,
-                                 MODEL=MODEL,
-                                 NGRAMS=NGRAMS,
-                                 maxlen=FEATURE_LEN,
-                                 num_iter=num_iter,
-                                 conf_int=conf_int)
+        rdf = cls.transform_and_pred(df=df,
+                                     newnamecol='__name',
+                                     vocab_fn=cls.VOCABFN.format(year),
+                                     race_fn=cls.RACEFN.format(year),
+                                     model_fn=cls.MODELFN.format(year),
+                                     ngrams=cls.NGRAMS,
+                                     maxlen=cls.FEATURE_LEN,
+                                     num_iter=num_iter,
+                                     conf_int=conf_int)
 
         del rdf['__name']
         return rdf

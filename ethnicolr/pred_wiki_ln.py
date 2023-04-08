@@ -2,32 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import argparse
 import pandas as pd
-import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import sequence
 
-from pkg_resources import resource_filename
-
-from .utils import test_and_norm_df, transform_and_pred, arg_parser
-
-MODELFN = "models/wiki/lstm/wiki_ln_lstm.h5"
-VOCABFN = "models/wiki/lstm/wiki_ln_vocab.csv"
-RACEFN = "models/wiki/lstm/wiki_race.csv"
-
-MODEL = resource_filename(__name__, MODELFN)
-VOCAB = resource_filename(__name__, VOCABFN)
-RACE = resource_filename(__name__, RACEFN)
-
-NGRAMS = 2
-FEATURE_LEN = 20
+from .ethnicolr_class import EthnicolrModelClass
+from .utils import arg_parser
 
 
-class WikiLnModel():
-    vocab = None
-    race = None
-    model = None
+class WikiLnModel(EthnicolrModelClass):
+    MODELFN = "models/wiki/lstm/wiki_ln_lstm.h5"
+    VOCABFN = "models/wiki/lstm/wiki_ln_vocab.csv"
+    RACEFN = "models/wiki/lstm/wiki_race.csv"
+
+    NGRAMS = 2
+    FEATURE_LEN = 20
 
     @classmethod
     def pred_wiki_ln(cls, 
@@ -50,19 +37,15 @@ class WikiLnModel():
                 - Additional columns for probability of each classes.
 
         """
-
-        df = test_and_norm_df(df, lname_col)
-
-        rdf = transform_and_pred(df=df,
-                                 newnamecol=lname_col,
-                                 cls=cls,
-                                 VOCAB=VOCAB,
-                                 RACE=RACE,
-                                 MODEL=MODEL,
-                                 NGRAMS=NGRAMS,
-                                 maxlen=FEATURE_LEN,
-                                 num_iter=num_iter,
-                                 conf_int=conf_int)
+        rdf = cls.transform_and_pred(df=df,
+                                     newnamecol=lname_col,
+                                     vocab_fn=cls.VOCABFN,
+                                     race_fn=cls.RACEFN,
+                                     model_fn=cls.MODELFN,
+                                     ngrams=cls.NGRAMS,
+                                     maxlen=cls.FEATURE_LEN,
+                                     num_iter=num_iter,
+                                     conf_int=conf_int)
 
         return rdf
 

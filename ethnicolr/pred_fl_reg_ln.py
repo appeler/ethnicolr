@@ -1,33 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import argparse
 import sys
-
-import numpy as np
 import pandas as pd
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import sequence
-from pkg_resources import resource_filename
 
-from .utils import test_and_norm_df, transform_and_pred, arg_parser
-
-MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm.h5"
-VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab.csv"
-RACEFN = "models/fl_voter_reg/lstm/fl_ln_race.csv"
-
-MODEL = resource_filename(__name__, MODELFN)
-VOCAB = resource_filename(__name__, VOCABFN)
-RACE = resource_filename(__name__, RACEFN)
-
-NGRAMS = 2
-FEATURE_LEN = 20
+from .ethnicolr_class import EthnicolrModelClass
+from .utils import arg_parser
 
 
-class FloridaRegLnModel:
-    vocab = None
-    race = None
-    model = None
+class FloridaRegLnModel(EthnicolrModelClass):
+    MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm.h5"
+    VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab.csv"
+    RACEFN = "models/fl_voter_reg/lstm/fl_ln_race.csv"
+
+    NGRAMS = 2
+    FEATURE_LEN = 20
 
     @classmethod
     def pred_fl_reg_ln(cls, 
@@ -52,20 +39,15 @@ class FloridaRegLnModel:
 
         """
 
-        df = test_and_norm_df(df, lname_col)
-        
-        rdf = transform_and_pred(
-                df=df,
-                newnamecol=lname_col,
-                cls=cls,
-                VOCAB=VOCAB,
-                RACE=RACE,
-                MODEL=MODEL,
-                NGRAMS=NGRAMS,
-                maxlen=FEATURE_LEN,
-                num_iter=num_iter,
-                conf_int=conf_int
-            )
+        rdf = cls.transform_and_pred(df=df,
+                                     newnamecol=lname_col,
+                                     vocab_fn=cls.VOCABFN,
+                                     race_fn=cls.RACEFN,
+                                     model_fn=cls.MODELFN,
+                                     ngrams=cls.NGRAMS,
+                                     maxlen=cls.FEATURE_LEN,
+                                     num_iter=num_iter,
+                                     conf_int=conf_int)
 
         return rdf
 

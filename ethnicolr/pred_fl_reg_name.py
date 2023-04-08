@@ -2,32 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import argparse
 import pandas as pd
-import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import sequence
 
-from pkg_resources import resource_filename
-
-from .utils import test_and_norm_df, transform_and_pred, arg_parser
-
-MODELFN = "models/fl_voter_reg/lstm/fl_all_name_lstm.h5"
-VOCABFN = "models/fl_voter_reg/lstm/fl_all_name_vocab.csv"
-RACEFN = "models/fl_voter_reg/lstm/fl_name_race.csv"
-
-MODEL = resource_filename(__name__, MODELFN)
-VOCAB = resource_filename(__name__, VOCABFN)
-RACE = resource_filename(__name__, RACEFN)
-
-NGRAMS = 2
-FEATURE_LEN = 25
+from .ethnicolr_class import EthnicolrModelClass
+from .utils import arg_parser
 
 
-class FloridaRegNameModel():
-    vocab = None
-    race = None
-    model = None
+class FloridaRegNameModel(EthnicolrModelClass):
+    MODELFN = "models/fl_voter_reg/lstm/fl_all_name_lstm.h5"
+    VOCABFN = "models/fl_voter_reg/lstm/fl_all_name_vocab.csv"
+    RACEFN = "models/fl_voter_reg/lstm/fl_name_race.csv"
+
+    NGRAMS = 2
+    FEATURE_LEN = 25
 
     @classmethod
     def pred_fl_reg_name(cls, 
@@ -63,20 +50,16 @@ class FloridaRegNameModel():
         df['__name'] = (df[lname_col].str.strip()
                         + ' ' + df[fname_col].str.strip()).str.title()
 
-        df = test_and_norm_df(df, '__name')
-
-        rdf = transform_and_pred(df=df,
+        rdf = cls.transform_and_pred(df=df,
                                  newnamecol='__name',
-                                 cls=cls,
-                                 VOCAB=VOCAB,
-                                 RACE=RACE,
-                                 MODEL=MODEL,
-                                 NGRAMS=NGRAMS,
-                                 maxlen=FEATURE_LEN,
+                                 vocab_fn=cls.VOCABFN,
+                                 race_fn=cls.RACEFN,
+                                 model_fn=cls.MODELFN,
+                                 ngrams=cls.NGRAMS,
+                                 maxlen=cls.FEATURE_LEN,
                                  num_iter=num_iter,
                                  conf_int=conf_int)
         del rdf['__name']
-
         return rdf
 
 

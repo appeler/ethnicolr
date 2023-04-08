@@ -1,29 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import argparse
 import sys
-
-import numpy as np
 import pandas as pd
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import sequence
-from pkg_resources import resource_filename
 
-from .utils import test_and_norm_df, transform_and_pred, arg_parser
-
-MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_5_cat{0:s}.h5"
-VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab_5_cat{0:s}.csv"
-RACEFN = "models/fl_voter_reg/lstm/fl_ln_five_cat_race{0:s}.csv"
-
-NGRAMS = 2
-FEATURE_LEN = 20
+from .ethnicolr_class import EthnicolrModelClass
+from .utils import arg_parser
 
 
-class FloridaRegLnFiveCatModel():
-    vocab = None
-    race = None
-    model = None
+class FloridaRegLnFiveCatModel(EthnicolrModelClass):
+    MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_5_cat{0:s}.h5"
+    VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab_5_cat{0:s}.csv"
+    RACEFN = "models/fl_voter_reg/lstm/fl_ln_five_cat_race{0:s}.csv"
+
+    NGRAMS = 2
+    FEATURE_LEN = 20
 
     @classmethod
     def pred_fl_reg_ln(cls, 
@@ -51,23 +42,17 @@ class FloridaRegLnFiveCatModel():
 
         """
 
-        df = test_and_norm_df(df, lname_col)
-
         year = '_2022' if year == 2022 else ''
-        VOCAB = resource_filename(__name__, VOCABFN.format(year))
-        MODEL = resource_filename(__name__, MODELFN.format(year))
-        RACE = resource_filename(__name__, RACEFN.format(year))
 
-        rdf = transform_and_pred(df=df,
-                                 newnamecol=lname_col,
-                                 cls=cls,
-                                 VOCAB=VOCAB,
-                                 RACE=RACE,
-                                 MODEL=MODEL,
-                                 NGRAMS=NGRAMS,
-                                 maxlen=FEATURE_LEN,
-                                 num_iter=num_iter,
-                                 conf_int=conf_int)
+        rdf = cls.transform_and_pred(df=df,
+                                     newnamecol=lname_col,
+                                     vocab_fn=cls.VOCABFN.format(year),
+                                     race_fn=cls.RACEFN.format(year),
+                                     model_fn=cls.MODELFN.format(year),
+                                     ngrams=cls.NGRAMS,
+                                     maxlen=cls.FEATURE_LEN,
+                                     num_iter=num_iter,
+                                     conf_int=conf_int)
 
         return rdf
 

@@ -2,32 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import argparse
 import pandas as pd
-import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import sequence
 
-from pkg_resources import resource_filename
-
-from .utils import test_and_norm_df, transform_and_pred, arg_parser
-
-MODELFN = "models/nc_voter_reg/lstm/nc_voter_name_lstm_oversample.h5"
-VOCABFN = "models/nc_voter_reg/lstm/nc_voter_name_vocab_oversample.csv"
-RACEFN = "models/nc_voter_reg/lstm/nc_name_race.csv"
-
-MODEL = resource_filename(__name__, MODELFN)
-VOCAB = resource_filename(__name__, VOCABFN)
-RACE = resource_filename(__name__, RACEFN)
-
-NGRAMS = (2, 3)
-FEATURE_LEN = 25
+from .ethnicolr_class import EthnicolrModelClass
+from .utils import arg_parser
 
 
-class NCRegNameModel():
-    vocab = None
-    race = None
-    model = None
+class NCRegNameModel(EthnicolrModelClass):
+    MODELFN = "models/nc_voter_reg/lstm/nc_voter_name_lstm_oversample.h5"
+    VOCABFN = "models/nc_voter_reg/lstm/nc_voter_name_vocab_oversample.csv"
+    RACEFN = "models/nc_voter_reg/lstm/nc_name_race.csv"
+
+    NGRAMS = (2, 3)
+    FEATURE_LEN = 25
 
     @classmethod
     def pred_nc_reg_name(cls,
@@ -62,19 +49,17 @@ class NCRegNameModel():
         df['__name'] = (df[lname_col].str.strip()
                         + ' ' + df[fname_col].str.strip()).str.title()
 
-        df = test_and_norm_df(df, '__name')
+        rdf = cls.transform_and_pred(df=df,
+                                     newnamecol='__name',
+                                     vocab_fn=cls.VOCABFN,
+                                     race_fn=cls.RACEFN,
+                                     model_fn=cls.MODELFN,
+                                     ngrams=cls.NGRAMS,
+                                     maxlen=cls.FEATURE_LEN,
+                                     num_iter=num_iter,
+                                     conf_int=conf_int)
 
-        rdf = transform_and_pred(df=df,
-                                 newnamecol='__name',
-                                 cls=cls,
-                                 VOCAB=VOCAB,
-                                 RACE=RACE,
-                                 MODEL=MODEL,
-                                 NGRAMS=NGRAMS,
-                                 maxlen=FEATURE_LEN,
-                                 num_iter=num_iter,
-                                 conf_int=conf_int)
-
+        del rdf['__name']
         return rdf
 
 
