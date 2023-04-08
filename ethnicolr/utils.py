@@ -9,54 +9,23 @@ from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 from itertools import chain
 
-
-def isstring(s: str):
-    # if we use Python 3
-    if sys.version_info[0] >= 3:
-        return isinstance(s, str)
-    # we use Python 2
-    return isinstance(s, basestring)
-
-
-def column_exists(df: pd.DataFrame, col: str) -> bool:
-    """Check the column name exists in the DataFrame.
-
-    Args:
-        df (:obj:`DataFrame`): Pandas DataFrame.
-        col (str): Column name.
-
-    Returns:
-        bool: True if exists, False if not exists.
+def test_and_norm_df(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    """Handles cases like:
+        - column doesn't exist, nukes missing rows
 
     """
     if col and (col not in df.columns):
-        print("Column `{0!s}` not found in the input file"
-              .format(col))
-        return False
-    else:
-        return True
+        raise Exception(f"The column {col} doesn't exist in the dataframe.")
 
+    df.dropna(subset=[col], inplace = True)
+    if df.shape[0] == 0:
+        raise Exception("The name column has no non-NaN values.")
 
-def fixup_columns(cols: list) -> list:
-    """Replace index location column to name with `col` prefix
+    df.drop_duplicates(subset = [col], inplace = True)
 
-    Args:
-        cols (list): List of original columns
+    return df
 
-    Returns:
-        list: List of column names
-
-    """
-    out_cols = []
-    for col in cols:
-        if type(col) == int:
-            out_cols.append("col{:d}".format(col))
-        else:
-            out_cols.append(col)
-    return out_cols
-
-
-def n_grams(seq, n=1):
+def n_grams(seq, n:int=1):
     """Returns an itirator over the n-grams given a listTokens"""
     shiftToken = lambda i: (el for j,el in enumerate(seq) if j>=i)
     shiftedTokens = (shiftToken(i) for i in range(n))
@@ -73,7 +42,7 @@ def range_ngrams(listTokens, ngramRange=(1,2)):
     return chain(*(n_grams(listTokens, i) for i in range(*ngramRange)))
 
 
-def find_ngrams(vocab, text, n):
+def find_ngrams(vocab, text: str, n) -> list:
     """Find and return list of the index of n-grams in the vocabulary list.
 
     Generate the n-grams of the specific text, find them in the vocabulary list
@@ -90,9 +59,6 @@ def find_ngrams(vocab, text, n):
     """
 
     wi = []
-
-    if not isstring(text):
-        return wi
 
     if type(n) is tuple:
         a = range_ngrams(text, n)
@@ -183,3 +149,35 @@ def transform_and_pred(
     del df['rowindex']
 
     return final_df
+
+def arg_parser(argv, title: str, default_out: str, default_year: int, year_choices: list, first: bool = False):
+
+    parser = argparse.ArgumentParser(description=title)
+    parser.add_argument('input', default=None,
+                        help='Input file')
+    parser.add_argument('-o', '--output',
+                        default=default_out,
+                        help='Output file with prediction data')
+    if first:
+        parser.add_argument('-f', '--first', required=True,
+                        help='Column name for the column with the first name')
+    parser.add_argument('-l', '--last', required=True,
+                        help='Column name for the column with the last name')
+    parser.add_argument('-i', '--iter', default=100, type=int,
+                        help='Number of iterations to measure uncertainty')
+    parser.add_argument('-c', '--conf', default=1.0, type=float,
+                        help='Confidence interval of Predictions')
+    parser.add_argument(
+        "-y",
+        "--year",
+        type=int,
+        default=default_year,
+        choices=year_choices,
+        help=f"Year of data (default={default_year})",
+    )
+    args = parser.parse_args(argv)
+
+    print(args)
+
+    return(args)
+

@@ -10,7 +10,7 @@ from tensorflow.keras.preprocessing import sequence
 
 from pkg_resources import resource_filename
 
-from .utils import column_exists, fixup_columns, transform_and_pred
+from .utils import test_and_norm_df, transform_and_pred, arg_parser
 
 MODELFN = "models/nc_voter_reg/lstm/nc_voter_name_lstm_oversample.h5"
 VOCABFN = "models/nc_voter_reg/lstm/nc_voter_name_vocab_oversample.csv"
@@ -30,21 +30,22 @@ class NCRegNameModel():
     model = None
 
     @classmethod
-    def pred_nc_reg_name(cls, df: pd.DataFrame, lname_col: str, fname_col: str, num_iter: int=100,
+    def pred_nc_reg_name(cls,
+                         df: pd.DataFrame,
+                         lname_col: str, 
+                         fname_col: str, 
+                         num_iter: int=100,
                          conf_int: float=1.0) -> pd.DataFrame:
-        """Predict the race+ethnicity by the full name using
+        """Predict the race+ethnicity by the full name using the
         North Carolina 12 category voter model.
 
-        Using the NC voter full name model to predict the race/ethnicity of
-        the input DataFrame.
-
         Args:
-            df (:obj:`DataFrame`): Pandas DataFrame containing the last name
-                and first name column.
-            lname_col (str or int): Column's name or location of the last name
-                in DataFrame.
-            fname_col (str or int): Column's name or location of the first name
-                in DataFrame.
+            df (:obj:`DataFrame`): Pandas DataFrame containing the first and last name
+                columns.
+            lname_col (str): Column name for the last name.
+            fname_col (str or int): Column name for the first name.
+            num_iter (int): Number of iterations do calculate the confidence interval. Default is 100.
+            conf_int (float): What confidence interval? Default is 1, which means just the point estimate.            
 
         Returns:
             DataFrame: Pandas DataFrame with additional columns:
@@ -54,19 +55,14 @@ class NCRegNameModel():
         """
 
         if lname_col not in df.columns:
-            print("No column `{0!s}` in the DataFrame".format(lname_col))
-            return df
+            raise Exception(f"The {lname_col} column doesn't exist in the dataframe.")
         if fname_col not in df.columns:
-            print("No column `{0!s}` in the DataFrame".format(fname_col))
-            return df
+            raise Exception(f"The {fname_col} column doesn't exist in the dataframe.")
 
         df['__name'] = (df[lname_col].str.strip()
                         + ' ' + df[fname_col].str.strip()).str.title()
 
-        df.dropna(subset=['__name'])
-        if df.shape[0] == 0:
-            del df['__name']
-            return df
+        df = test_and_norm_df(df, '__name')
 
         rdf = transform_and_pred(df=df,
                                  newnamecol='__name',
@@ -85,48 +81,25 @@ class NCRegNameModel():
 pred_nc_reg_name = NCRegNameModel.pred_nc_reg_name
 
 
-def main(argv=sys.argv[1:]):
-    title = ('Predict Race/Ethnicity by name using NC 12 category'
-             ' voter registration model')
-    parser = argparse.ArgumentParser(description=title)
-    parser.add_argument('input', default=None,
-                        help='Input file')
-    parser.add_argument('-o', '--output', default='nc-pred-name-output.csv',
-                        help='Output file with prediction data')
-    parser.add_argument('-f', '--first', required=True,
-                        help='Name or index location of column contains '
-                             'the first name')
-    parser.add_argument('-l', '--last', required=True,
-                        help='Name or index location of column contains '
-                             'the last name')
-    parser.add_argument('-i', '--iter', default=100, type=int,
-                        help='Number of iterations to measure uncertainty')
-    parser.add_argument('-c', '--conf', default=1.0, type=float,
-                        help='Confidence interval of Predictions')
+def main(argv=sys.argv[1:]) -> None:
+    args = arg_parser(argv, 
+                title = "Predict Race/Ethnicity by name using NC 12 category voter registration model", 
+                default_out = "fl-pred-name-output.csv", 
+                default_year = 2017, 
+                year_choices = [2017],
+                first = True)
 
-    args = parser.parse_args(argv)
+    df = pd.read_csv(args.input)
+   
+    rdf = pred_nc_reg_name(df = df, 
+                           lname_col = args.last, 
+                           fname_col = args.first, 
+                           num_iter = args.iter, 
+                           conf_int = args.conf)
 
-    print(args)
 
-    if not args.last.isdigit() and not args.first.isdigit():
-        df = pd.read_csv(args.input)
-    else:
-        df = pd.read_csv(args.input, header=None)
-        args.last = int(args.last)
-        args.first = int(args.first)
-
-    if not column_exists(df, args.last):
-        return -1
-    if not column_exists(df, args.first):
-        return -1
-
-    rdf = pred_nc_reg_name(df, args.last, args.first, args.iter, args.conf)
-
-    print("Saving output to file: `{0:s}`".format(args.output))
-    rdf.columns = fixup_columns(rdf.columns)
+    print(f"Saving output to file: `{args.output}`")
     rdf.to_csv(args.output, index=False)
-
-    return 0
 
 
 if __name__ == "__main__":
