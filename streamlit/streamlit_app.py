@@ -10,7 +10,7 @@ st.title("Ethnicolr")
 # Define your sidebar options
 sidebar_options = {
     'Append Census Data to Last Name': census_ln,
-    'Florida VR Last Name Model': 
+    'Florida VR Last Name Model': pred_census_ln
 }
 
 def app():
