@@ -80,18 +80,11 @@ To see the available command line options for any function, please type in
                            Year of Census data (default=2000)
      -o OUTPUT, --output OUTPUT
                            Output file with Census data columns
-     -l LAST, --last LAST  Name or index location of column contains the last
-                           name
+     -l LAST, --last LAST  Name of column containing the last name
 
 
 Examples
 ----------
-
-To append census data from 2010 to a `file without column headers <ethnicolr/data/input-without-header.csv>`__ and the first column carries the last name, use ``-l 0``
-
-::
-
-   census_ln -y 2010 -o output-census2010.csv -l 0 input-without-header.csv
 
 To append census data from 2010 to a `file with column header in the first row <ethnicolr/data/input-with-header.csv>`__, specify the column name carrying last names using the ``-l`` option, keeping the rest the same:
 
@@ -100,14 +93,7 @@ To append census data from 2010 to a `file with column header in the first row <
    census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv   
 
 
-To predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__, if the input file doesn't have any column headers, you must using ``-l`` and ``-f`` to specify the index of column carrying the last name and first name respectively (first column has index 0).
-
-::
-
-   pred_wiki_name -o output-wiki-pred-race.csv -l 0 -f 1 input-without-header.csv
-
-
-And to predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__ for a file with column headers, you can specify the column name of last name and first name by using ``-l`` and ``-f`` flags respectively.
+To predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__, specify the column name of last name and first name by using ``-l`` and ``-f`` flags respectively.
 
 ::
 
@@ -121,7 +107,7 @@ We expose 6 functions, each of which either take a pandas DataFrame or a
 CSV. If the CSV doesn't have a header, we make some assumptions about
 where the data is:
 
-- **census\_ln(df, namecol, year=2000)**
+- **census\_ln(df, lname_col, year=2000)**
 
   -  What it does:
 
@@ -135,7 +121,7 @@ where the data is:
  +============+==========================================================================================================================+
  |            | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred             |
  +------------+--------------------------------------------------------------------------------------------------------------------------+
- |            | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name        |
+ |            | **lname_col** : *{string, list, int}* string or list of the name or location of the column containing the last name        |
  +------------+--------------------------------------------------------------------------------------------------------------------------+
  |            | **Year** : *{2000, 2010}, default=2000* year of census to use                                                            |
  +------------+--------------------------------------------------------------------------------------------------------------------------+
@@ -171,7 +157,7 @@ where the data is:
       2  jackson    41.93    53.02   0.31    1.04      2.18        1.53
 
 
--  **pred\_census\_ln(df, namecol, year=2000, num\_iter=100, conf\_int=1.0)**
+-  **pred\_census\_ln(df, lname_col, year=2000, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -224,7 +210,7 @@ where the data is:
          2  jackson  black  0.002797  0.528193  0.014605  0.454405
 
 
--  **pred\_wiki\_ln( df, namecol, num\_iter=100, conf\_int=1.0)**
+-  **pred\_wiki\_ln( df, lname_col, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -239,7 +225,7 @@ where the data is:
    +==============+=====================================================================================================================+
    |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred        |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
+   |              | **lname_col** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
@@ -362,7 +348,7 @@ where the data is:
       Name: 0, dtype: object
 
 
--  **pred\_fl\_reg\_ln(df, namecol, num\_iter=100, conf\_int=1.0)**
+-  **pred\_fl\_reg\_ln(df, lname_col, num\_iter=100, conf\_int=1.0)**
 
    -  What it does?:
 
@@ -376,7 +362,7 @@ where the data is:
    +==============+=====================================================================================================================+
    |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred        |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
+   |              | **lname_col** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
@@ -437,7 +423,7 @@ where the data is:
       Name: 0, dtype: object
 
 
--  **pred\_fl\_reg\_name(df, namecol, num\_iter=100, conf\_int=1.0)**
+-  **pred\_fl\_reg\_name(df, lname_col, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -514,7 +500,7 @@ where the data is:
    +==============+=====================================================================================================================+
    |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred        |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
+   |              | **lname_col** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
