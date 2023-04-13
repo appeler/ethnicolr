@@ -8,6 +8,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 from pkg_resources import resource_filename
 from itertools import chain
+from typing import Tuple
 
 def test_and_norm_df(df: pd.DataFrame, col: str) -> pd.DataFrame:
     """Handles cases like:
@@ -33,7 +34,7 @@ def n_grams(seq, n:int=1):
     return tupleNGrams
 
 
-def range_ngrams(listTokens, ngramRange=(1,2)):
+def range_ngrams(listTokens: list, ngramRange:Tuple=(1,2)):
     """Returns an itirator over all n-grams for n in range(ngramRange)
        given a listTokens.
     """
