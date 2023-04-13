@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import ethnicolr
 from ethnicolr import census_ln
+import base64
 
 # Set app title
 st.title("Ethnicolr")
