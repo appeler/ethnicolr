@@ -4,8 +4,6 @@ import ethnicolr
 from ethnicolr import census_ln, pred_census_ln
 import base64
 
-# Set app title
-st.title("Ethnicolr")
 
 # Define your sidebar options
 sidebar_options = {
@@ -21,7 +19,7 @@ def download_file(df):
 
 def app():
     # Set app title
-    st.title("My Streamlit App")
+    st.title("Ethnicolr")
 
     # Set up the sidebar
     st.sidebar.title('Select Function')
