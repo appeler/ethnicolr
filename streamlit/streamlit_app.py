@@ -13,6 +13,12 @@ sidebar_options = {
     'Florida VR Last Name Model': pred_census_ln
 }
 
+def download_file(df):
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="results.csv">Download results</a>'
+    st.markdown(href, unsafe_allow_html=True)
+
 def app():
     # Set app title
     st.title("My Streamlit App")
@@ -37,18 +43,18 @@ def app():
         function = sidebar_options[selected_function]
         if st.button('Run'):
             transformed_df = function(df, namecol=lname_col, year = year)
+            st.dataframe(transformed_df)
+            download_file(transformed_df)
+
     elif selected_function == "Florida VR Last Name Model":
         lname_col = st.selectbox("Select column with last name", df.columns)
         function = sidebar_options[selected_function]
         if st.button('Run'):
             transformed_df = function(df, namecol=lname_col)
-    
-    st.dataframe(transformed_df)
+            st.dataframe(transformed_df)
+            download_file(transformed_df)
 
-    csv = transformed_df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="results.csv">Download results</a>'
-    st.markdown(href, unsafe_allow_html=True)
+    
 
 
 # Run the app
