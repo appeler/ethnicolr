@@ -35,11 +35,13 @@ def app():
         lname_col = st.selectbox("Select column with last name", df.columns)
         year = st.selectbox("Select a year", [2000, 2010])
         function = sidebar_options[selected_function]
-        transformed_df = function(df, namecol=lname_col, year = year)
+        if st.button('Run'):
+            transformed_df = function(df, namecol=lname_col, year = year)
     elif selected_function == "Florida VR Last Name Model":
         lname_col = st.selectbox("Select column with last name", df.columns)
         function = sidebar_options[selected_function]
-        transformed_df = function(df, namecol=lname_col)
+        if st.button('Run'):
+            transformed_df = function(df, namecol=lname_col)
     
     st.dataframe(transformed_df)
 
