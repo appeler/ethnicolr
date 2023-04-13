@@ -16,7 +16,7 @@ def app():
     uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
 
     # Load data
-    if file is not None:
+    if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         st.write("Data loaded successfully!")
     else:
