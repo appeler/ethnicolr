@@ -27,7 +27,7 @@ def app():
 
     if st.button("Append Electoral Roll Data"):
     # Use the package to transform the DataFrame
-        transformed_df = census_ln(df, lname_col=lname_col)
+        transformed_df = census_ln(df, namecol=lname_col)
         st.dataframe(transformed_df)
 
         csv = transformed_df.to_csv(index=False)
