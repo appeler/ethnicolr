@@ -19,7 +19,11 @@ def download_file(df):
 
 def app():
     # Set app title
-    st.title("Ethnicolr")
+    st.title("ethnicolr: Predict Race and Ethnicity From Name")
+
+    # Generic info.
+    st.write('We exploit the US census data, the Florida voting registration data, and the Wikipedia data collected by Skiena and colleagues, to predict race and ethnicity based on first and last name or just the last name.')
+    st.write('[Github](https://github.com/appeler/ethnicolr)')
 
     # Set up the sidebar
     st.sidebar.title('Select Function')
