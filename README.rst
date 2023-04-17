@@ -19,24 +19,14 @@ census data we use in the model (the raw data has additional categories of
 Native Americans and Bi-racial) merely categorizes between Non-Hispanic Whites, 
 Non-Hispanic Blacks, Asians, and Hispanics.
 
-DIME Race
+Streamlit
 -----------
-Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__ 
-is posted `here <http://dx.doi.org/10.7910/DVN/M5K7VR>`__ The underlying python scripts 
-are posted `here <https://github.com/appeler/dime_race>`__ 
+Streamlit App: https://appeler-ethnicolr-streamlitstreamlit-app-qek30c.streamlit.app/
 
 Caveats and Notes
 -----------------------
 
-If you picked a random individual with last name 'Smith' from the US in 2010  
-and asked us to guess this person's race (measured as crudely as by the census),
-the best guess would be based on what is available from the aggregated Census file. 
-It is the Bayes Optimal Solution. So what good are last name only predictive models
-for? A few things---if you want to impute ethnicity at a more granular level,
-guess the race of people in different years (than when the census was conducted 
-if some assumptions hold), guess the race of people in different countries (again if some 
-assumptions hold), when names are slightly different (again with some assumptions), etc. 
-The big benefit comes from when both the first name and last name is known.
+If you picked a person at random with the last name 'Smith' in the US in 2010 and asked us to guess this person's race (as measured by the census), the best guess would be based on what is available from the aggregated Census file. It is the Bayes Optimal Solution. So what good are last-name-only predictive models for? A few things---if you want to impute race and ethnicity for last names that are not in the census file, infer the race and ethnicity in different years than when the census was conducted (if some assumptions hold), infer the race of people in different countries (if some assumptions hold), etc. The biggest benefit comes in cases where both the first name and last name are known.
 
 Install
 ----------
@@ -55,8 +45,9 @@ Or
    conda install -c soodoku ethnicolr 
 
 Notes:
- - The models are run and verified on TensorFlow 2.x using Python 3.7 and 3.8 and lower will work. TensorFlow 1.x has been deprecated.
- - If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
+
+ - The models are run and verified on TensorFlow 2.x using Python 3.7 and 3.8.
+ - If you install on Windows, Theano installation typically needs admin. privileges on the shell.
 
 General API
 ------------------
@@ -80,18 +71,11 @@ To see the available command line options for any function, please type in
                            Year of Census data (default=2000)
      -o OUTPUT, --output OUTPUT
                            Output file with Census data columns
-     -l LAST, --last LAST  Name or index location of column contains the last
-                           name
+     -l LAST, --last LAST  Name of the column containing the last name
 
 
 Examples
 ----------
-
-To append census data from 2010 to a `file without column headers <ethnicolr/data/input-without-header.csv>`__ and the first column carries the last name, use ``-l 0``
-
-::
-
-   census_ln -y 2010 -o output-census2010.csv -l 0 input-without-header.csv
 
 To append census data from 2010 to a `file with column header in the first row <ethnicolr/data/input-with-header.csv>`__, specify the column name carrying last names using the ``-l`` option, keeping the rest the same:
 
@@ -100,14 +84,7 @@ To append census data from 2010 to a `file with column header in the first row <
    census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv   
 
 
-To predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__, if the input file doesn't have any column headers, you must using ``-l`` and ``-f`` to specify the index of column carrying the last name and first name respectively (first column has index 0).
-
-::
-
-   pred_wiki_name -o output-wiki-pred-race.csv -l 0 -f 1 input-without-header.csv
-
-
-And to predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__ for a file with column headers, you can specify the column name of last name and first name by using ``-l`` and ``-f`` flags respectively.
+To predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__, specify the column name of last name and first name by using ``-l`` and ``-f`` flags respectively.
 
 ::
 
@@ -118,10 +95,9 @@ Functions
 ----------
 
 We expose 6 functions, each of which either take a pandas DataFrame or a
-CSV. If the CSV doesn't have a header, we make some assumptions about
-where the data is:
+CSV.
 
-- **census\_ln(df, namecol, year=2000)**
+- **census\_ln(df, lname_col, year=2000)**
 
   -  What it does:
 
@@ -129,13 +105,12 @@ where the data is:
      - For names in the `census file <ethnicolr/data/census>`__, it appends 
        relevant data of what probability the name provided is of a certain race/ethnicity
 
-
  +------------+--------------------------------------------------------------------------------------------------------------------------+
  | Parameters |                                                                                                                          |
  +============+==========================================================================================================================+
  |            | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred             |
  +------------+--------------------------------------------------------------------------------------------------------------------------+
- |            | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name        |
+ |            | **lname_col** : *{string}* name of the column containing the last name        |
  +------------+--------------------------------------------------------------------------------------------------------------------------+
  |            | **Year** : *{2000, 2010}, default=2000* year of census to use                                                            |
  +------------+--------------------------------------------------------------------------------------------------------------------------+
@@ -171,7 +146,7 @@ where the data is:
       2  jackson    41.93    53.02   0.31    1.04      2.18        1.53
 
 
--  **pred\_census\_ln(df, namecol, year=2000, num\_iter=100, conf\_int=1.0)**
+-  **pred\_census\_ln(df, lname_col, year=2000, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -187,7 +162,7 @@ where the data is:
    +==============+=====================================================================================================================+
    |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred        |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
+   |              | **namecol** : *{string}* name of the column containing the last name   |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
    |              | **year** : *{2000, 2010}, default=2000* year of census to use                                                       |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
@@ -224,7 +199,7 @@ where the data is:
          2  jackson  black  0.002797  0.528193  0.014605  0.454405
 
 
--  **pred\_wiki\_ln( df, namecol, num\_iter=100, conf\_int=1.0)**
+-  **pred\_wiki\_ln( df, lname_col, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -239,7 +214,7 @@ where the data is:
    +==============+=====================================================================================================================+
    |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred        |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
+   |              | **lname_col** : *{string}* name of the column containing the last name   |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
    |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
@@ -316,11 +291,11 @@ where the data is:
    +==============+============================================================================================================================================================================================================================================================================================================================+
    |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred                                                                                                                                                                                                               |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **namecol** : *{string, list}* string or list of the name or location of the column containing the first name, last name, middle name, and suffix, if there. The first name and last name columns are required. If no middle name of suffix columns are there, it is assumed that there are no middle names or suffixes.   |
+   |              | **namecol** : *{string}* name of the column containing the name.   |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
+   |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty of predictions                                                                                                                                                                                                                                  |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                                                                                                                                                                                                                                |
+   |              | **conf\_int** : *float, default=1.0* confidence interval                                                                                                                                                                                                                                                |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -362,7 +337,7 @@ where the data is:
       Name: 0, dtype: object
 
 
--  **pred\_fl\_reg\_ln(df, namecol, num\_iter=100, conf\_int=1.0)**
+-  **pred\_fl\_reg\_ln(df, lname_col, num\_iter=100, conf\_int=1.0)**
 
    -  What it does?:
 
@@ -376,11 +351,11 @@ where the data is:
    +==============+=====================================================================================================================+
    |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred        |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
+   |              | **lname_col** : *{string}* name of the column containing the last name   |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
+   |              | **num\_iter** : *int, default=100* number of iterations to calculate the uncertainty                           |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                         |
+   |              | **conf\_int** : *float, default=1.0* confidence interval                                       |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
 
 
@@ -437,7 +412,7 @@ where the data is:
       Name: 0, dtype: object
 
 
--  **pred\_fl\_reg\_name(df, namecol, num\_iter=100, conf\_int=1.0)**
+-  **pred\_fl\_reg\_name(df, lname_col, num\_iter=100, conf\_int=1.0)**
 
    -  What it does:
 
@@ -451,9 +426,9 @@ where the data is:
    +==============+============================================================================================================================================================================================================================================================================================================================+
    |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred                                                                                                                                                                                                               |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **namecol** : *{string, list}* string or list of the name or location of the column containing the first name, last name, middle name, and suffix, if there. The first name and last name columns are required. If no middle name of suffix columns are there, it is assumed that there are no middle names or suffixes.   |
+   |              | **namecol** : *{list}* name of the column containing the name.   |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
+   |              | **num\_iter** : *int, default=100* number of iterations to calculate the uncertainty                                                                                                                                                                                                                                  |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
    |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                                                                                                                                                                                                                                |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -514,11 +489,11 @@ where the data is:
    +==============+=====================================================================================================================+
    |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred        |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **namecol** : *{string, list, int}* string or list of the name or location of the column containing the last name   |
+   |              | **lname_col** : *{string, list, int}* name of location of the column containing the last name   |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                           |
+   |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty                           |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                         |
+   |              | **conf\_int** : *float, default=1.0* confidence interval                                         |
    +--------------+---------------------------------------------------------------------------------------------------------------------+
 
 
@@ -583,11 +558,11 @@ where the data is:
    +==============+============================================================================================================================================================================================================================================================================================================================+
    |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred                                                                                                                                                                                                               |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **namecol** : *{string, list}* string or list of the name or location of the column containing the first name, last name, middle name, and suffix, if there. The first name and last name columns are required. If no middle name of suffix columns are there, it is assumed that there are no middle names or suffixes.   |
+   |              | **namecol** : *{string, list}* string or list of the name or location of the column containing the first name, last name.  |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
+   |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty                                                                                                                                                                                                                                  |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                                                                                                                                                                                                                                |
+   |              | **conf\_int** : *float, default=1.0* confidence interval                                                                                                                                                                                                                                                |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -652,11 +627,11 @@ where the data is:
    +==============+============================================================================================================================================================================================================================================================================================================================+
    |              | **df** : *{DataFrame, csv}* Pandas dataframe of CSV file contains the names of the individual to be inferred                                                                                                                                                                                                               |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **namecol** : *{string, list}* string or list of the name or location of the column containing the first name, last name, middle name, and suffix, if there. The first name and last name columns are required. If no middle name of suffix columns are there, it is assumed that there are no middle names or suffixes.   |
+   |              | **namecol** : *{string, list}* string or list of the name or location of the column containing the first name, last name.   |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty in model                                                                                                                                                                                                                                  |
+   |              | **num\_iter** : *int, default=100* number of iterations to calculate uncertainty                                                                                                                                                                                                                                  |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-   |              | **conf\_int** : *float, default=1.0* confidence interval in predicted class                                                                                                                                                                                                                                                |
+   |              | **conf\_int** : *float, default=1.0* confidence interval                                                                                                                                                                                                                                                |
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
