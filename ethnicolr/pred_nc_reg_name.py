@@ -86,6 +86,7 @@ def main(argv=sys.argv[1:]) -> None:
     print(f"Saving output to file: `{args.output}`")
     rdf.to_csv(args.output, index=False)
 
+    return 0
 
 if __name__ == "__main__":
     sys.exit(main())
