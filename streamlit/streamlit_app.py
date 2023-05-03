@@ -8,7 +8,8 @@ import base64
 # Define your sidebar options
 sidebar_options = {
     'Append Census Data to Last Name': census_ln,
-    'Florida VR Last Name Model': pred_census_ln
+    'Florida VR Last Name Model': pred_fl_reg_ln,
+    'Florida VR Full Name Model': pred_fl_reg_name
 }
 
 def download_file(df):
@@ -22,12 +23,14 @@ def app():
     st.title("ethnicolr: Predict Race and Ethnicity From Name")
 
     # Generic info.
-    st.write('We exploit the US census data, the Florida voting registration data, and the Wikipedia data collected by Skiena and colleagues, to predict race and ethnicity based on first and last name or just the last name.')
-    st.write('[Github](https://github.com/appeler/ethnicolr)')
+    st.write('We use the US census data, the Florida voting registration data, \
+              and the Wikipedia data collected by Skiena and colleagues, to \
+              predict race and ethnicity based on first and last name or just the last name.')
+    st.write('[Github Repository](https://github.com/appeler/ethnicolr)')
 
     # Set up the sidebar
     st.sidebar.title('Select Function')
-    selected_function = st.sidebar.selectbox('', list(sidebar_options.keys()))
+    selected_function = st.sidebar.selectbox('Select a function', list(sidebar_options.keys()))
 
     # Upload CSV file
     uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
