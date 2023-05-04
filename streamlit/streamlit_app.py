@@ -54,6 +54,8 @@ def app():
     2. Fight biases
     3. Prevent biases
 
+    Here are a couple of papers: 1. [Diversity of news recommendations](https://dl.acm.org/doi/abs/10.1145/3406522.3446019) 2. [Diversity Innovation Paradox](https://www.pnas.org/doi/abs/10.1073/pnas.1915378117) that have used our software
+
     #### Usage
 
     Enter a list of (last) names or upload a CSV with (first and) last name columns. Here's a [sample CSV](https://raw.githubusercontent.com/appeler/ethnicolr/master/ethnicolr/data/input-with-header.csv)
