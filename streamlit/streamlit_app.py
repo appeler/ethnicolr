@@ -70,7 +70,7 @@ def app():
             transformed_df = function(df, lname_col=lname_col, year = year)
             group_cols = ['pctwhite', 'pctblack', 'pctapi', 'pctaian', 'pct2prace']
             transformed_df[group_cols] = transformed_df[group_cols].astype(float)
-            transformed_df["race"] = transformed_df[group_cols].idxmax(axis=0)
+            transformed_df["race"] = transformed_df[group_cols].idxmax(axis=1)
             st.dataframe(transformed_df)
             download_file(transformed_df)
             a_plot(transformed_df, "race")
