@@ -38,7 +38,7 @@ def app():
             input_list = st.text_input("Enter a list of last names (comma-separated)")
             if input_list:
                 input_list = input_list.split(",")
-                input_list = [float(x.strip()) for x in input_list]
+                input_list = [x.strip() for x in input_list]
                 df = pd.DataFrame(list_name, columns=['lname_col'])
         elif input_type == "CSV":
             uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
