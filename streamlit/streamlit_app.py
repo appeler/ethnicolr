@@ -118,7 +118,9 @@ def app():
             if uploaded_file is not None:
                 df = pd.read_csv(uploaded_file)
                 st.write("Data loaded successfully!")
-                namecol = st.selectbox("Select column with the name", df.columns)
+                fname_col = st.selectbox("Select column with the first names", df.columns)
+                lname_col = st.selectbox("Select column with the last names", df.columns)
+
         function = sidebar_options[selected_function]
         if st.button('Run'):
             transformed_df = function(df, lname_col=lname_col, fname_col = fname_col)
