@@ -83,8 +83,15 @@ def app():
             if input_list:
                 input_list = input_list.split(",")
                 list_name = [x.strip() for x in input_list]
-                df = pd.DataFrame(list_name, columns=['namecol'])
-                namecol = 'namecol'
+                name_dicts = []
+                for name in list_name:
+                    first_name, last_name = name.split(" ")
+                    name_dicts.append({'fname_col': first_name, "lname_col": last_name})
+
+                # Convert the list of dictionaries into a Pandas DataFrame
+                df = pd.DataFrame(name_dicts)
+                fname_col = 'fname_col'
+                lname_col = 'lname_col'
         elif input_type == "CSV":
             uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
             if uploaded_file is not None:
@@ -93,7 +100,7 @@ def app():
                 namecol = st.selectbox("Select column with the name", df.columns)
         function = sidebar_options[selected_function]
         if st.button('Run'):
-            transformed_df = function(df, namecol=namecol)
+            transformed_df = function(df, lname_col=lname_col, fname_col = fname_col)
             st.dataframe(transformed_df)
             download_file(transformed_df)
 
