@@ -69,7 +69,7 @@ def app():
         if st.button('Run'):
             transformed_df = function(df, lname_col=lname_col, year = year)
             group_cols = ['pctwhite', 'pctblack', 'pctapi', 'pctaian', 'pct2prace']
-            df[group_cols] = transformed_df[group_cols].astype(float)
+            transformed_df[group_cols] = transformed_df[group_cols].astype(float)
             max_col = transformed_df[group_cols].idxmax(axis=1)
             # Add a new column to the DataFrame with the grouping variable
             transformed_df["race"] = pd.Categorical(max_col, categories=group_cols)
