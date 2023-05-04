@@ -45,7 +45,6 @@ def app():
     st.write('[Github Repository](https://github.com/appeler/ethnicolr)')
 
     # Set up the sidebar
-    st.sidebar.title('Select Function')
     selected_function = st.sidebar.selectbox(label = 'Select a function', options = list(sidebar_options.keys()))
 
     if selected_function == "Append Census Data to Last Name":
