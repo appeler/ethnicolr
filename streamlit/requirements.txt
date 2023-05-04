@@ -7,5 +7,5 @@ tqdm
 nltk
 tensorflow>=2.7.2,<3
 setuptools>=65.5.1
-ethnicolr
+ethnicolr==0.9.6
 streamlit
