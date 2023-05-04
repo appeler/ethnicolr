@@ -12,6 +12,9 @@ sidebar_options = {
     'Florida VR Full Name Model': pred_fl_reg_name
 }
 
+default_last_name_list = ["garcia, hernandez, smith, chen, washington, jackson, brown"]
+default_name_list = ["john smith, john wayne, lili peng, miguel garcia, lakisha johnson"]
+
 def download_file(df):
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
@@ -42,6 +45,8 @@ def app():
     st.write('We use the US census data, the Florida voting registration data, \
               and the Wikipedia data collected by Skiena and colleagues, to \
               predict race and ethnicity based on first and last name or just the last name.')
+
+    st.write("Either enter a list of (last) names or upload a CSV with (first and) last name columns.")
     st.write('[Github Repository](https://github.com/appeler/ethnicolr)')
 
     # Set up the sidebar
@@ -50,7 +55,7 @@ def app():
     if selected_function == "Append Census Data to Last Name":
         input_type = st.radio("Input type:", ("List", "CSV"))
         if input_type == "List":
-            input_list = st.text_input("Enter a list of last names (comma-separated)")
+            input_list = st.text_input("Enter a list of last names (comma-separated):", value=", ".join(default_last_name_list))
             year = st.selectbox(label = "Select a year", options = [2000, 2010])
             if input_list:
                 input_list = input_list.split(",")
@@ -69,15 +74,15 @@ def app():
             transformed_df = function(df, lname_col=lname_col, year = year)
             group_cols = ['pctwhite', 'pctblack', 'pctapi', 'pctaian', 'pct2prace', 'pcthispanic']
             transformed_df[group_cols] = transformed_df[group_cols].astype(float)
-            transformed_df["race"] = transformed_df[group_cols].idxmax(axis=1)
+            transformed_df["modal_race"] = transformed_df[group_cols].idxmax(axis=1).str[3:]
             st.dataframe(transformed_df)
             download_file(transformed_df)
-            a_plot(transformed_df, "race")
+            a_plot(transformed_df, "modal_race")
     
     elif selected_function == "Florida VR Last Name Model":
         input_type = st.radio("Input type:", ("List", "CSV"))
         if input_type == "List":
-            input_list = st.text_input("Enter a list of last names (comma-separated)")
+            input_list = st.text_input("Enter a list of last names (comma-separated):", value=", ".join(default_last_name_list))
             if input_list:
                 input_list = input_list.split(",")
                 list_name = [x.strip() for x in input_list]
@@ -99,7 +104,7 @@ def app():
     elif selected_function == "Florida VR Full Name Model":
         input_type = st.radio("Input type:", ("List", "CSV"))
         if input_type == "List":
-            input_list = st.text_input("Enter a list of names (comma-separated)")
+            input_list = st.text_input("Enter a list of last names (comma-separated):", value=", ".join(default_name_list))
             if input_list:
                 input_list = input_list.split(",")
                 list_name = [x.strip() for x in input_list]
