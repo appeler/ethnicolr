@@ -38,7 +38,7 @@ def app():
             input_list = st.text_input("Enter a list of last names (comma-separated)")
             if input_list:
                 input_list = input_list.split(",")
-                input_list = [x.strip() for x in input_list]
+                list_name = [x.strip() for x in input_list]
                 df = pd.DataFrame(list_name, columns=['lname_col'])
                 lname_col = 'lname_col'
                 year = st.selectbox("Select a year", [2000, 2010])
