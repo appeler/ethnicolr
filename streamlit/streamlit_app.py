@@ -46,7 +46,7 @@ def app():
               and the Wikipedia data collected by Skiena and colleagues, to \
               predict race and ethnicity based on first and last name or just the last name.')
 
-    st.write("Either enter a list of (last) names or upload a CSV with (first and) last name columns.")
+    st.write("Enter a list of (last) names or upload a CSV with (first and) last name columns. Here's a [sample CSV](https://raw.githubusercontent.com/appeler/ethnicolr/master/ethnicolr/data/input-with-header.csv)")
     st.write('[Github Repository](https://github.com/appeler/ethnicolr)')
 
     # Set up the sidebar
