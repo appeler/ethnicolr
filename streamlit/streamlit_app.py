@@ -40,12 +40,11 @@ def a_plot(df, group_col):
 def app():
 
     st.markdown(
-        """
+    """
     ### Predict Race and Ethnicity From Name
 
-    'We use the US census data, the Florida voting registration data, \
-              and the Wikipedia data collected by Skiena and colleagues, to \
-              predict race and ethnicity based on first and last name or just the last name.'
+    We use the US census data and the Florida voting registration data to\
+    predict race and ethnicity based on first and last name or just the last name.'
 
     #### Aim
     
@@ -55,10 +54,12 @@ def app():
     2. Fight biases
     3. Prevent biases
 
+    #### Usage
+
+    Enter a list of (last) names or upload a CSV with (first and) last name columns. Here's a [sample CSV](https://raw.githubusercontent.com/appeler/ethnicolr/master/ethnicolr/data/input-with-header.csv)
+
     """
     )
-
-    st.write("Enter a list of (last) names or upload a CSV with (first and) last name columns. Here's a [sample CSV](https://raw.githubusercontent.com/appeler/ethnicolr/master/ethnicolr/data/input-with-header.csv)")
 
     # Set up the sidebar
     selected_function = st.sidebar.selectbox(label = 'Select a function', options = list(sidebar_options.keys()))
