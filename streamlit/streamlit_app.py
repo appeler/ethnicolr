@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import ethnicolr
-from ethnicolr import census_ln, pred_census_ln
+from ethnicolr import census_ln, pred_census_ln, pred_fl_reg_ln, pred_fl_reg_name
 import base64
 
 
