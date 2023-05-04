@@ -39,12 +39,25 @@ def a_plot(df, group_col):
 
 def app():
     # Set app title
-    st.title("ethnicolr: Predict Race and Ethnicity From Name")
+    st.markdown("Predict Race and Ethnicity From Name")
 
     # Generic info.
     st.write('We use the US census data, the Florida voting registration data, \
               and the Wikipedia data collected by Skiena and colleagues, to \
               predict race and ethnicity based on first and last name or just the last name.')
+
+    st.markdown(
+        """
+    ## Aim
+    
+    We are releasing this software in the hope that it enables activists and researchers\
+    
+    1. Highlight biases
+    2. Fight biases
+    3. Prevent biases
+
+    """
+    )
 
     st.write("Enter a list of (last) names or upload a CSV with (first and) last name columns. Here's a [sample CSV](https://raw.githubusercontent.com/appeler/ethnicolr/master/ethnicolr/data/input-with-header.csv)")
 
