@@ -30,13 +30,13 @@ def app():
 
     # Set up the sidebar
     st.sidebar.title('Select Function')
-    selected_function = st.sidebar.selectbox(label = 'Select a function', list(sidebar_options.keys()))
+    selected_function = st.sidebar.selectbox(label = 'Select a function', options = list(sidebar_options.keys()))
 
     if selected_function == "Append Census Data to Last Name":
         input_type = st.radio("Input type:", ("List", "CSV"))
         if input_type == "List":
             input_list = st.text_input("Enter a list of last names (comma-separated)")
-            year = st.selectbox(label = "Select a year", [2000, 2010])
+            year = st.selectbox(label = "Select a year", year = [2000, 2010])
             if input_list:
                 input_list = input_list.split(",")
                 list_name = [x.strip() for x in input_list]
@@ -48,7 +48,7 @@ def app():
                 df = pd.read_csv(uploaded_file)
                 st.write("Data loaded successfully!")
                 lname_col = st.selectbox("Select column with last name", df.columns)
-                year = st.selectbox(label = "Select a year", [2000, 2010])
+                year = st.selectbox(label = "Select a year", year = [2000, 2010])
         function = sidebar_options[selected_function]
         if st.button('Run'):
             transformed_df = function(df, lname_col=lname_col, year = year)
