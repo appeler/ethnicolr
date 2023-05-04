@@ -103,7 +103,7 @@ def app():
     elif selected_function == "Florida VR Full Name Model":
         input_type = st.radio("Input type:", ("List", "CSV"))
         if input_type == "List":
-            input_list = st.text_input("Enter a list of last names (comma-separated):", value=", ".join(default_name_list))
+            input_list = st.text_input("Enter a list of names (comma-separated):", value=", ".join(default_name_list))
             if input_list:
                 input_list = input_list.split(",")
                 list_name = [x.strip() for x in input_list]
