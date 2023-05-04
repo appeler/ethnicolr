@@ -38,17 +38,16 @@ def a_plot(df, group_col):
     st.pyplot(fig)
 
 def app():
-    # Set app title
-    st.markdown("Predict Race and Ethnicity From Name")
-
-    # Generic info.
-    st.write('We use the US census data, the Florida voting registration data, \
-              and the Wikipedia data collected by Skiena and colleagues, to \
-              predict race and ethnicity based on first and last name or just the last name.')
 
     st.markdown(
         """
-    ## Aim
+    ### Predict Race and Ethnicity From Name
+
+    'We use the US census data, the Florida voting registration data, \
+              and the Wikipedia data collected by Skiena and colleagues, to \
+              predict race and ethnicity based on first and last name or just the last name.'
+
+    #### Aim
     
     We are releasing this software in the hope that it enables activists and researchers\
     
