@@ -30,13 +30,13 @@ def app():
 
     # Set up the sidebar
     st.sidebar.title('Select Function')
-    selected_function = st.sidebar.selectbox('', list(sidebar_options.keys()))
+    selected_function = st.sidebar.selectbox(label = 'Select a function', list(sidebar_options.keys()))
 
     if selected_function == "Append Census Data to Last Name":
         input_type = st.radio("Input type:", ("List", "CSV"))
         if input_type == "List":
             input_list = st.text_input("Enter a list of last names (comma-separated)")
-            year = st.selectbox("Select a year", [2000, 2010])
+            year = st.selectbox(label = "Select a year", [2000, 2010])
             if input_list:
                 input_list = input_list.split(",")
                 list_name = [x.strip() for x in input_list]
@@ -44,12 +44,11 @@ def app():
                 lname_col = 'lname_col'
         elif input_type == "CSV":
             uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
-            # Load data
             if uploaded_file is not None:
                 df = pd.read_csv(uploaded_file)
                 st.write("Data loaded successfully!")
                 lname_col = st.selectbox("Select column with last name", df.columns)
-                year = st.selectbox("Select a year", [2000, 2010])
+                year = st.selectbox(label = "Select a year", [2000, 2010])
         function = sidebar_options[selected_function]
         if st.button('Run'):
             transformed_df = function(df, lname_col=lname_col, year = year)
@@ -57,14 +56,46 @@ def app():
             download_file(transformed_df)
     
     elif selected_function == "Florida VR Last Name Model":
-        lname_col = st.selectbox("Select column with last name", df.columns)
+        input_type = st.radio("Input type:", ("List", "CSV"))
+        if input_type == "List":
+            input_list = st.text_input("Enter a list of last names (comma-separated)")
+            if input_list:
+                input_list = input_list.split(",")
+                list_name = [x.strip() for x in input_list]
+                df = pd.DataFrame(list_name, columns=['lname_col'])
+                lname_col = 'lname_col'
+        elif input_type == "CSV":
+            uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
+            if uploaded_file is not None:
+                df = pd.read_csv(uploaded_file)
+                st.write("Data loaded successfully!")
+                lname_col = st.selectbox("Select column with last name", df.columns)
         function = sidebar_options[selected_function]
         if st.button('Run'):
-            transformed_df = function(df, namecol=lname_col)
+            transformed_df = function(df, lname_col=lname_col, year = year)
             st.dataframe(transformed_df)
             download_file(transformed_df)
 
-    
+    elif selected_function == "Florida VR Full Name Model":
+        input_type = st.radio("Input type:", ("List", "CSV"))
+        if input_type == "List":
+            input_list = st.text_input("Enter a list of names (comma-separated)")
+            if input_list:
+                input_list = input_list.split(",")
+                list_name = [x.strip() for x in input_list]
+                df = pd.DataFrame(list_name, columns=['namecol'])
+                namecol = 'namecol'
+        elif input_type == "CSV":
+            uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
+            if uploaded_file is not None:
+                df = pd.read_csv(uploaded_file)
+                st.write("Data loaded successfully!")
+                namecol = st.selectbox("Select column with the name", df.columns)
+        function = sidebar_options[selected_function]
+        if st.button('Run'):
+            transformed_df = function(df, namecol=namecol, year = year)
+            st.dataframe(transformed_df)
+            download_file(transformed_df)
 
 
 # Run the app
