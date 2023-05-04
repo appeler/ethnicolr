@@ -40,6 +40,8 @@ def app():
                 input_list = input_list.split(",")
                 input_list = [x.strip() for x in input_list]
                 df = pd.DataFrame(list_name, columns=['lname_col'])
+                lname_col = 'lname_col'
+                year = st.selectbox("Select a year", [2000, 2010])
         elif input_type == "CSV":
             uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
             # Load data
