@@ -3,7 +3,7 @@ import pandas as pd
 import ethnicolr
 from ethnicolr import census_ln, pred_census_ln, pred_fl_reg_ln, pred_fl_reg_name
 import base64
-
+import matplotlib.pyplot as plt
 
 # Define your sidebar options
 sidebar_options = {
@@ -17,6 +17,22 @@ def download_file(df):
     b64 = base64.b64encode(csv.encode()).decode()
     href = f'<a href="data:file/csv;base64,{b64}" download="results.csv">Download results</a>'
     st.markdown(href, unsafe_allow_html=True)
+
+def a_plot(df, group_col):
+    # Group the data and count the occurrences of each group
+    grouped_df = df.groupby(group_col).size().reset_index(name="Count")
+
+    # Display the grouped data
+    st.write("Grouped Data")
+    st.dataframe(grouped_df)
+
+    # Create a bar plot of the grouped data
+    fig, ax = plt.subplots()
+    ax.bar(grouped_df[group_col], grouped_df["Count"])
+    ax.set_xlabel(group_col)
+    ax.set_ylabel("Count")
+    ax.set_title(f"Counts by {group_col}")
+    st.pyplot(fig)
 
 def app():
     # Set app title
@@ -52,8 +68,13 @@ def app():
         function = sidebar_options[selected_function]
         if st.button('Run'):
             transformed_df = function(df, lname_col=lname_col, year = year)
+            group_cols = ['pctwhite', 'pctblack', 'pctapi', 'pctaian', 'pct2prace']
+            max_col = transformed_df[group_cols].idxmax(axis=1)
+            # Add a new column to the DataFrame with the grouping variable
+            transformed_df["race"] = pd.Categorical(max_col, categories=group_cols)
             st.dataframe(transformed_df)
             download_file(transformed_df)
+            a_plot(transformed_df, "race")
     
     elif selected_function == "Florida VR Last Name Model":
         input_type = st.radio("Input type:", ("List", "CSV"))
@@ -75,6 +96,7 @@ def app():
             transformed_df = function(df, lname_col=lname_col)
             st.dataframe(transformed_df)
             download_file(transformed_df)
+            a_plot(transformed_df, "race")
 
     elif selected_function == "Florida VR Full Name Model":
         input_type = st.radio("Input type:", ("List", "CSV"))
@@ -103,7 +125,7 @@ def app():
             transformed_df = function(df, lname_col=lname_col, fname_col = fname_col)
             st.dataframe(transformed_df)
             download_file(transformed_df)
-
+            a_plot(transformed_df, group_col = 'race')
 
 # Run the app
 if __name__ == "__main__":
