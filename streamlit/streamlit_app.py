@@ -36,12 +36,12 @@ def app():
         input_type = st.radio("Input type:", ("List", "CSV"))
         if input_type == "List":
             input_list = st.text_input("Enter a list of last names (comma-separated)")
+            year = st.selectbox("Select a year", [2000, 2010])
             if input_list:
                 input_list = input_list.split(",")
                 list_name = [x.strip() for x in input_list]
                 df = pd.DataFrame(list_name, columns=['lname_col'])
                 lname_col = 'lname_col'
-                year = st.selectbox("Select a year", [2000, 2010])
         elif input_type == "CSV":
             uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
             # Load data
@@ -52,7 +52,7 @@ def app():
                 year = st.selectbox("Select a year", [2000, 2010])
         function = sidebar_options[selected_function]
         if st.button('Run'):
-            transformed_df = function(df, namecol=lname_col, year = year)
+            transformed_df = function(df, lname_col=lname_col, year = year)
             st.dataframe(transformed_df)
             download_file(transformed_df)
     
