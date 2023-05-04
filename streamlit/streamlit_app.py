@@ -68,7 +68,7 @@ def app():
         function = sidebar_options[selected_function]
         if st.button('Run'):
             transformed_df = function(df, lname_col=lname_col, year = year)
-            group_cols = ['pctwhite', 'pctblack', 'pctapi', 'pctaian', 'pct2prace']
+            group_cols = ['pctwhite', 'pctblack', 'pctapi', 'pctaian', 'pct2prace', 'pcthispanic']
             transformed_df[group_cols] = transformed_df[group_cols].astype(float)
             transformed_df["race"] = transformed_df[group_cols].idxmax(axis=1)
             st.dataframe(transformed_df)
