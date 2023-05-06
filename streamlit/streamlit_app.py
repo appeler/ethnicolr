@@ -63,7 +63,7 @@ def app():
     """
     )
 
-    iter_range = (0, 100000)
+    int_range = (0, 100000)
     conf_int_range = (0.0, 1.0)
 
     # Set up the sidebar
