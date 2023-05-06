@@ -63,6 +63,9 @@ def app():
     """
     )
 
+    iter_range = (0, 100000)
+    conf_int_range = (0.0, 1.0)
+
     # Set up the sidebar
     selected_function = st.sidebar.selectbox(label = 'Select a function', options = list(sidebar_options.keys()))
 
@@ -102,15 +105,21 @@ def app():
                 list_name = [x.strip() for x in input_list]
                 df = pd.DataFrame(list_name, columns=['lname_col'])
                 lname_col = 'lname_col'
+                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], step=1)
+                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], step=0.01)
+
         elif input_type == "CSV":
             uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
             if uploaded_file is not None:
                 df = pd.read_csv(uploaded_file)
                 st.write("Data loaded successfully!")
                 lname_col = st.selectbox("Select column with last name", df.columns)
+                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], step=1)
+                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], step=0.01)
+
         function = sidebar_options[selected_function]
         if st.button('Run'):
-            transformed_df = function(df, lname_col=lname_col)
+            transformed_df = function(df, lname_col=lname_col, conf_int = conf_int_val, num_iter = iter_val)
             st.dataframe(transformed_df)
             download_file(transformed_df)
             a_plot(transformed_df, "race")
@@ -127,10 +136,12 @@ def app():
                     first_name, last_name = name.split(" ")
                     name_dicts.append({'fname_col': first_name, "lname_col": last_name})
 
-                # Convert the list of dictionaries into a Pandas DataFrame
                 df = pd.DataFrame(name_dicts)
                 fname_col = 'fname_col'
                 lname_col = 'lname_col'
+                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], step=1)
+                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], step=0.01)
+
         elif input_type == "CSV":
             uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
             if uploaded_file is not None:
@@ -138,10 +149,12 @@ def app():
                 st.write("Data loaded successfully!")
                 fname_col = st.selectbox("Select column with the first names", df.columns)
                 lname_col = st.selectbox("Select column with the last names", df.columns)
+                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], step=1)
+                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], step=0.01)
 
         function = sidebar_options[selected_function]
         if st.button('Run'):
-            transformed_df = function(df, lname_col=lname_col, fname_col = fname_col)
+            transformed_df = function(df, lname_col=lname_col, fname_col = fname_col, conf_int = conf_int_val, num_iter = iter_val)
             st.dataframe(transformed_df)
             download_file(transformed_df)
             a_plot(transformed_df, group_col = 'race')
