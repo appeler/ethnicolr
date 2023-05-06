@@ -32,7 +32,7 @@ def log_usage(action):
     with open("usage_logs.json", "w") as f:
         json.dump(usage_logs, f)
     global count
-    count = len(usage_logs.get("app", []))
+    count = len(usage_logs.get("ethnicolr", []))
 
 def download_file(df):
     csv = df.to_csv(index=False)
