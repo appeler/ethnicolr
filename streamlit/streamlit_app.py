@@ -64,7 +64,7 @@ def app():
     )
 
     int_range = (0, 100000)
-    conf_int_range = (0.0, 1.0)
+    float_range = (0.0, 1.0)
 
     # Set up the sidebar
     selected_function = st.sidebar.selectbox(label = 'Select a function', options = list(sidebar_options.keys()))
