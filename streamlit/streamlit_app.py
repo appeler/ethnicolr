@@ -1,5 +1,4 @@
 import streamlit as st
-from session_state import get
 import pandas as pd
 import ethnicolr
 from ethnicolr import census_ln, pred_census_ln, pred_fl_reg_ln, pred_fl_reg_name
