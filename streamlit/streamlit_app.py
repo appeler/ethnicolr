@@ -21,22 +21,6 @@ def download_file(df):
     href = f'<a href="data:file/csv;base64,{b64}" download="results.csv">Download results</a>'
     st.markdown(href, unsafe_allow_html=True)
 
-def a_plot(df, group_col):
-    # Group the data and count the occurrences of each group
-    grouped_df = df.groupby(group_col).size().reset_index(name="Count")
-
-    # Display the grouped data
-    st.write("Grouped Data")
-    st.dataframe(grouped_df)
-
-    # Create a bar plot of the grouped data
-    fig, ax = plt.subplots()
-    ax.bar(grouped_df[group_col], grouped_df["Count"])
-    ax.set_xlabel(group_col)
-    ax.set_ylabel("Count")
-    ax.set_title(f"Counts by {group_col}")
-    st.pyplot(fig)
-
 def app():
 
     st.markdown(
@@ -90,11 +74,8 @@ def app():
         if st.button('Run'):
             transformed_df = function(df, lname_col=lname_col, year = year)
             group_cols = ['pctwhite', 'pctblack', 'pctapi', 'pctaian', 'pct2prace', 'pcthispanic']
-            transformed_df[group_cols] = transformed_df[group_cols].astype(float)
-            transformed_df["modal_race"] = transformed_df[group_cols].idxmax(axis=1).str[3:]
             st.dataframe(transformed_df)
             download_file(transformed_df)
-            a_plot(transformed_df, "modal_race")
     
     elif selected_function == "Florida VR Last Name Model":
         input_type = st.radio("Input type:", ("List", "CSV"))
@@ -122,7 +103,6 @@ def app():
             transformed_df = function(df, lname_col=lname_col, conf_int = conf_int_val, num_iter = iter_val)
             st.dataframe(transformed_df)
             download_file(transformed_df)
-            a_plot(transformed_df, "race")
 
     elif selected_function == "Florida VR Full Name Model":
         input_type = st.radio("Input type:", ("List", "CSV"))
@@ -157,7 +137,6 @@ def app():
             transformed_df = function(df, lname_col=lname_col, fname_col = fname_col, conf_int = conf_int_val, num_iter = iter_val)
             st.dataframe(transformed_df)
             download_file(transformed_df)
-            a_plot(transformed_df, group_col = 'race')
 
 # Run the app
 if __name__ == "__main__":
