@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
 import ethnicolr
+import json
+import datetime
 from ethnicolr import census_ln, pred_census_ln, pred_fl_reg_ln, pred_fl_reg_name
 import base64
-import matplotlib.pyplot as plt
 
 sidebar_options = {
     'Append Census Data to Last Name': census_ln,
@@ -11,12 +12,27 @@ sidebar_options = {
     'Florida VR Full Name Model': pred_fl_reg_name
 }
 
-if "usage_count" not in st.session_state:
-    st.session_state.usage_count = 0
-
-
 default_last_name_list = ["garcia, hernandez, smith, chen, washington, jackson, brown"]
 default_name_list = ["john smith, john wayne, lili peng, miguel garcia, lakisha johnson"]
+
+# Load the usage logs from a JSON file
+try:
+    with open("usage_logs.json", "r") as f:
+        usage_logs = json.load(f)
+except FileNotFoundError:
+    usage_logs = {}
+
+def log_usage(action):
+    now = datetime.datetime.now()
+    date_str = now.strftime("%Y-%m-%d %H:%M:%S")
+    if action in usage_logs:
+        usage_logs[action].append(date_str)
+    else:
+        usage_logs[action] = [date_str]
+    with open("usage_logs.json", "w") as f:
+        json.dump(usage_logs, f)
+    global count
+    count = len(usage_logs.get("app", []))
 
 def download_file(df):
     csv = df.to_csv(index=False)
@@ -25,6 +41,8 @@ def download_file(df):
     st.markdown(href, unsafe_allow_html=True)
 
 def app():
+
+    log_usage("ethnicolr")
 
     st.markdown(
     """
@@ -50,7 +68,7 @@ def app():
     """
     )
 
-    st.write("App usage count:", st.session_state.usage_count)
+    st.write(f"Current usage count: {count}")
 
     int_range = (0, 100000)
     float_range = (0.0, 1.0)
@@ -77,7 +95,6 @@ def app():
                 year = st.selectbox(label = "Select a year", options = [2000, 2010])
         function = sidebar_options[selected_function]
         if st.button('Run'):
-            st.session_state.usage_count += 1
             transformed_df = function(df, lname_col=lname_col, year = year)
             group_cols = ['pctwhite', 'pctblack', 'pctapi', 'pctaian', 'pct2prace', 'pcthispanic']
             st.dataframe(transformed_df)
@@ -106,7 +123,6 @@ def app():
 
         function = sidebar_options[selected_function]
         if st.button('Run'):
-            st.session_state.usage_count += 1
             transformed_df = function(df, lname_col=lname_col, conf_int = conf_int_val, num_iter = iter_val)
             st.dataframe(transformed_df)
             download_file(transformed_df)
@@ -141,7 +157,6 @@ def app():
 
         function = sidebar_options[selected_function]
         if st.button('Run'):
-            st.session_state.usage_count += 1
             transformed_df = function(df, lname_col=lname_col, fname_col = fname_col, conf_int = conf_int_val, num_iter = iter_val)
             st.dataframe(transformed_df)
             download_file(transformed_df)
