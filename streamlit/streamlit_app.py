@@ -20,7 +20,9 @@ try:
     with open("usage_logs.json", "r") as f:
         usage_logs = json.load(f)
 except FileNotFoundError:
-    usage_logs = {}
+    usage_logs = {"ethnicolr": []}
+    with open("usage_logs.json", "w") as f:
+        json.dump(usage_logs, f)
 
 def log_usage(action):
     now = datetime.datetime.now()
