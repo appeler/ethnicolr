@@ -44,6 +44,8 @@ def app():
 
     log_usage("ethnicolr")
 
+    st.write(f"Current usage count: {count}")
+
     st.markdown(
     """
     ### Predict Race and Ethnicity From Name
@@ -68,7 +70,6 @@ def app():
     """
     )
 
-    st.write(f"Current usage count: {count}")
 
     int_range = (0, 100000)
     float_range = (0.0, 1.0)
@@ -109,8 +110,8 @@ def app():
                 list_name = [x.strip() for x in input_list]
                 df = pd.DataFrame(list_name, columns=['lname_col'])
                 lname_col = 'lname_col'
-                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], step=1)
-                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], step=0.01)
+                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], value = 100, step=1)
+                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], value = .9, step=0.01)
 
         elif input_type == "CSV":
             uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
@@ -118,8 +119,8 @@ def app():
                 df = pd.read_csv(uploaded_file)
                 st.write("Data loaded successfully!")
                 lname_col = st.selectbox("Select column with last name", df.columns)
-                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], step=1)
-                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], step=0.01)
+                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], value = 100, step=1)
+                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], value = .9, step=0.01)
 
         function = sidebar_options[selected_function]
         if st.button('Run'):
@@ -142,8 +143,8 @@ def app():
                 df = pd.DataFrame(name_dicts)
                 fname_col = 'fname_col'
                 lname_col = 'lname_col'
-                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], step=1)
-                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], step=0.01)
+                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], value = 100, step=1)
+                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], value = .9, step=0.01)
 
         elif input_type == "CSV":
             uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
@@ -152,8 +153,8 @@ def app():
                 st.write("Data loaded successfully!")
                 fname_col = st.selectbox("Select column with the first names", df.columns)
                 lname_col = st.selectbox("Select column with the last names", df.columns)
-                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], step=1)
-                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], step=0.01)
+                iter_val = st.sidebar.number_input("Enter number of iterations", min_value=int_range[0], max_value=int_range[1], value = 100, step=1)
+                conf_int_val = st.sidebar.number_input("Enter confidence interval (0 to 1)", min_value=float_range[0], max_value=float_range[1], value = .9, step=0.01)
 
         function = sidebar_options[selected_function]
         if st.button('Run'):
