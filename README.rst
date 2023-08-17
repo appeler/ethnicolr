@@ -8,7 +8,7 @@ ethnicolr: Predict Race and Ethnicity From Name
 .. image:: https://anaconda.org/soodoku/ethnicolr/badges/version.svg
     :target: https://anaconda.org/soodoku/ethnicolr/
 .. image:: https://pepy.tech/badge/ethnicolr
-    :target: https://pepy.tech/project/ethnicolr
+    :target: https://static.pepy.tech/badge/ethnicolr
 
 We exploit the US census data, the Florida voting registration data, and 
 the Wikipedia data collected by Skiena and colleagues, to predict race
