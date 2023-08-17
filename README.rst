@@ -7,8 +7,8 @@ ethnicolr: Predict Race and Ethnicity From Name
     :target: https://pypi.python.org/pypi/ethnicolr
 .. image:: https://anaconda.org/soodoku/ethnicolr/badges/version.svg
     :target: https://anaconda.org/soodoku/ethnicolr/
-.. image:: https://pepy.tech/badge/ethnicolr
-    :target: https://static.pepy.tech/badge/ethnicolr
+.. image:: https://static.pepy.tech/badge/ethnicolr
+    :target: https://www.pepy.tech/projects/ethnicolr
 
 We exploit the US census data, the Florida voting registration data, and 
 the Wikipedia data collected by Skiena and colleagues, to predict race
