@@ -19,6 +19,10 @@ census data we use in the model (the raw data has additional categories of
 Native Americans and Bi-racial) merely categorizes between Non-Hispanic Whites, 
 Non-Hispanic Blacks, Asians, and Hispanics.
 
+New Package With New Models in Pytorch 
+----------------------------------------
+https://github.com/appeler/ethnicolr2
+
 Streamlit
 -----------
 Streamlit App: https://appeler-ethnicolr-streamlitstreamlit-app-qek30c.streamlit.app/
