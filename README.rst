@@ -23,9 +23,9 @@ New Package With New Models in Pytorch
 ----------------------------------------
 https://github.com/appeler/ethnicolr2
 
-Streamlit
+Streamlit App
 -----------
-Streamlit App: https://appeler-ethnicolr-streamlitstreamlit-app-qek30c.streamlit.app/
+https://ethnicolr.streamlit.app/
 
 Caveats and Notes
 -----------------------
