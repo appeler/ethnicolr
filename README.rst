@@ -98,8 +98,7 @@ To predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/eth
 Functions
 ----------
 
-We expose 6 functions, each of which either take a pandas DataFrame or a
-CSV.
+We expose 6 functions, each of which either takes a pandas DataFrame or a CSV.
 
 - **census\_ln(df, lname_col, year=2000)**
 
@@ -158,7 +157,7 @@ CSV.
       -  Uses the `last name census 2000 
          model <ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb>`__ or 
          `last name census 2010 model <ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb>`__ 
-         to predict the race and ethnicity.
+         to predict race and ethnicity.
 
 
    +--------------+---------------------------------------------------------------------------------------------------------------------+
