@@ -89,11 +89,10 @@ setup(
         "License :: OSI Approved :: MIT License",
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Topic :: Scientific/Engineering :: Information Analysis",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Utilities",
@@ -110,8 +109,8 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=["tensorflow>=2.7.2,<3;platform_machine!='aarch64'",
-                      "tensorflow-aarch64>=2.7.2,<3;platform_machine=='aarch64'",
+    install_requires=["tensorflow>=2.7.2,<2.16;platform_machine!='aarch64'",
+                      "tensorflow-aarch64>=2.7.2,<2.16;platform_machine=='aarch64'",
                       "pandas>=1.3.0"],
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
