@@ -21,16 +21,21 @@ Non-Hispanic Blacks, Asians, and Hispanics.
 
 New Package With New Models in Pytorch 
 ----------------------------------------
+
 https://github.com/appeler/ethnicolr2
 
+
 Streamlit App
------------
+---------------
+
 https://ethnicolr.streamlit.app/
+
 
 Caveats and Notes
 -----------------------
 
 If you picked a person at random with the last name 'Smith' in the US in 2010 and asked us to guess this person's race (as measured by the census), the best guess would be based on what is available from the aggregated Census file. It is the Bayes Optimal Solution. So what good are last-name-only predictive models for? A few things---if you want to impute race and ethnicity for last names that are not in the census file, infer the race and ethnicity in different years than when the census was conducted (if some assumptions hold), infer the race of people in different countries (if some assumptions hold), etc. The biggest benefit comes in cases where both the first name and last name are known.
+
 
 Install
 ----------
