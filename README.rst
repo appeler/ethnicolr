@@ -7,8 +7,8 @@ ethnicolr: Predict Race and Ethnicity From Name
     :target: https://pypi.python.org/pypi/ethnicolr
 .. image:: https://anaconda.org/soodoku/ethnicolr/badges/version.svg
     :target: https://anaconda.org/soodoku/ethnicolr/
-.. image:: https://pepy.tech/badge/ethnicolr
-    :target: https://pepy.tech/project/ethnicolr
+.. image:: https://static.pepy.tech/badge/ethnicolr
+    :target: https://www.pepy.tech/projects/ethnicolr
 
 We exploit the US census data, the Florida voting registration data, and 
 the Wikipedia data collected by Skiena and colleagues, to predict race
@@ -19,14 +19,23 @@ census data we use in the model (the raw data has additional categories of
 Native Americans and Bi-racial) merely categorizes between Non-Hispanic Whites, 
 Non-Hispanic Blacks, Asians, and Hispanics.
 
-Streamlit
------------
-Streamlit App: https://appeler-ethnicolr-streamlitstreamlit-app-qek30c.streamlit.app/
+New Package With New Models in Pytorch 
+----------------------------------------
+
+https://github.com/appeler/ethnicolr2
+
+
+Streamlit App
+---------------
+
+https://ethnicolr.streamlit.app/
+
 
 Caveats and Notes
 -----------------------
 
 If you picked a person at random with the last name 'Smith' in the US in 2010 and asked us to guess this person's race (as measured by the census), the best guess would be based on what is available from the aggregated Census file. It is the Bayes Optimal Solution. So what good are last-name-only predictive models for? A few things---if you want to impute race and ethnicity for last names that are not in the census file, infer the race and ethnicity in different years than when the census was conducted (if some assumptions hold), infer the race of people in different countries (if some assumptions hold), etc. The biggest benefit comes in cases where both the first name and last name are known.
+
 
 Install
 ----------
@@ -94,8 +103,7 @@ To predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/eth
 Functions
 ----------
 
-We expose 6 functions, each of which either take a pandas DataFrame or a
-CSV.
+We expose 6 functions, each of which either takes a pandas DataFrame or a CSV.
 
 - **census\_ln(df, lname_col, year=2000)**
 
@@ -154,7 +162,7 @@ CSV.
       -  Uses the `last name census 2000 
          model <ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb>`__ or 
          `last name census 2010 model <ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb>`__ 
-         to predict the race and ethnicity.
+         to predict race and ethnicity.
 
 
    +--------------+---------------------------------------------------------------------------------------------------------------------+
