@@ -1,0 +1,124 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "build>=0.7.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ethnicolr"
+version = "0.10.0"
+description = "Predict Race/Ethnicity Based on Sequence of Characters in Names"
+readme = "README.rst"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Suriyan Laohaprapanon, Gaurav Sood", email = "suriyant@gmail.com, gsood07@gmail.com"}
+]
+keywords = ["race", "ethnicity", "names", "demographics", "machine-learning", "nlp"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+# Dynamic dependencies will be determined at install time
+dynamic = ["dependencies"]
+
+[project.urls]
+"Homepage" = "https://github.com/appeler/ethnicolr"
+"Bug Reports" = "https://github.com/appeler/ethnicolr/issues"
+"Documentation" = "https://github.com/appeler/ethnicolr#readme"
+"Source Code" = "https://github.com/appeler/ethnicolr"
+
+[project.scripts]
+census_ln = "ethnicolr.census_ln:main"
+pred_census_ln = "ethnicolr.pred_census_ln:main"
+pred_wiki_name = "ethnicolr.pred_wiki_name:main"
+pred_wiki_ln = "ethnicolr.pred_wiki_ln:main"
+pred_fl_reg_name = "ethnicolr.pred_fl_reg_name:main"
+pred_fl_reg_ln = "ethnicolr.pred_fl_reg_ln:main"
+pred_fl_reg_ln_five_cat = "ethnicolr.pred_fl_reg_ln_five_cat:main"
+pred_fl_reg_name_five_cat = "ethnicolr.pred_fl_reg_name_five_cat:main"
+pred_nc_reg_name = "ethnicolr.pred_nc_reg_name:main"
+ethnicolr_download_models = "ethnicolr.utils.download:main"
+
+[project.optional-dependencies]
+dev = [
+    "check-manifest",
+    "flake8",
+    "black",
+    "isort",
+]
+test = [
+    "coverage",
+    "pytest",
+    "pytest-cov",
+    "tox",
+]
+docs = [
+    "sphinx",
+    "sphinx_rtd_theme",
+]
+all = [
+    "check-manifest",
+    "flake8",
+    "black",
+    "isort",
+    "coverage",
+    "pytest",
+    "pytest-cov",
+    "tox",
+    "sphinx",
+    "sphinx_rtd_theme",
+]
+models = []
+
+[tool.setuptools]
+packages = ["ethnicolr"]
+
+[tool.setuptools.dynamic]
+dependencies = {attr = "ethnicolr._dynamic_deps.get_dependencies"}
+
+[tool.setuptools.package-data]
+ethnicolr = [
+    "data/census/census_2000.csv",
+    "data/census/census_2010.csv",
+    "data/census/readme.md",
+    "data/census/*.pdf",
+    "data/census/*.R",
+    "data/wiki/*.*",
+    "models/*.ipynb",
+    "models/*.md",
+    "models/census/lstm/*.h5",
+    "models/census/lstm/*.csv",
+    "models/wiki/lstm/*.h5",
+    "models/wiki/lstm/*.csv",
+    "models/fl_voter_reg/lstm/*.h5",
+    "models/fl_voter_reg/lstm/*.csv",
+    "models/nc_voter_reg/lstm/*.h5",
+    "models/nc_voter_reg/lstm/*.csv",
+    "data/input*.csv",
+    "examples/*.ipynb",
+]
+
+# Custom hooks for model downloads
+[tool.setuptools.cmdclass]
+install = "ethnicolr._setup_hooks:PostInstallCommand"
+develop = "ethnicolr._setup_hooks:PostDevelopCommand"
+test = "ethnicolr._setup_hooks:Tox"
+
+# Additional configuration
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
