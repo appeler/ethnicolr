@@ -134,18 +134,21 @@ class EthnicolrModelClass:
             pdf.columns = cls.race
             pdf["rowindex"] = pdf.index
 
+            # Fix FutureWarning: Use string aggregation functions instead of callable functions
             res = (
                 pdf.groupby("rowindex")
-                .agg(
-                    [
-                        np.mean,
-                        np.std,
-                        lambda x: np.percentile(x, q=lower_perc),
-                        lambda x: np.percentile(x, q=upper_perc),
-                    ]
-                )
+                .agg({
+                    # Use dictionary-based aggregation with string function names
+                    col: ["mean", "std", 
+                          # For percentiles, we need to use lambda functions
+                          lambda x: np.percentile(x, q=lower_perc),
+                          lambda x: np.percentile(x, q=upper_perc)]
+                    for col in pdf.columns if col != "rowindex"
+                })
                 .reset_index()
             )
+            
+            # Rename the columns to match the previous naming convention
             res.columns = [f"{i}_{j}" for i, j in res.columns]
             res.columns = res.columns.str.replace("<lambda_0>", "lb")
             res.columns = res.columns.str.replace("<lambda_1>", "ub")
