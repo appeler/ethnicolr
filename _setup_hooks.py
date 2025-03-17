@@ -1,5 +1,5 @@
 """
-Modern setup hooks for ethnicolr2.
+Modern setup hooks for ethnicolr.
 
 This module implements hook points for setuptools using entry points,
 replacing the need for custom command classes in setup.py.
@@ -37,9 +37,9 @@ def download_models():
     
     try:
         # Get the package installation path
-        import ethnicolr2
-        base_dir = Path(ethnicolr2.__file__).parent
-        base_url = "https://github.com/appeler/ethnicolr2/releases/latest/download"
+        import ethnicolr
+        base_dir = Path(ethnicolr.__file__).parent
+        base_url = "https://github.com/appeler/ethnicolr/releases/latest/download"
         
         for model_file in MODEL_FILES:
             target_file = base_dir / model_file
