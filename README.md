@@ -62,10 +62,9 @@ Notes:
 ## General API
 
 To see the available command line options for any function, please type
-in [`<function-name>`{.docutils .literal}]{.pre}` `{.docutils
-.literal}[`--help`{.docutils .literal}]{.pre}
+in [`<function-name>`]` `[`--help`]
 
-``` literal-block
+```python
 # census_ln --help
 usage: census_ln [-h] [-y {2000,2010}] [-o OUTPUT] -l LAST input
 
@@ -88,7 +87,7 @@ optional arguments:
 To append census data from 2010 to a [file with column header in the
 first row](ethnicolr/data/input-with-header.csv){.reference .external},
 specify the column name carrying last names using the [`-l`{.docutils
-.literal}]{.pre} option, keeping the rest the same:
+.literal}] option, keeping the rest the same:
 
 ```bash
 census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv
@@ -96,7 +95,7 @@ census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv
 
 To predict race/ethnicity using [Wikipedia full name
 model](ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb), specify the column name of last name and first name by using
-[`-l`{.docutils .literal}]{.pre} and [`-f`{.docutils .literal}]{.pre}
+[`-l`] and [`-f`]
 flags respectively.
 
 ```bash
