@@ -1,9 +1,9 @@
 ## ethnicolr: Predict Race and Ethnicity From Name
 
-![Test Badge](https://github.com/appeler/ethnicolr/workflows/test/badge.svg){:target="_blank"}
-[![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.python.org/pypi/ethnicolr){:target="_blank"}
-[![Anaconda version](https://anaconda.org/soodoku/ethnicolr/badges/version.svg)](https://anaconda.org/soodoku/ethnicolr/){:target="_blank"}
-[![PePy Downloads](https://static.pepy.tech/badge/ethnicolr)](https://www.pepy.tech/projects/ethnicolr){:target="_blank"}
+![Test Badge](https://github.com/appeler/ethnicolr/workflows/test/badge.svg)
+[![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.python.org/pypi/ethnicolr)
+[![Anaconda version](https://anaconda.org/soodoku/ethnicolr/badges/version.svg)](https://anaconda.org/soodoku/ethnicolr/)
+[![PePy Downloads](https://static.pepy.tech/badge/ethnicolr)](https://www.pepy.tech/projects/ethnicolr)
 
 We exploit the US census data, the Florida voting registration data, and
 the Wikipedia data collected by Skiena and colleagues to predict race
