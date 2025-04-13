@@ -85,9 +85,8 @@ optional arguments:
 ## Examples
 
 To append census data from 2010 to a [file with column header in the
-first row](ethnicolr/data/input-with-header.csv){.reference .external},
-specify the column name carrying last names using the [`-l`{.docutils
-.literal}] option, keeping the rest the same:
+first row](ethnicolr/data/input-with-header.csv),
+specify the column name carrying last names using the [`-l`] option, keeping the rest the same:
 
 ```bash
 census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv
@@ -110,8 +109,7 @@ a CSV.
 - **census_ln(df, lname_col, year=2000)**
   - What it does:
     - Removes extra space
-    - For names in the [census file](ethnicolr/data/census){.reference
-      .external}, it appends relevant data of what probability the name
+    - For names in the [census file](ethnicolr/data/census), it appends relevant data of what probability the name
       provided is of a certain race/ethnicity
 
 > -----------------------------------------------------------------------------
@@ -128,8 +126,7 @@ a CSV.
 
 - Output: Appends the following columns to the pandas DataFrame or CSV:
   pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic. See
-  [here](https://github.com/appeler/ethnicolr/blob/master/ethnicolr/data/census/census_2000.pdf){.reference
-  .external} for what the column names mean.
+  [here](https://github.com/appeler/ethnicolr/blob/master/ethnicolr/data/census/census_2000.pdf) for what the column names mean.
 
   ``` literal-block
   >>> import pandas as pd
@@ -161,10 +158,8 @@ a CSV.
   - What it does:
     - Removes extra space.
     - Uses the [last name census 2000
-      model](ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb){.reference
-      .external} or [last name census 2010
-      model](ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb){.reference
-      .external} to predict race and ethnicity.
+      model](ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb) or [last name census 2010
+      model](ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb) to predict race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -350,8 +345,7 @@ a CSV.
   - What does it do?:
     - Removes extra space, if there.
     - Uses the [last name FL registration
-      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln.ipynb){.reference
-      .external} to predict the race and ethnicity.
+      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln.ipynb) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -488,8 +482,7 @@ a CSV.
   - What does it do?:
     - Removes extra space, if there.
     - Uses the [last name FL registration
-      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb){.reference
-      .external} to predict the race and ethnicity.
+      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -646,8 +639,7 @@ a CSV.
 
   - Output: Appends the following columns to the pandas DataFrame or
     CSV: race + ethnicity. The codebook is
-    [here](https://github.com/appeler/nc_race_ethnicity){.reference
-    .external}. For each race, it will provide the mean, standard error,
+    [here](https://github.com/appeler/nc_race_ethnicity). For each race, it will provide the mean, standard error,
     lower & upper bound of confidence interval
 
   ```python
@@ -754,10 +746,10 @@ census](http://www.census.gov/topics/population/genealogy/data/2000_surnames.htm
 census](http://www.census.gov/topics/population/genealogy/data/2010_surnames.html), the [Wikipedia data](ethnicolr/data/wiki/) collected by Skiena and colleagues, and the Florida voter
 registration data from early 2017.
 
-- [Census](ethnicolr/data/census/){.reference .external}
-- [The Wikipedia dataset](ethnicolr/data/wiki/){.reference .external}
+- [Census](ethnicolr/data/census/)
+- [The Wikipedia dataset](ethnicolr/data/wiki/)
 - [Florida voter registration
-  database](http://dx.doi.org/10.7910/DVN/UBIG3F){.reference .external}
+  database](http://dx.doi.org/10.7910/DVN/UBIG3F)
 
 ### Evaluation
 
@@ -787,7 +779,7 @@ Conduct](http://contributor-covenant.org/version/1/0/0/)
 ## License
 
 The package is released under the [MIT
-License](https://opensource.org/licenses/MIT){.reference .external}.
+License](https://opensource.org/licenses/MIT).
 
 
 ## 🔗 Adjacent Repositories
