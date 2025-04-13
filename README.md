@@ -1,42 +1,28 @@
-::::::::::::::::: document
-::: {#ethnicolr-predict-race-and-ethnicity-from-name .section}
-# ethnicolr: Predict Race and Ethnicity From Name
+## ethnicolr: Predict Race and Ethnicity From Name
 
-https://github.com/appeler/ethnicolr/workflows/test/badge.svg
-
-https://img.shields.io/pypi/v/ethnicolr.svg
-
-https://anaconda.org/soodoku/ethnicolr/badges/version.svg
-
-[![](https://static.pepy.tech/badge/ethnicolr)](https://www.pepy.tech/projects/ethnicolr){.reference
-.external .image-reference}
+![Test Badge](https://github.com/appeler/ethnicolr/workflows/test/badge.svg){:target="_blank"}
+[![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.python.org/pypi/ethnicolr){:target="_blank"}
+[![Anaconda version](https://anaconda.org/soodoku/ethnicolr/badges/version.svg)](https://anaconda.org/soodoku/ethnicolr/){:target="_blank"}
+[![PePy Downloads](https://static.pepy.tech/badge/ethnicolr)](https://www.pepy.tech/projects/ethnicolr){:target="_blank"}
 
 We exploit the US census data, the Florida voting registration data, and
-the Wikipedia data collected by Skiena and colleagues, to predict race
+the Wikipedia data collected by Skiena and colleagues to predict race
 and ethnicity based on first and last name or just the last name. The
 granularity at which we predict the race depends on the dataset. For
 instance, Skiena et al.\' Wikipedia data is at the ethnic group level,
 while the census data we use in the model (the raw data has additional
 categories of Native Americans and Bi-racial) merely categorizes between
 Non-Hispanic Whites, Non-Hispanic Blacks, Asians, and Hispanics.
-:::
 
-::: {#new-package-with-new-models-in-pytorch .section}
-# New Package With New Models in Pytorch
+### New Package With New Models in Pytorch
 
-[https://github.com/appeler/ethnicolr2](https://github.com/appeler/ethnicolr2){.reference
-.external}
-:::
+[https://github.com/appeler/ethnicolr2](https://github.com/appeler/ethnicolr2)
 
-::: {#streamlit-app .section}
-# Streamlit App
+### Streamlit App
 
-[https://ethnicolr.streamlit.app/](https://ethnicolr.streamlit.app/){.reference
-.external}
-:::
+[https://ethnicolr.streamlit.app/](https://ethnicolr.streamlit.app/)
 
-::: {#caveats-and-notes .section}
-# Caveats and Notes
+### Caveats and Notes
 
 If you picked a person at random with the last name \'Smith\' in the US
 in 2010 and asked us to guess this person\'s race (as measured by the
@@ -49,15 +35,12 @@ census was conducted (if some assumptions hold), infer the race of
 people in different countries (if some assumptions hold), etc. The
 biggest benefit comes in cases where both the first name and last name
 are known.
-:::
 
-::: {#install .section}
-# Install
+### Install
 
 We strongly recommend installing ethnicolor inside a Python virtual
 environment (see [venv
-documentation](https://docs.python.org/3/library/venv.html#creating-virtual-environments){.reference
-.external})
+documentation](https://docs.python.org/3/library/venv.html#creating-virtual-environments))
 
 ``` literal-block
 pip install ethnicolr
@@ -75,10 +58,8 @@ Notes:
 >   and 3.8.
 > - If you install on Windows, Theano installation typically needs
 >   admin. privileges on the shell.
-:::
 
-::: {#general-api .section}
-# General API
+## General API
 
 To see the available command line options for any function, please type
 in [`<function-name>`{.docutils .literal}]{.pre}` `{.docutils
@@ -101,35 +82,30 @@ optional arguments:
                         Output file with Census data columns
   -l LAST, --last LAST  Name of the column containing the last name
 ```
-:::
 
-::: {#examples .section}
-# Examples
+## Examples
 
 To append census data from 2010 to a [file with column header in the
 first row](ethnicolr/data/input-with-header.csv){.reference .external},
 specify the column name carrying last names using the [`-l`{.docutils
 .literal}]{.pre} option, keeping the rest the same:
 
-``` literal-block
+```bash
 census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv
 ```
 
 To predict race/ethnicity using [Wikipedia full name
-model](ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb){.reference
-.external}, specify the column name of last name and first name by using
+model](ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb), specify the column name of last name and first name by using
 [`-l`{.docutils .literal}]{.pre} and [`-f`{.docutils .literal}]{.pre}
 flags respectively.
 
-``` literal-block
+```bash
 pred_wiki_name -o output-wiki-pred-race.csv -l last_name -f first_name input-with-header.csv
 ```
-:::
 
-::: {#functions .section}
-# Functions
+## Functions
 
-We expose 6 functions, each of which either takes a pandas DataFrame or
+We expose six functions, each of which either takes a pandas DataFrame or
 a CSV.
 
 - **census_ln(df, lname_col, year=2000)**
@@ -216,7 +192,7 @@ a CSV.
 
   *(Using the same dataframe from example above)*
 
-  ``` literal-block
+  ```python
   >>> census_ln(df, 'name')
         name pctwhite pctblack pctapi pctaian pct2prace pcthispanic
   0    smith    73.35    22.22   0.40    0.85      1.63        1.56
@@ -241,8 +217,7 @@ a CSV.
   - What it does:
     - Removes extra space.
     - Uses the [last name wiki
-      model](ethnicolr/models/ethnicolr_keras_lstm_wiki_ln.ipynb){.reference
-      .external} to predict the race and ethnicity.
+      model](ethnicolr/models/ethnicolr_keras_lstm_wiki_ln.ipynb) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -275,7 +250,7 @@ a CSV.
   "GreaterEuropean,WestEuropean,Italian","GreaterEuropean,WestEuropean,Nordic".
   ```
 
-  ``` literal-block
+  ```python
   >>> import pandas as pd
 
   >>> names = [
@@ -317,8 +292,7 @@ a CSV.
   - What it does:
     - Removes extra space.
     - Uses the [full name wiki
-      model](ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb){.reference
-      .external} to predict the race and ethnicity.
+      model](ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -374,7 +348,7 @@ a CSV.
 
 - **pred_fl_reg_ln(df, lname_col, num_iter=100, conf_int=1.0)**
 
-  - What it does?:
+  - What does it do?:
     - Removes extra space, if there.
     - Uses the [last name FL registration
       model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln.ipynb){.reference
@@ -396,12 +370,12 @@ a CSV.
     ----------------------------------------------------------------------------
 
   - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race (white, black, asian, or hispanic), asian (percentage
-    chance Asian), hispanic, nh_black, nh_white. For each race it will
+    CSV: race (white, black, asian, or Hispanic), asian (percentage
+    chance Asian), Hispanic, nh_black, nh_white. For each race, it will
     provide the mean, standard error, lower & upper bound of confidence
     interval
 
-  ``` literal-block
+  ```python
   >>> import pandas as pd
 
   >>> names = [
@@ -452,8 +426,7 @@ a CSV.
   - What it does:
     - Removes extra space.
     - Uses the [full name FL
-      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_name.ipynb){.reference
-      .external} to predict the race and ethnicity.
+      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_name.ipynb) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -471,8 +444,8 @@ a CSV.
     ----------------------------------------------------------------------------
 
   - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race (white, black, asian, or hispanic), asian (percentage
-    chance Asian), hispanic, nh_black, nh_white. For each race it will
+    CSV: race (white, black, asian, or Hispanic), asian (percentage
+    chance Asian), Hispanic, nh_black, nh_white. For each race, it will
     provide the mean, standard error, lower & upper bound of confidence
     interval
 
@@ -513,7 +486,7 @@ a CSV.
 
 - **pred_fl_reg_ln_five_cat(df, namecol, num_iter=100, conf_int=1.0)**
 
-  - What it does?:
+  - What does it do?:
     - Removes extra space, if there.
     - Uses the [last name FL registration
       model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb){.reference
@@ -535,14 +508,14 @@ a CSV.
     ----------------------------------------------------------------------------
 
   - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race (white, black, asian, hispanic or other), asian
+    CSV: race (white, black, asian, Hispanic or other), asian
     (percentage chance Asian), hispanic, nh_black, nh_white, other. For
-    each race it will provide the mean, standard error, lower & upper
+    each race, it will provide the mean, standard error, lower & upper
     bound of confidence interval
 
   *(Using the same dataframe from example above)*
 
-  ``` literal-block
+  ```python
   >>> odf = pred_fl_reg_ln_five_cat(df,'last')
   ['asian', 'hispanic', 'nh_black', 'nh_white', 'other']
 
@@ -586,8 +559,7 @@ a CSV.
   - What it does:
     - Removes extra space.
     - Uses the [full name FL
-      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb){.reference
-      .external} to predict the race and ethnicity.
+      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -605,14 +577,14 @@ a CSV.
     ----------------------------------------------------------------------------
 
   - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race (white, black, asian, hispanic, or other), asian
+    CSV: race (white, black, asian, Hispanic, or other), asian
     (percentage chance Asian), hispanic, nh_black, nh_white, other. For
-    each race it will provide the mean, standard error, lower & upper
+    each race, it will provide the mean, standard error, lower & upper
     bound of confidence interval
 
   *(Using the same dataframe from example above)*
 
-  ``` literal-block
+  ```python
   >>> odf = pred_fl_reg_name_five_cat(df, 'last','first')
   ['asian', 'hispanic', 'nh_black', 'nh_white', 'other']
 
@@ -656,8 +628,7 @@ a CSV.
   - What it does:
     - Removes extra space.
     - Uses the [full name NC
-      model](ethnicolr/models/ethnicolr_keras_lstm_nc_12_cat_model.ipynb){.reference
-      .external} to predict the race and ethnicity.
+      model](ethnicolr/models/ethnicolr_keras_lstm_nc_12_cat_model.ipynb) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -666,7 +637,7 @@ a CSV.
                  contains the names of the individual to be inferred
 
                  **namecol** : *{string, list}* string or list of the name or
-                 location of the column containing the first name, last name.
+                 location of the column containing the first name and last name.
 
                  **num_iter** : *int, default=100* number of iterations to
                  calculate uncertainty
@@ -677,10 +648,10 @@ a CSV.
   - Output: Appends the following columns to the pandas DataFrame or
     CSV: race + ethnicity. The codebook is
     [here](https://github.com/appeler/nc_race_ethnicity){.reference
-    .external}. For each race it will provide the mean, standard error,
+    .external}. For each race, it will provide the mean, standard error,
     lower & upper bound of confidence interval
 
-  ``` literal-block
+  ```python
   >>> import pandas as pd
 
   >>> names = [
@@ -758,85 +729,74 @@ a CSV.
   race                     HL+O
   Name: 0, dtype: object
   ```
-:::
 
-::: {#application .section}
-# Application
+### Application
 
 To illustrate how the package can be used, we impute the race of the
 campaign contributors recorded by FEC for the years 2000 and 2010 and
 tally campaign contributions by race.
 
 - [Contrib 2000/2010 using
-  census_ln](ethnicolr/examples/ethnicolr_app_contrib20xx-census_ln.ipynb){.reference
-  .external}
+  census_ln](ethnicolr/examples/ethnicolr_app_contrib20xx-census_ln.ipynb)
 - [Contrib 2000/2010 using
-  pred_census_ln](ethnicolr/examples/ethnicolr_app_contrib20xx.ipynb){.reference
-  .external}
+  pred_census_ln](ethnicolr/examples/ethnicolr_app_contrib20xx.ipynb)
 - [Contrib 2000/2010 using
-  pred_fl_reg_name](ethnicolr/examples/ethnicolr_app_contrib20xx-fl_reg.ipynb){.reference
-  .external}
-
+  pred_fl_reg_name](ethnicolr/examples/ethnicolr_app_contrib20xx-fl_reg.ipynb)
+  
 Data on race of all the people in the [DIME
-data](https://data.stanford.edu/dime){.reference .external} is posted
-[here](http://dx.doi.org/10.7910/DVN/M5K7VR){.reference .external} The
-underlying python scripts are posted
-[here](https://github.com/appeler/dime_race){.reference .external}
-:::
-
-::: {#data .section}
+data](https://data.stanford.edu/dime) is posted
+[here](http://dx.doi.org/10.7910/DVN/M5K7VR). The
+underlying Python scripts are posted
+[here](https://github.com/appeler/dime_race)
 # Data
 
 In particular, we utilize the last-name\--race data from the [2000
-census](http://www.census.gov/topics/population/genealogy/data/2000_surnames.html){.reference
-.external} and [2010
-census](http://www.census.gov/topics/population/genealogy/data/2010_surnames.html){.reference
-.external}, the [Wikipedia data](ethnicolr/data/wiki/){.reference
-.external} collected by Skiena and colleagues, and the Florida voter
+census](http://www.census.gov/topics/population/genealogy/data/2000_surnames.html) and [2010
+census](http://www.census.gov/topics/population/genealogy/data/2010_surnames.html), the [Wikipedia data](ethnicolr/data/wiki/) collected by Skiena and colleagues, and the Florida voter
 registration data from early 2017.
 
 - [Census](ethnicolr/data/census/){.reference .external}
 - [The Wikipedia dataset](ethnicolr/data/wiki/){.reference .external}
 - [Florida voter registration
   database](http://dx.doi.org/10.7910/DVN/UBIG3F){.reference .external}
-:::
 
-::: {#evaluation .section}
-# Evaluation
+### Evaluation
 
 1.  SCAN Health Plan, a Medicare Advantage plan that serves over 200,000
     members throughout California used the software to better assess
     racial disparities of health among the people they serve. They only
-    had racial data on about 47% of their members so used it to learn
+    had racial data on about 47% of their members, so they used it to learn
     the race of the remaining 53%. On the data they had labels for, they
     found .9 AUC and 83% accuracy for the last name model.
-2.  Evaluation on NC Data:
-    [https://github.com/appeler/nc_race_ethnicity](https://github.com/appeler/nc_race_ethnicity){.reference
-    .external}
-:::
+    
+3.  Evaluation on NC Data:
+    [https://github.com/appeler/nc_race_ethnicity](https://github.com/appeler/nc_race_ethnicity)
+    
+### Authors
 
-::: {#authors .section}
-# Authors
+Suriyan Laohaprapanon and Gaurav Sood
 
-Suriyan Laohaprapanon, Gaurav Sood and Bashar Naji
-:::
-
-::: {#contributor-code-of-conduct .section}
-# Contributor Code of Conduct
+### Contributor Code of Conduct
 
 The project welcomes contributions from everyone! In fact, it depends on
-it. To maintain this welcoming atmosphere, and to collaborate in a fun
+it. To maintain this welcoming atmosphere and to collaborate in a fun
 and productive way, we expect contributors to the project to abide by
 the [Contributor Code of
-Conduct](http://contributor-covenant.org/version/1/0/0/){.reference
-.external}.
-:::
+Conduct](http://contributor-covenant.org/version/1/0/0/)
 
-::: {#license .section}
-# License
+
+## License
 
 The package is released under the [MIT
 License](https://opensource.org/licenses/MIT){.reference .external}.
-:::
-:::::::::::::::::
+
+
+## 🔗 Adjacent Repositories
+
+- [appeler/ethnicolor](https://github.com/appeler/ethnicolor) — Race and Ethnicity based on name using data from census, voter reg. files, etc.
+- [appeler/ethnicolr_new](https://github.com/appeler/ethnicolr_new) — Predict Race and Ethnicity Based on the Sequence of Characters in a Name
+- [appeler/nc_race_ethnicity](https://github.com/appeler/nc_race_ethnicity) — Evaluation of some of the ethnicolr models on the NC Voter Registration Data + New Models Based on NC Voter Registration Data.
+- [appeler/search_names](https://github.com/appeler/search_names) — Search a long list of names (patterns) in a large text corpus systematically and quickly
+- [appeler/namesexdata](https://github.com/appeler/namesexdata) — Data on international first names and sex of people with that name
+
 
