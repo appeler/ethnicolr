@@ -1,5 +1,0 @@
-tensorflow>=2.7.2,<2.16
-ethnicolr==0.9.8
-streamlit
-pandas>=1.3.0
-numpy
