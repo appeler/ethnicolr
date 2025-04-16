@@ -1,2 +1,2 @@
-ethnicolr[inference] @ git+https://github.com/appeler/ethnicolr@main
+ethnicolr[inference]
 streamlit
