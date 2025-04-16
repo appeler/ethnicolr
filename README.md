@@ -46,12 +46,6 @@ documentation](https://docs.python.org/3/library/venv.html#creating-virtual-envi
 pip install ethnicolr
 ```
 
-Or
-
-``` literal-block
-conda install -c soodoku ethnicolr
-```
-
 Notes:
 
 > - The models are run and verified on TensorFlow 2.x using Python 3.7
