@@ -2,3 +2,4 @@ tensorflow>=2.7.2
 numpy
 ethnicolr==0.9.6
 streamlit
+pandas
