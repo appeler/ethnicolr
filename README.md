@@ -48,8 +48,8 @@ pip install ethnicolr
 
 Notes:
 
-> - The models are run and verified on TensorFlow 2.x using Python 3.7
->   and 3.8.
+> - The models are run and verified on TensorFlow 2.x using Python 3.10
+>   and 3.11
 > - If you install on Windows, Theano installation typically needs
 >   admin. privileges on the shell.
 
