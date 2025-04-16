@@ -1,4 +1,4 @@
-tensorflow==2.4.0  # Or another version known to work with the model
-keras==2.4.0       # Must be compatible with the model's version
-ethnicolr          # Let this use a compatible version
+tensorflow==2.4.0
+keras==2.4.0
+ethnicolr
 streamlit
