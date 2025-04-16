@@ -1,4 +1,4 @@
 tensorflow==2.4.0
-keras==2.4.0
+keras==3.9.0
 ethnicolr
 streamlit
