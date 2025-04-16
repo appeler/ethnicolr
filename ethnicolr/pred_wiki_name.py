@@ -14,8 +14,6 @@ import pandas as pd
 from pkg_resources import resource_filename
 from .ethnicolr_class import EthnicolrModelClass
 from .utils import arg_parser
-from tqdm import tqdm
-tqdm.pandas()
 
 # Configure logging
 logging.basicConfig(
