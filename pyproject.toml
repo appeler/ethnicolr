@@ -10,7 +10,8 @@ readme = "README.rst"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Suriyan Laohaprapanon, Gaurav Sood", email = "suriyant@gmail.com, gsood07@gmail.com"}
+    {name = "Suriyan Laohaprapanon", email = "suriyant@gmail.com"},
+    {name = "Gaurav Sood", email = "gsood07@gmail.com"}
 ]
 keywords = ["race", "ethnicity", "names", "demographics", "machine-learning", "nlp"]
 classifiers = [
@@ -22,11 +23,12 @@ classifiers = [
     "Topic :: Utilities",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.12"
 ]
-
-# Dynamic dependencies will be determined at install time
-dynamic = ["dependencies"]
+dependencies = [
+  "pandas>=1.3.0",
+  "numpy"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/appeler/ethnicolr"
@@ -47,21 +49,29 @@ pred_nc_reg_name = "ethnicolr.pred_nc_reg_name:main"
 ethnicolr_download_models = "ethnicolr.utils.download:main"
 
 [project.optional-dependencies]
+macos = [
+  "tensorflow-macos==2.13.0",  # Apple Silicon only
+  "keras==2.13.1"              # must match TF version
+]
+linux = [
+  "tensorflow>=2.13,<2.14"
+]
+base = ["pandas", "numpy"]
 dev = [
     "check-manifest",
     "flake8",
     "black",
-    "isort",
+    "isort"
 ]
 test = [
     "coverage",
     "pytest",
     "pytest-cov",
-    "tox",
+    "tox"
 ]
 docs = [
     "sphinx",
-    "sphinx_rtd_theme",
+    "sphinx_rtd_theme"
 ]
 all = [
     "check-manifest",
@@ -73,15 +83,14 @@ all = [
     "pytest-cov",
     "tox",
     "sphinx",
-    "sphinx_rtd_theme",
+    "sphinx_rtd_theme"
 ]
-models = []
 
 [tool.setuptools]
 packages = ["ethnicolr"]
+include-package-data = true
 
-[tool.setuptools.dynamic]
-dependencies = {attr = "ethnicolr._dynamic_deps.get_dependencies"}
+
 
 [tool.setuptools.package-data]
 ethnicolr = [
@@ -102,16 +111,10 @@ ethnicolr = [
     "models/nc_voter_reg/lstm/*.h5",
     "models/nc_voter_reg/lstm/*.csv",
     "data/input*.csv",
-    "examples/*.ipynb",
+    "examples/*.ipynb"
 ]
 
-# Custom hooks for model downloads
-[tool.setuptools.cmdclass]
-install = "ethnicolr._setup_hooks:PostInstallCommand"
-develop = "ethnicolr._setup_hooks:PostDevelopCommand"
-test = "ethnicolr._setup_hooks:Tox"
 
-# Additional configuration
 [tool.black]
 line-length = 88
 target-version = ["py38", "py39", "py310", "py311", "py312"]
