@@ -3,3 +3,4 @@ numpy
 ethnicolr==0.9.6
 streamlit
 pandas
+keras==2.4.0
