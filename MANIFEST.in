@@ -1,4 +1,23 @@
-include MANIFEST.in
-include README.rst
+# Include license and readme
 include LICENSE
-include setup.py
+include README.rst
+include pyproject.toml
+
+# Include documentation
+recursive-include docs *.rst *.py *.bat *.txt *.png *.jpg conf.py Makefile make.bat
+
+# Include examples
+recursive-include examples *.ipynb *.py *.md
+
+# Include tests
+recursive-include tests *.py
+
+# Include data files
+recursive-include ethnicolr2/data *.csv *.txt *.md *.pdf *.R
+recursive-include ethnicolr2/models *.joblib *.pt *.csv *.md
+
+# Exclude bytecode and cache files
+global-exclude *.py[cod]
+global-exclude __pycache__
+global-exclude *.so
+global-exclude .DS_Store

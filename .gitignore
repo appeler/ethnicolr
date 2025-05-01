@@ -15,3 +15,5 @@ ethnicolr.egg-info/
 dev/
 docs/build
 docs/source/_build
+/testenv
+/testenv311

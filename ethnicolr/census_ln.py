@@ -1,90 +1,136 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Census Last Name Data Module.
+
+Enriches input data with demographic percentages from U.S. Census (2000 or 2010).
+"""
 
 import sys
+import os
+import logging
+from typing import List, Optional
 import pandas as pd
-
-from pkg_resources import resource_filename
-
+import importlib.resources as resources
 from .ethnicolr_class import EthnicolrModelClass
 from .utils import arg_parser
 
-CENSUS2000 = resource_filename(__name__, "data/census/census_2000.csv")
-CENSUS2010 = resource_filename(__name__, "data/census/census_2010.csv")
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-CENSUS_COLS = ['pctwhite', 'pctblack', 'pctapi', 'pctaian', 'pct2prace',
-               'pcthispanic']
+# Constants
+CENSUS2000 = str(resources.files("ethnicolr") / "data/census/census_2000.csv")
+CENSUS2010 = str(resources.files("ethnicolr") / "data/census/census_2010.csv")
+CENSUS_COLS = [
+    'pctwhite', 'pctblack', 'pctapi', 'pctaian',
+    'pct2prace', 'pcthispanic'
+]
 
+class CensusLnData:
+    """Handles Census Last Name demographic enrichment."""
 
-class CensusLnData():
     census_df = None
+    census_year = None
 
     @classmethod
-    def census_ln(cls, 
+    def census_ln(cls,
                   df: pd.DataFrame,
-                  lname_col: str, 
-                  year: int=2000) -> pd.DataFrame:
-        """Appends columns from Census data to the input DataFrame
-        based on the last name.
-
-        Removes extra space. Checks if the name is the Census data.  If it is,
-        outputs data from that row.
-
-        Args:
-            df (:obj:`DataFrame`): Pandas DataFrame containing the first and last name
-                columns.
-            lname_col (str): Column name for the last name.
-            year (int): The year of Census data to be used. (2000 or 2010)
-                (default is 2000)
-
-        Returns:
-            DataFrame: Pandas DataFrame with additional columns 'pctwhite',
-                'pctblack', 'pctapi', 'pctaian', 'pct2prace', 'pcthispanic'
-
-        """
+                  lname_col: str,
+                  year: int = 2000) -> pd.DataFrame:
+        if year not in [2000, 2010]:
+            raise ValueError("Census year must be either 2000 or 2010")
 
         df = EthnicolrModelClass.test_and_norm_df(df, lname_col)
-        
-        df['__last_name'] = df[lname_col].str.strip().str.upper()
+
+        # Ensure temporary column doesn't conflict
+        temp_col = "__ethnicolr_temp_lname"
+        while temp_col in df.columns:
+            temp_col += "_"
+
+        df[temp_col] = df[lname_col].fillna("").astype(str).str.strip().str.upper()
 
         if cls.census_df is None or cls.census_year != year:
-            if year == 2000:
-                cls.census_df = pd.read_csv(CENSUS2000, usecols=['name']
-                                            + CENSUS_COLS)
-            elif year == 2010:
-                cls.census_df = pd.read_csv(CENSUS2010, usecols=['name']
-                                            + CENSUS_COLS)
+            census_file = CENSUS2000 if year == 2000 else CENSUS2010
+            logger.info(f"Loading Census {year} data from {census_file}...")
 
-            cls.census_df.drop(cls.census_df[cls.census_df.name.isnull()]
-                               .index, inplace=True)
+            try:
+                census_df = pd.read_csv(
+                    census_file,
+                    usecols=['name'] + CENSUS_COLS
+                ).dropna(subset=['name'])
 
-            cls.census_df.columns = ['__last_name'] + CENSUS_COLS
-            cls.census_year = year
+                census_df.columns = [temp_col] + CENSUS_COLS
+                cls.census_df = census_df
+                cls.census_year = year
 
-        rdf = pd.merge(df, cls.census_df, how='left', on='__last_name')
+                logger.info(f"Loaded {len(cls.census_df)} last names from Census {year}")
+            except Exception as e:
+                logger.error(f"Failed to load Census data: {e}")
+                raise
 
-        del df['__last_name']
-        del rdf['__last_name']
+        logger.info(f"Merging demographic data for {len(df)} records...")
+        start_cols = set(df.columns)
+
+        rdf = pd.merge(df, cls.census_df, how='left', on=temp_col)
+
+        if temp_col in df.columns:
+            df.drop(columns=[temp_col], inplace=True)
+        if temp_col in rdf.columns:
+            rdf.drop(columns=[temp_col], inplace=True)
+
+        matched = rdf.dropna(subset=[CENSUS_COLS[0]]).shape[0]
+        logger.info(f"Matched {matched} of {len(rdf)} rows ({matched / len(rdf) * 100:.1f}%)")
+
+        new_cols = set(rdf.columns) - start_cols
+        logger.info(f"Added columns: {', '.join(sorted(new_cols))}")
 
         return rdf
 
 
+# Backwards compatibility alias
 census_ln = CensusLnData.census_ln
 
 
-def main(argv=sys.argv[1:]) -> None:
-    args = arg_parser(argv, 
-                title = "Appends Census columns by last name", 
-                default_out = "census-output.csv", 
-                default_year = 2010, 
-                year_choices = [2000, 2010])
+def main(argv: Optional[List[str]] = None) -> int:
+    if argv is None:
+        argv = sys.argv[1:]
 
-    df = pd.read_csv(args.input)
+    try:
+        args = arg_parser(
+            argv,
+            title="Append Census demographic data by last name",
+            default_out="census-output.csv",
+            default_year=2010,
+            year_choices=[2000, 2010]
+        )
 
-    rdf = census_ln(df, args.last, args.year)
+        logger.info(f"Reading input file: {args.input}")
+        df = pd.read_csv(args.input, dtype=str, keep_default_na=False)
+        logger.info(f"Loaded {len(df)} records")
 
-    print(f"Saving output to file: `{args.output}`")
-    rdf.to_csv(args.output, index=False)
+        rdf = census_ln(df, args.last, args.year)
+
+        if os.path.exists(args.output):
+            logger.warning(f"Overwriting existing file: {args.output}")
+
+        rdf.to_csv(args.output, index=False, encoding="utf-8")
+        logger.info(f"📦 Output written: {args.output} ({len(rdf)} rows)")
+
+        return 0
+
+    except FileNotFoundError as e:
+        logger.error(f"Missing data file: {e}")
+        return 2
+    except ValueError as e:
+        logger.error(f"Invalid input: {e}")
+        return 3
+    except Exception as e:
+        logger.exception(f"Unhandled error: {e}")
+        return 1
 
 
 if __name__ == "__main__":
