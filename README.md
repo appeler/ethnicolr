@@ -1,5 +1,6 @@
 ## ethnicolr: Predict Race and Ethnicity From Name
 
+![PyPI Authenicated](https://notarypy.soodoku.workers.devb/badge/ethnicolr/0.14.0/ethnicolr-0.14.0-py3-none-any.whl)
 ![Test Badge](https://github.com/appeler/ethnicolr/workflows/test/badge.svg)
 [![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.python.org/pypi/ethnicolr)
 [![Anaconda version](https://anaconda.org/soodoku/ethnicolr/badges/version.svg)](https://anaconda.org/soodoku/ethnicolr/)
