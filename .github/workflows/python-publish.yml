@@ -6,7 +6,12 @@ on:
       - 'v*'
   release:
     types: [published]
-    
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Likely Test'
+        required: false
+        default: 'Manual build'
 jobs:
   publish:
     runs-on: ubuntu-latest
