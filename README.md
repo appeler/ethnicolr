@@ -77,6 +77,18 @@ optional arguments:
   -l LAST, --last LAST  Name of the column containing the last name
 ```
 
+### Cleaning Names
+
+The prediction models work best when first and last names contain only
+alphabetic characters. Before calling the CLI or Python APIs, strip out
+titles (e.g., *Dr*, *Hon.*), middle names, suffixes, punctuation and
+non\-ASCII characters. The `pred_wiki_name` command automatically
+normalizes names by removing diacritics and extraneous characters. If
+the tool still skips entries, check that the first and last name columns
+are not empty after cleaning. An `ethnicolr_name` column is added to the
+output to show the normalized form used for prediction so you can map
+results back to your original data.
+
 ## Examples
 
 To append census data from 2010 to a [file with column header in the

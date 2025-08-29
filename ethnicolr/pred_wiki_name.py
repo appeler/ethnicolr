@@ -9,6 +9,8 @@ Predicts race/ethnicity using full names based on LSTM models trained on Wikiped
 import sys
 import os
 import logging
+import re
+import unicodedata
 from typing import List, Optional
 import pandas as pd
 from pkg_resources import resource_filename
@@ -21,6 +23,24 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+def _normalize_name(name: str) -> str:
+    """Normalize a name by removing accents and punctuation.
+
+    The Wikipedia models expect names containing only ASCII letters.
+    This helper strips diacritics, drops any non-letter characters and
+    collapses multiple spaces. The cleaned string is title cased to match
+    the model's training format.
+    """
+    # Remove accents
+    name = unicodedata.normalize("NFKD", str(name))
+    name = name.encode("ascii", "ignore").decode("utf-8")
+    # Drop everything except letters and spaces
+    name = re.sub(r"[^A-Za-z ]+", " ", name)
+    # Condense whitespace and strip
+    name = re.sub(r"\s+", " ", name).strip()
+    return name.title()
 
 
 class WikiNameModel(EthnicolrModelClass):
@@ -77,22 +97,30 @@ class WikiNameModel(EthnicolrModelClass):
 
         working_df = df.copy()
 
-        # Create a safe temporary name column
+        # Create safe temporary columns
+        raw_col = "__ethnicolr_raw_name"
+        norm_col = "__ethnicolr_clean_name"
         temp_col = "__ethnicolr_temp_name"
+
+        while raw_col in working_df.columns:
+            raw_col += "_"
+        while norm_col in working_df.columns:
+            norm_col += "_"
         while temp_col in working_df.columns:
             temp_col += "_"
 
         logger.info(f"Processing {len(working_df)} names")
 
-        # Create full name with NA handling
-        working_df[temp_col] = (
+        # Create full name and normalized variant
+        working_df[raw_col] = (
             working_df[lname_col].fillna("").astype(str).str.strip() + " " +
             working_df[fname_col].fillna("").astype(str).str.strip()
-        ).str.title()
+        )
+        working_df[norm_col] = working_df[raw_col].apply(_normalize_name)
 
-        # Remove rows with empty names
+        # Remove rows with empty normalized names
         before = len(working_df)
-        working_df = working_df[working_df[temp_col].str.strip().str.len() > 0]
+        working_df = working_df[working_df[norm_col].str.strip().str.len() > 0]
         after = len(working_df)
 
         if before > after:
@@ -104,8 +132,11 @@ class WikiNameModel(EthnicolrModelClass):
         try:
             logger.info(f"Applying Wikipedia name model (confidence interval: {conf_int})")
 
-            rdf = cls.transform_and_pred(
-                df=working_df,
+            # Deduplicate normalized names for efficient prediction
+            unique_df = working_df[[norm_col]].drop_duplicates().rename(columns={norm_col: temp_col})
+
+            preds = cls.transform_and_pred(
+                df=unique_df,
                 newnamecol=temp_col,
                 vocab_fn=vocab_path,
                 race_fn=race_path,
@@ -116,9 +147,12 @@ class WikiNameModel(EthnicolrModelClass):
                 conf_int=conf_int
             )
 
-            # Clean up temporary column
-            if temp_col in rdf.columns:
-                rdf.drop(columns=[temp_col], inplace=True)
+            # Merge predictions back to the full DataFrame
+            rdf = working_df.merge(preds, left_on=norm_col, right_on=temp_col, how="left")
+
+            # Clean up temporary columns
+            rdf.drop(columns=[temp_col, raw_col], inplace=True, errors="ignore")
+            rdf.rename(columns={norm_col: "ethnicolr_name"}, inplace=True)
 
             predicted = rdf.dropna(subset=["race"]).shape[0]
             logger.info(f"Predicted {predicted} of {after} names ({predicted / after * 100:.1f}%)")
