@@ -9,6 +9,8 @@ Predicts race/ethnicity using full names based on LSTM models trained on Wikiped
 import sys
 import os
 import logging
+import re
+import unicodedata
 from typing import List, Optional
 import pandas as pd
 from pkg_resources import resource_filename
@@ -21,6 +23,24 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+def _normalize_name(name: str) -> str:
+    """Normalize a name by removing accents and punctuation.
+
+    The Wikipedia models expect names containing only ASCII letters.
+    This helper strips diacritics, drops any non-letter characters and
+    collapses multiple spaces. The cleaned string is title cased to match
+    the model's training format.
+    """
+    # Remove accents
+    name = unicodedata.normalize("NFKD", str(name))
+    name = name.encode("ascii", "ignore").decode("utf-8")
+    # Drop everything except letters and spaces
+    name = re.sub(r"[^A-Za-z ]+", " ", name)
+    # Condense whitespace and strip
+    name = re.sub(r"\s+", " ", name).strip()
+    return name.title()
 
 
 class WikiNameModel(EthnicolrModelClass):
@@ -88,7 +108,7 @@ class WikiNameModel(EthnicolrModelClass):
         working_df[temp_col] = (
             working_df[lname_col].fillna("").astype(str).str.strip() + " " +
             working_df[fname_col].fillna("").astype(str).str.strip()
-        ).str.title()
+        ).apply(_normalize_name)
 
         # Remove rows with empty names
         before = len(working_df)
