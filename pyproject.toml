@@ -4,14 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ethnicolr"
-version = "0.17.0"
+version = "0.18.0"
 description = "Predict Race/Ethnicity Based on Sequence of Characters in Names"
 readme = "README.md"
-requires-python = ">=3.9, <3.12"
+requires-python = ">=3.9, <3.13"
 license = {text = "MIT"}
 authors = [
-    {name = "Suriyan Laohaprapanon", email = "suriyant@gmail.com"},
-    {name = "Gaurav Sood", email = "gsood07@gmail.com"}
+    
+    {name = "Gaurav Sood", email = "contact@gsood.com"},
+    {name = "Suriyan Laohaprapanon", email = "suriyant@gmail.com"}
 ]
 keywords = ["race", "ethnicity", "names", "demographics", "machine-learning", "nlp"]
 classifiers = [
