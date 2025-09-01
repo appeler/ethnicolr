@@ -4,11 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ethnicolr"
-version = "0.18.3"
+version = "0.18.4"
 description = "Predict Race/Ethnicity Based on Sequence of Characters in Names"
 readme = "README.md"
 requires-python = ">=3.9, <3.13"
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     
     {name = "Gaurav Sood", email = "contact@gsood.com"},
@@ -22,7 +23,6 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Utilities",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12"
 ]
