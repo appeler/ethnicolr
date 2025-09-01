@@ -9,8 +9,24 @@ import numpy as np
 import pandas as pd
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
+from tensorflow.keras.layers import LSTM as _KerasLSTM
 
 logger = logging.getLogger(__name__)
+
+
+class _CompatLSTM(_KerasLSTM):
+    """Backward-compatible LSTM layer.
+
+    Older versions of Keras exposed a ``time_major`` argument on ``LSTM``
+    layers. The pre-trained models distributed with *ethnicolr* were saved
+    with this argument set to ``False``. Keras 3 removed the keyword which
+    causes deserialization to fail with ``ValueError``. This shim accepts the
+    deprecated argument but simply ignores it, allowing legacy models to load
+    on newer Keras versions."""
+
+    def __init__(self, *args, time_major=False, **kwargs):
+        # ``time_major`` is unused but preserved for compatibility.
+        super().__init__(*args, **kwargs)
 
 
 class EthnicolrModelClass:
@@ -110,7 +126,14 @@ class EthnicolrModelClass:
         if cls.model is None:
             cls.vocab = pd.read_csv(vocab_path).vocab.tolist()
             cls.race = pd.read_csv(race_path).race.tolist()
-            cls.model = load_model(model_path)
+            # ``time_major`` argument was removed in Keras 3. Models bundled with
+            # ethnicolr were trained with ``time_major=False`` which causes
+            # deserialization errors on newer Keras versions. We register a
+            # compatibility LSTM that simply ignores the argument.
+            cls.model = load_model(
+                model_path,
+                custom_objects={"LSTM": _CompatLSTM},
+            )
 
         # Vectorize input
         X = [cls.find_ngrams(cls.vocab, name, ngrams) for name in df[newnamecol]]
