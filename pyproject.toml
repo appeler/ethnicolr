@@ -91,10 +91,11 @@ all = [
 ]
 
 [tool.setuptools]
-packages = ["ethnicolr"]
 include-package-data = true
 
-
+[tool.setuptools.packages.find]
+include = ["ethnicolr*"]
+exclude = ["ethnicolr.tests*"]
 
 [tool.setuptools.package-data]
 ethnicolr = [
