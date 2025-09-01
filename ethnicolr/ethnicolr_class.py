@@ -39,8 +39,12 @@ class EthnicolrModelClass:
     @staticmethod
     def test_and_norm_df(df: pd.DataFrame, col: str) -> pd.DataFrame:
         """
-        Validates the presence of the column and removes rows with NaNs or duplicates.
-        Now with better logging about what gets removed.
+        Validate presence of ``col`` and drop rows with NaNs while preserving duplicates.
+
+        Earlier implementations removed duplicate values which could silently drop
+        rows. This caused a mismatch between the number of input rows and the
+        predictions returned. The function now keeps duplicates but logs how many
+        were found so callers remain informed.
         """
         if col not in df.columns:
             raise ValueError(f"The column '{col}' does not exist in the DataFrame.")
@@ -57,18 +61,16 @@ class EthnicolrModelClass:
         if df.empty:
             raise ValueError("The name column has no non-NaN values.")
 
-        # Track duplicate removals
-        before_dedup = len(df)
-        df = df.drop_duplicates(subset=[col])
-        after_dedup = len(df)
-
-        if before_dedup > after_dedup:
+        # Log duplicates but keep them so prediction results align with inputs
+        dup_count = df.duplicated(subset=[col]).sum()
+        if dup_count > 0:
             logger.info(
-                f"Removed {before_dedup - after_dedup} duplicate rows based on column '{col}'"
+                f"Preserving {dup_count} duplicate rows based on column '{col}'"
             )
 
+        final_length = len(df)
         logger.info(
-            f"Data filtering summary: {original_length} → {after_dedup} rows (kept {after_dedup/original_length*100:.1f}%)"
+            f"Data filtering summary: {original_length} → {final_length} rows (kept {final_length/original_length*100:.1f}%)"
         )
 
         return df
@@ -121,7 +123,9 @@ class EthnicolrModelClass:
         df = df.copy()
         df = cls.test_and_norm_df(df, newnamecol)
         df[newnamecol] = df[newnamecol].astype(str).str.strip().str.title()
-        df["__rowindex"] = np.arange(len(df))
+        rowindex_added = "__rowindex" not in df.columns
+        if rowindex_added:
+            df["__rowindex"] = np.arange(len(df))
 
         # Load model, vocab, and race label set once
         if cls.model is None:
@@ -213,5 +217,6 @@ class EthnicolrModelClass:
             final_df = df.merge(summary, on="__rowindex", how="left")
 
         # Clean up
-        final_df.drop(columns=["__rowindex"], inplace=True, errors="ignore")
+        if rowindex_added:
+            final_df.drop(columns=["__rowindex"], inplace=True, errors="ignore")
         return final_df.reset_index(drop=True)

@@ -107,5 +107,34 @@ class TestPredWiki(unittest.TestCase):
         )
         self.assertTrue(all(odf.true_race == odf.race))
 
+    def test_pred_wiki_name_preserves_duplicates(self):
+        dupe_df = pd.DataFrame(
+            [
+                {"last": "O'Neil", "first": "John"},
+                {"last": "ONeil", "first": "John"},
+            ]
+        )
+        out = pred_wiki_name(dupe_df, "last", "first")
+        self.assertEqual(len(out), len(dupe_df))
+        self.assertListEqual(out["last"].tolist(), dupe_df["last"].tolist())
+        self.assertListEqual(out["first"].tolist(), dupe_df["first"].tolist())
+        self.assertTrue(out["processing_status"].eq("processed").all())
+        self.assertEqual(out["race"].nunique(), 1)
+
+    def test_pred_wiki_name_handles_accents_and_initials(self):
+        tricky_df = pd.DataFrame(
+            [
+                {"last": "Szathmáry", "first": "Emöke"},
+                {"last": "McMillan", "first": "A."},
+                {"last": "FitzGerald", "first": "John"},
+                {"last": "Edwards", "first": "N"},
+                {"last": "Sauder", "first": "E"},
+                {"last": "Aguilar", "first": "J."},
+            ]
+        )
+        out = pred_wiki_name(tricky_df, "last", "first")
+        self.assertEqual(len(out), len(tricky_df))
+        self.assertTrue(out["processing_status"].eq("processed").all())
+
 if __name__ == "__main__":
     unittest.main()

@@ -13,6 +13,8 @@ import sys
 import unicodedata
 from typing import List, Optional
 
+import numpy as np
+
 import pandas as pd
 from pkg_resources import resource_filename
 
@@ -102,6 +104,7 @@ class WikiNameModel(EthnicolrModelClass):
         model_path, vocab_path, race_path = cls.get_model_paths()
 
         working_df = df.copy()
+        working_df["__rowindex"] = np.arange(len(working_df))
         original_length = len(working_df)
 
         # Create a safe temporary name column
