@@ -4,6 +4,7 @@
 import logging
 from importlib.resources import files
 from itertools import chain
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -130,10 +131,27 @@ class EthnicolrModelClass:
             # ethnicolr were trained with ``time_major=False`` which causes
             # deserialization errors on newer Keras versions. We register a
             # compatibility LSTM that simply ignores the argument.
-            cls.model = load_model(
-                model_path,
-                custom_objects={"LSTM": _CompatLSTM},
-            )
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message="Argument `input_length` is deprecated",
+                    category=UserWarning,
+                )
+                warnings.filterwarnings(
+                    "ignore",
+                    message="Do not pass an `input_shape`/`input_dim` argument",
+                    category=UserWarning,
+                )
+                warnings.filterwarnings(
+                    "ignore",
+                    message="Argument `decay` is no longer supported",
+                    category=UserWarning,
+                )
+                cls.model = load_model(
+                    model_path,
+                    custom_objects={"LSTM": _CompatLSTM},
+                    compile=False,
+                )
 
         # Vectorize input
         X = [cls.find_ngrams(cls.vocab, name, ngrams) for name in df[newnamecol]]
