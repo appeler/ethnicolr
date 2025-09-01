@@ -1,0 +1,97 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## About ethnicolr
+
+ethnicolr is a Python package that predicts race and ethnicity from names using machine learning models trained on US Census data, Florida voter registration data, and Wikipedia data. The package provides both command-line utilities and Python APIs for race/ethnicity prediction.
+
+## Development Commands
+
+### Testing
+- Run all tests: `pytest`
+- Run tests with coverage: `pytest --cov=ethnicolr`
+- Run specific test file: `pytest ethnicolr/tests/test_010_census_ln.py`
+
+### Code Quality
+- Format code: `black .`
+- Sort imports: `isort .`
+- Lint code: `flake8`
+- All quality checks: `black . && isort . && flake8`
+
+### Installation
+- Install package in development mode: `pip install -e .`
+- Install with optional dependencies: `pip install -e .[dev,test]`
+- For macOS with Apple Silicon: `pip install -e .[macos]`
+- For Linux: `pip install -e .[linux]`
+
+## Package Architecture
+
+### Core Modules
+- `ethnicolr/__init__.py` - Main package imports and public API
+- `ethnicolr/utils.py` - Common argument parsing utilities for CLI tools
+- `ethnicolr/census_ln.py` - Census data lookup by last name
+- `ethnicolr/pred_*.py` - Various prediction models:
+  - `pred_census_ln.py` - Census-based last name predictions
+  - `pred_wiki_*.py` - Wikipedia-based predictions (name/last name)
+  - `pred_fl_reg_*.py` - Florida voter registration based predictions
+  - `pred_nc_reg_name.py` - North Carolina voter registration predictions
+
+### Data and Models
+- `ethnicolr/data/` - Training datasets (census, Wikipedia, voter registration)
+- `ethnicolr/models/` - Pre-trained LSTM models stored as .h5 files and vocabulary CSV files
+- Models are organized by source: `census/`, `wiki/`, `fl_voter_reg/`, `nc_voter_reg/`
+
+### Command Line Interface
+The package provides CLI commands defined in pyproject.toml:
+- `census_ln` - Append census race probabilities by last name
+- `pred_census_ln` - Predict race using census LSTM model
+- `pred_wiki_name` / `pred_wiki_ln` - Wikipedia-based predictions
+- `pred_fl_reg_name` / `pred_fl_reg_ln` - Florida voter registration predictions
+- `pred_fl_reg_*_five_cat` - 5-category Florida models
+- `pred_nc_reg_name` - North Carolina predictions
+- `ethnicolr_download_models` - Download model files
+
+### Testing Structure
+- Tests are in `ethnicolr/tests/` with descriptive numeric prefixes
+- Each major module has corresponding test files
+- Tests use unittest framework with pandas DataFrame fixtures
+
+## Key Dependencies
+
+- **TensorFlow/Keras**: For LSTM model inference (version 2.13.x)
+- **pandas**: Data manipulation and CSV I/O
+- **numpy**: Numerical operations
+- Models require platform-specific TensorFlow installations (tensorflow-macos for Apple Silicon)
+
+## Important Notes
+
+- Models work best with clean alphabetic names (remove titles, punctuation, non-ASCII)
+- The package supports confidence intervals and uncertainty estimation via Monte Carlo sampling
+- Different models predict at different granularities (4-category vs 13-category ethnicity)
+- Census models predict: white, black, Asian, Hispanic
+- Wikipedia models predict detailed ethnic categories
+- Florida/NC models include regional variations
+
+## Recent Improvements (2024)
+
+### Enhanced Name Processing
+- **Wikipedia models now preserve all input names** - no more silent dropping of problematic names
+- Added normalization tracking columns: `name_normalized`, `name_normalized_clean`, `processing_status`
+- Better handling of accented characters, punctuation, and special characters
+- Improved logging shows exactly which names are skipped and why
+- Expected improvement from 60-80% to 85-95% success rates for diverse name datasets
+
+### New Output Columns
+- `processing_status`: Shows if name was "processed", "skipped_empty_original", or "skipped_empty_after_normalization"
+- `__name`: Full name used for processing
+- Normalization tracking helps debug problematic names
+
+This addresses issues with Canadian/international datasets containing accented names, titles, and special characters.
+
+## Model File Locations
+
+Pre-trained models are stored in `ethnicolr/models/*/lstm/` directories:
+- `.h5` files contain the neural network weights
+- `.csv` files contain vocabulary mappings
+- Models are loaded dynamically based on the prediction function used
