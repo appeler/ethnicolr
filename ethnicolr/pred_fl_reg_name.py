@@ -17,8 +17,7 @@ from .utils import arg_parser
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -27,6 +26,7 @@ class FloridaRegNameModel(EthnicolrModelClass):
     """
     Florida full-name LSTM prediction model.
     """
+
     MODELFN = "models/fl_voter_reg/lstm/fl_all_name_lstm.h5"
     VOCABFN = "models/fl_voter_reg/lstm/fl_all_name_vocab.csv"
     RACEFN = "models/fl_voter_reg/lstm/fl_name_race.csv"
@@ -39,14 +39,16 @@ class FloridaRegNameModel(EthnicolrModelClass):
         return (
             resource_filename(__name__, cls.MODELFN),
             resource_filename(__name__, cls.VOCABFN),
-            resource_filename(__name__, cls.RACEFN)
+            resource_filename(__name__, cls.RACEFN),
         )
 
     @classmethod
     def check_models_exist(cls):
         model_path, vocab_path, race_path = cls.get_model_paths()
         missing_files = [
-            path for path in [model_path, vocab_path, race_path] if not os.path.exists(path)
+            path
+            for path in [model_path, vocab_path, race_path]
+            if not os.path.exists(path)
         ]
 
         if missing_files:
@@ -61,12 +63,14 @@ class FloridaRegNameModel(EthnicolrModelClass):
         return True
 
     @classmethod
-    def pred_fl_reg_name(cls,
-                         df: pd.DataFrame,
-                         lname_col: str,
-                         fname_col: str,
-                         num_iter: int = 100,
-                         conf_int: float = 1.0) -> pd.DataFrame:
+    def pred_fl_reg_name(
+        cls,
+        df: pd.DataFrame,
+        lname_col: str,
+        fname_col: str,
+        num_iter: int = 100,
+        conf_int: float = 1.0,
+    ) -> pd.DataFrame:
         """
         Predict race/ethnicity using the Florida voter LSTM model.
         """
@@ -79,35 +83,70 @@ class FloridaRegNameModel(EthnicolrModelClass):
         model_path, vocab_path, race_path = cls.get_model_paths()
 
         working_df = df.copy()
+        original_length = len(working_df)
 
         # Generate a unique temp name column
         temp_col = "__ethnicolr_temp_name"
         while temp_col in working_df.columns:
             temp_col += "_"
 
-        logger.info(f"Processing {len(working_df)} full names")
+        logger.info(f"Processing {original_length} full names")
 
-        # Build full name and sanitize
-        working_df[temp_col] = (
-            working_df[lname_col].fillna("").astype(str).str.strip() + " " +
-            working_df[fname_col].fillna("").astype(str).str.strip()
-        ).str.title()
+        # Create original full name column for reference
+        working_df["__name"] = (
+            working_df[lname_col].fillna("").astype(str).str.strip()
+            + " "
+            + working_df[fname_col].fillna("").astype(str).str.strip()
+        ).str.strip()
 
-        before = len(working_df)
-        working_df = working_df[working_df[temp_col].str.strip().str.len() > 0]
-        after = len(working_df)
+        # Build full name and sanitize for processing
+        working_df[temp_col] = working_df["__name"].str.title()
 
-        if before > after:
-            logger.warning(f"Removed {before - after} rows with empty or invalid names.")
+        # Add normalization info columns
+        working_df["name_normalized"] = working_df["__name"]
+        working_df["name_normalized_clean"] = working_df[temp_col]
 
-        if after == 0:
-            raise ValueError("No valid names to process. Please check your input data.")
+        # Track which names will be skipped and why
+        empty_original = working_df["__name"].str.strip().str.len() == 0
+        empty_after_clean = working_df[temp_col].str.strip().str.len() == 0
+
+        # Create processing status column
+        working_df["processing_status"] = "processed"
+        working_df.loc[empty_original, "processing_status"] = "skipped_empty_original"
+        working_df.loc[empty_after_clean & ~empty_original, "processing_status"] = (
+            "skipped_empty_after_normalization"
+        )
+
+        # Count what we're about to skip
+        to_skip = working_df["processing_status"] != "processed"
+        skipped_count = to_skip.sum()
+
+        if skipped_count > 0:
+            skip_reasons = working_df[to_skip]["processing_status"].value_counts()
+            logger.warning(f"Will skip {skipped_count} names:")
+            for reason, count in skip_reasons.items():
+                logger.warning(f"  - {count} names: {reason}")
+
+        # Separate processable and skipped names
+        processable_df = working_df[~to_skip].copy()
+        skipped_df = working_df[to_skip].copy()
+
+        if len(processable_df) == 0:
+            logger.warning(
+                "No valid names to process after cleaning. Returning original data with status info."
+            )
+            result_df = working_df.copy()
+            result_df["race"] = None
+            return result_df
 
         try:
-            logger.info(f"Applying Florida voter name model (confidence interval: {conf_int})")
+            logger.info(
+                f"Applying Florida voter name model to {len(processable_df)} processable names (confidence interval: {conf_int})"
+            )
 
-            rdf = cls.transform_and_pred(
-                df=working_df,
+            # Run prediction only on processable names
+            pred_df = cls.transform_and_pred(
+                df=processable_df,
                 newnamecol=temp_col,
                 vocab_fn=vocab_path,
                 race_fn=race_path,
@@ -115,17 +154,50 @@ class FloridaRegNameModel(EthnicolrModelClass):
                 ngrams=cls.NGRAMS,
                 maxlen=cls.FEATURE_LEN,
                 num_iter=num_iter,
-                conf_int=conf_int
+                conf_int=conf_int,
             )
 
-            if temp_col in rdf.columns:
-                rdf.drop(columns=[temp_col], inplace=True)
+            # For skipped names, add empty prediction columns
+            if len(skipped_df) > 0:
+                # Get all prediction columns from successful predictions
+                pred_columns = set(pred_df.columns) - set(working_df.columns)
+                for col in pred_columns:
+                    if col not in skipped_df.columns:
+                        if col == "race":
+                            skipped_df[col] = None
+                        else:
+                            skipped_df[col] = float("nan")
 
-            predicted = rdf.dropna(subset=["race"]).shape[0]
-            logger.info(f"Predicted {predicted} of {after} rows ({predicted / after * 100:.1f}%)")
-            logger.info(f"Added columns: {', '.join(set(rdf.columns) - set(df.columns))}")
+            # Combine results
+            result_df = pd.concat([pred_df, skipped_df], ignore_index=True)
 
-            return rdf
+            # Sort by original order if possible
+            if "__rowindex" in result_df.columns:
+                result_df = result_df.sort_values("__rowindex").reset_index(drop=True)
+
+            # Clean up temporary columns
+            columns_to_drop = [temp_col, "__rowindex"]
+            result_df.drop(
+                columns=[col for col in columns_to_drop if col in result_df.columns],
+                inplace=True,
+                errors="ignore",
+            )
+
+            predicted = result_df["race"].notna().sum()
+            logger.info(
+                f"Successfully predicted {predicted} of {original_length} names ({predicted / original_length * 100:.1f}%)"
+            )
+
+            if skipped_count > 0:
+                logger.info(
+                    f"Skipped {skipped_count} names - see 'processing_status' column for details"
+                )
+
+            logger.info(
+                f"Added columns: {', '.join(set(result_df.columns) - set(df.columns))}"
+            )
+
+            return result_df
 
         except Exception as e:
             logger.error(f"Prediction error: {e}")
@@ -147,7 +219,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             default_out="fl-pred-name-output.csv",
             default_year=2017,
             year_choices=[2017],
-            first=True
+            first=True,
         )
 
         logger.info(f"Reading input file: {args.input}")
@@ -159,7 +231,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             lname_col=args.last,
             fname_col=args.first,
             num_iter=args.iter,
-            conf_int=args.conf
+            conf_int=args.conf,
         )
 
         if os.path.exists(args.output):

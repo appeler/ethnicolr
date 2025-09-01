@@ -1,6 +1,6 @@
 ## ethnicolr: Predict Race and Ethnicity From Name
 
-![PyPI Authenicated](https://notarypy.soodoku.workers.dev/badge/ethnicolr/0.14.0/ethnicolr-0.14.0-py3-none-any.whl)
+![PyPI Authenicated](https://notarypy.soodoku.workers.dev/badge/ethnicolr/0.18.4/ethnicolr-0.18.4-py3-none-any.whl)
 ![Test Badge](https://github.com/appeler/ethnicolr/workflows/test/badge.svg)
 [![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.python.org/pypi/ethnicolr)
 [![Anaconda version](https://anaconda.org/soodoku/ethnicolr/badges/version.svg)](https://anaconda.org/soodoku/ethnicolr/)
@@ -39,20 +39,31 @@ are known.
 
 ### Install
 
-We strongly recommend installing ethnicolor inside a Python virtual
+We strongly recommend installing ethnicolr inside a Python virtual
 environment (see [venv
 documentation](https://docs.python.org/3/library/venv.html#creating-virtual-environments))
 
-``` literal-block
+```bash
 pip install ethnicolr
 ```
 
 Notes:
 
 > - The models are run and verified on TensorFlow 2.x using Python 3.10
->   and 3.11
+>   through 3.12
 > - If you install on Windows, Theano installation typically needs
 >   admin. privileges on the shell.
+
+### Jupyter Quickstart
+
+```bash
+pip install ethnicolr jupyter
+ethnicolr_download_models
+jupyter notebook ethnicolr/examples
+```
+
+Open one of the example notebooks and run the cells to see the package in
+action.
 
 ## General API
 
@@ -77,6 +88,16 @@ optional arguments:
   -l LAST, --last LAST  Name of the column containing the last name
 ```
 
+### Cleaning Names
+
+The prediction models work best when first and last names contain only
+alphabetic characters. Before calling the CLI or Python APIs, strip out
+titles (e.g., *Dr*, *Hon.*), middle names, suffixes, punctuation and
+non\-ASCII characters. The `pred_wiki_name` command automatically
+normalizes names by removing diacritics and extraneous characters. If
+the tool still skips entries, check that the first and last name columns
+are not empty after cleaning.
+
 ## Examples
 
 To append census data from 2010 to a [file with column header in the
@@ -98,8 +119,8 @@ pred_wiki_name -o output-wiki-pred-race.csv -l last_name -f first_name input-wit
 
 ## Functions
 
-We expose six functions, each of which either takes a pandas DataFrame or
-a CSV.
+We expose several functions, each of which either takes a pandas DataFrame
+or a CSV.
 
 - **census_ln(df, lname_col, year=2000)**
   - What it does:

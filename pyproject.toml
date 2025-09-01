@@ -4,14 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ethnicolr"
-version = "0.15.0"
+version = "0.18.4"
 description = "Predict Race/Ethnicity Based on Sequence of Characters in Names"
 readme = "README.md"
-requires-python = ">=3.9, <3.12"
-license = {text = "MIT"}
+requires-python = ">=3.9, <3.13"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
-    {name = "Suriyan Laohaprapanon", email = "suriyant@gmail.com"},
-    {name = "Gaurav Sood", email = "gsood07@gmail.com"}
+    
+    {name = "Gaurav Sood", email = "contact@gsood.com"},
+    {name = "Suriyan Laohaprapanon", email = "suriyant@gmail.com"}
 ]
 keywords = ["race", "ethnicity", "names", "demographics", "machine-learning", "nlp"]
 classifiers = [
@@ -21,7 +23,6 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Utilities",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12"
 ]
@@ -90,10 +91,11 @@ all = [
 ]
 
 [tool.setuptools]
-packages = ["ethnicolr"]
 include-package-data = true
 
-
+[tool.setuptools.packages.find]
+include = ["ethnicolr*"]
+exclude = ["ethnicolr.tests*"]
 
 [tool.setuptools.package-data]
 ethnicolr = [
