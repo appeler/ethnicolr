@@ -1,6 +1,6 @@
 ## ethnicolr: Predict Race and Ethnicity From Name
 
-![PyPI Authenicated](https://notarypy.soodoku.workers.dev/badge/ethnicolr/0.15.0/ethnicolr-0.15.0-py3-none-any.whl)
+![PyPI Authenicated](https://notarypy.soodoku.workers.dev/badge/ethnicolr/0.18.3/ethnicolr-0.18.3-py3-none-any.whl)
 ![Test Badge](https://github.com/appeler/ethnicolr/workflows/test/badge.svg)
 [![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.python.org/pypi/ethnicolr)
 [![Anaconda version](https://anaconda.org/soodoku/ethnicolr/badges/version.svg)](https://anaconda.org/soodoku/ethnicolr/)
@@ -39,20 +39,31 @@ are known.
 
 ### Install
 
-We strongly recommend installing ethnicolor inside a Python virtual
+We strongly recommend installing ethnicolr inside a Python virtual
 environment (see [venv
 documentation](https://docs.python.org/3/library/venv.html#creating-virtual-environments))
 
-``` literal-block
+```bash
 pip install ethnicolr
 ```
 
 Notes:
 
 > - The models are run and verified on TensorFlow 2.x using Python 3.10
->   and 3.11
+>   through 3.12
 > - If you install on Windows, Theano installation typically needs
 >   admin. privileges on the shell.
+
+### Jupyter Quickstart
+
+```bash
+pip install ethnicolr jupyter
+ethnicolr_download_models
+jupyter notebook ethnicolr/examples
+```
+
+Open one of the example notebooks and run the cells to see the package in
+action.
 
 ## General API
 
@@ -108,8 +119,8 @@ pred_wiki_name -o output-wiki-pred-race.csv -l last_name -f first_name input-wit
 
 ## Functions
 
-We expose six functions, each of which either takes a pandas DataFrame or
-a CSV.
+We expose several functions, each of which either takes a pandas DataFrame
+or a CSV.
 
 - **census_ln(df, lname_col, year=2000)**
   - What it does:
