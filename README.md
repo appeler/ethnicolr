@@ -5,7 +5,6 @@
 [![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.python.org/pypi/ethnicolr)
 [![Documentation](https://img.shields.io/badge/docs-github.io-blue)](https://appeler.github.io/ethnicolr/)
 [![PePy Downloads](https://static.pepy.tech/badge/ethnicolr)](https://www.pepy.tech/projects/ethnicolr)
-[![Python](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/appeler/ethnicolr/main/pyproject.toml&query=$.tool.poetry.dependencies.python&label=Python)](https://www.python.org/downloads/)
 
 We exploit the US census data, the Florida voting registration data, and
 the Wikipedia data collected by Skiena and colleagues to predict race
