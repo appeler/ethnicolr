@@ -75,7 +75,8 @@ test = [
 ]
 docs = [
     "sphinx",
-    "sphinx_rtd_theme"
+    "sphinx_rtd_theme",
+    "tomli; python_version<'3.11'"
 ]
 all = [
     "check-manifest",
