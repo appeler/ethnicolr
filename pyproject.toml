@@ -1,15 +1,14 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "build>=0.7.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.21.1"]
+build-backend = "hatchling.build"
 
 [project]
 name = "ethnicolr"
 version = "0.18.4"
 description = "Predict Race/Ethnicity Based on Sequence of Characters in Names"
 readme = "README.md"
-requires-python = ">=3.9, <3.13"
-license = "MIT"
-license-files = ["LICENSE"]
+requires-python = ">=3.10"
+license = {text = "MIT"}
 authors = [
     
     {name = "Gaurav Sood", email = "contact@gsood.com"},
@@ -23,8 +22,10 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Utilities",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12"
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13"
 ]
 dependencies = [
   "pandas>=1.3.0",
@@ -34,7 +35,7 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/appeler/ethnicolr"
 "Bug Reports" = "https://github.com/appeler/ethnicolr/issues"
-"Documentation" = "https://github.com/appeler/ethnicolr#readme"
+"Documentation" = "https://appeler.github.io/ethnicolr/"
 "Source Code" = "https://github.com/appeler/ethnicolr"
 
 [project.scripts]
@@ -62,79 +63,133 @@ inference = [
 ]
 base = ["pandas", "numpy"]
 dev = [
-    "check-manifest",
-    "flake8",
-    "black",
-    "isort"
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-xdist>=3.0",
+    "ruff>=0.7.0",
+    "mypy>=1.0",
+    "black>=24.0",
+    "isort>=5.0",
+    "pre-commit>=3.0",
 ]
 test = [
-    "coverage",
-    "pytest",
-    "pytest-cov",
-    "tox"
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-xdist>=3.0",
 ]
 docs = [
-    "sphinx",
-    "sphinx_rtd_theme",
-    "tomli; python_version<'3.11'"
-]
-all = [
-    "check-manifest",
-    "flake8",
-    "black",
-    "isort",
-    "coverage",
-    "pytest",
-    "pytest-cov",
-    "tox",
-    "sphinx",
-    "sphinx_rtd_theme"
+    "sphinx>=7.0",
+    "furo>=2024.1.29",
+    "sphinx-autodoc-typehints>=1.25",
+    "sphinx-copybutton>=0.5",
+    "myst-parser>=2.0",
 ]
 
-[tool.setuptools]
-include-package-data = true
-
-[tool.setuptools.packages.find]
-include = ["ethnicolr*"]
-exclude = ["ethnicolr.tests*"]
-
-[tool.setuptools.package-data]
-ethnicolr = [
-    "data/census/census_2000.csv",
-    "data/census/census_2010.csv",
-    "data/census/readme.md",
-    "data/census/*.pdf",
-    "data/census/*.xlsx",
-    "data/census/*.R",
-    "data/census/hispanic_ln/*.csv",
-    "data/census/hispanic_ln/*.pdf",
-    "data/wiki/*.*",
-    "data/fl_voter_reg/*.md",
-    "data/fl_voter_reg/*.ipynb",
-    "data/nc_voter_reg/*.md", 
-    "data/nc_voter_reg/*.ipynb",
-    "models/*.ipynb",
-    "models/*.md",
-    "models/census/lstm/*.h5",
-    "models/census/lstm/*.csv",
-    "models/wiki/lstm/*.h5",
-    "models/wiki/lstm/*.csv",
-    "models/fl_voter_reg/lstm/*.h5",
-    "models/fl_voter_reg/lstm/*.csv",
-    "models/nc_voter_reg/lstm/*.h5",
-    "models/nc_voter_reg/lstm/*.csv",
-    "data/input*.csv",
-    "examples/*.ipynb"
+[tool.hatch.build]
+exclude = [
+    "/.github",
+    "/.venv",
+    "/docs",
+    "/tests",
+    "/.gitignore",
+    "/.pre-commit-config.yaml",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = ["ethnicolr"]
 
+
+# Ruff configuration
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    "docs",
+    ".eggs",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # imported but unused
+"tests/*" = ["S101"]  # use of assert
+
+[tool.ruff.lint.isort]
+known-first-party = ["ethnicolr"]
+
+# Black configuration
 [tool.black]
 line-length = 88
-target-version = ["py38", "py39", "py310", "py311", "py312"]
+target-version = ["py310", "py311", "py312"]
 
+# isort configuration
 [tool.isort]
 profile = "black"
+line_length = 88
+known_first_party = ["ethnicolr"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+minversion = "7.0"
+testpaths = ["ethnicolr/tests"]
 python_files = "test_*.py"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--cov=ethnicolr",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+
+# mypy configuration
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["ethnicolr"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
