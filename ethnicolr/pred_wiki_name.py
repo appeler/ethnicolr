@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Wikipedia Name-based Race/Ethnicity Prediction Module.
 
@@ -11,10 +10,8 @@ import os
 import re
 import sys
 import unicodedata
-from typing import List, Optional
 
 import numpy as np
-
 import pandas as pd
 from pkg_resources import resource_filename
 
@@ -230,7 +227,7 @@ class WikiNameModel(EthnicolrModelClass):
 pred_wiki_name = WikiNameModel.pred_wiki_name
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 

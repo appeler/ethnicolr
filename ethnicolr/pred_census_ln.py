@@ -1,27 +1,26 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Census Last Name Race/Ethnicity Prediction Module.
 
 Uses LSTM models trained on U.S. Census data to predict race/ethnicity from last names.
 """
 
-import sys
-import os
 import logging
-from typing import Optional, List
+import os
+import sys
+
 import pandas as pd
 from pkg_resources import resource_filename
+
 from .ethnicolr_class import EthnicolrModelClass
 from .utils import arg_parser
 
 # Suppress TensorFlow noise
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -34,14 +33,18 @@ class CensusLnModel(EthnicolrModelClass):
     def get_model_paths(cls, year):
         return (
             resource_filename(__name__, f"models/census/lstm/census{year}_ln_lstm.h5"),
-            resource_filename(__name__, f"models/census/lstm/census{year}_ln_vocab.csv"),
-            resource_filename(__name__, f"models/census/lstm/census{year}_race.csv")
+            resource_filename(
+                __name__, f"models/census/lstm/census{year}_ln_vocab.csv"
+            ),
+            resource_filename(__name__, f"models/census/lstm/census{year}_race.csv"),
         )
 
     @classmethod
     def check_models_exist(cls, year):
         model_path, vocab_path, race_path = cls.get_model_paths(year)
-        missing = [p for p in [model_path, vocab_path, race_path] if not os.path.exists(p)]
+        missing = [
+            p for p in [model_path, vocab_path, race_path] if not os.path.exists(p)
+        ]
         if missing:
             msg = (
                 f"Required model files not found for Census {year}:\n"
@@ -54,12 +57,14 @@ class CensusLnModel(EthnicolrModelClass):
         return True
 
     @classmethod
-    def pred_census_ln(cls,
-                       df: pd.DataFrame,
-                       lname_col: str,
-                       year: int = 2010,
-                       num_iter: int = 100,
-                       conf_int: float = 1.0) -> pd.DataFrame:
+    def pred_census_ln(
+        cls,
+        df: pd.DataFrame,
+        lname_col: str,
+        year: int = 2010,
+        num_iter: int = 100,
+        conf_int: float = 1.0,
+    ) -> pd.DataFrame:
         if year not in [2000, 2010]:
             raise ValueError("Census year must be either 2000 or 2010")
 
@@ -80,11 +85,13 @@ class CensusLnModel(EthnicolrModelClass):
             ngrams=cls.NGRAMS,
             maxlen=cls.FEATURE_LEN,
             num_iter=num_iter,
-            conf_int=conf_int
+            conf_int=conf_int,
         )
 
         pred_count = rdf.dropna(subset=["race"]).shape[0]
-        logger.info(f"Predicted {pred_count} of {len(df)} rows ({pred_count / len(df) * 100:.1f}%)")
+        logger.info(
+            f"Predicted {pred_count} of {len(df)} rows ({pred_count / len(df) * 100:.1f}%)"
+        )
         logger.info(f"Added columns: {', '.join(set(rdf.columns) - set(df.columns))}")
 
         return rdf
@@ -105,7 +112,7 @@ def download_models(year=None):
         logger.info(f"Downloaded Census {y} model files successfully")
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
@@ -115,12 +122,13 @@ def main(argv: Optional[List[str]] = None) -> int:
             title="Predict Race/Ethnicity by last name using Census LSTM model",
             default_out="census-pred-ln-output.csv",
             default_year=2010,
-            year_choices=[2000, 2010]
+            year_choices=[2000, 2010],
         )
 
         parser.add_argument(
-            "--download-models", action="store_true",
-            help="Download required model files"
+            "--download-models",
+            action="store_true",
+            help="Download required model files",
         )
 
         args = parser.parse_args(argv)
@@ -138,7 +146,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             lname_col=args.last,
             year=args.year,
             num_iter=args.iter,
-            conf_int=args.conf
+            conf_int=args.conf,
         )
 
         if os.path.exists(args.output):

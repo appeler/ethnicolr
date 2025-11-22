@@ -1,18 +1,16 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Tests for Wiki models
 
 """
 
-import os
-import shutil
 import unittest
+
 import pandas as pd
+
 from ethnicolr.pred_wiki_ln import pred_wiki_ln
 from ethnicolr.pred_wiki_name import pred_wiki_name
-from . import capture
 
 race = [
     "Asian,GreaterEastAsian,EastAsian",
@@ -50,8 +48,7 @@ race_mean = [
 class TestPredWiki(unittest.TestCase):
     def setUp(self):
         names = [
-            {"last": "smith", "first": "john",
-             "true_race": "GreaterEuropean,British"},
+            {"last": "smith", "first": "john", "true_race": "GreaterEuropean,British"},
             {
                 "last": "zhang",
                 "first": "simon",
@@ -67,8 +64,7 @@ class TestPredWiki(unittest.TestCase):
         odf = pred_wiki_ln(self.df, "last")
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns
-                     if col in race]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
                 == 1.0
             )
         )
@@ -78,8 +74,7 @@ class TestPredWiki(unittest.TestCase):
         odf = pred_wiki_name(self.df, "last", "first")
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns
-                     if col in race]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns if col in race]].sum(axis=1).round(1)
                 == 1.0
             )
         )
@@ -89,8 +84,9 @@ class TestPredWiki(unittest.TestCase):
         odf = pred_wiki_ln(self.df, "last", conf_int=0.9)
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns
-                     if col in race_mean]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns if col in race_mean]]
+                .sum(axis=1)
+                .round(1)
                 == 1.0
             )
         )
@@ -100,8 +96,9 @@ class TestPredWiki(unittest.TestCase):
         odf = pred_wiki_name(self.df, "last", "first", conf_int=0.9)
         self.assertTrue(
             all(
-                odf[[col for col in odf.columns
-                     if col in race_mean]].sum(axis=1).round(1)
+                odf[[col for col in odf.columns if col in race_mean]]
+                .sum(axis=1)
+                .round(1)
                 == 1.0
             )
         )
@@ -135,6 +132,7 @@ class TestPredWiki(unittest.TestCase):
         out = pred_wiki_name(tricky_df, "last", "first")
         self.assertEqual(len(out), len(tricky_df))
         self.assertTrue(out["processing_status"].eq("processed").all())
+
 
 if __name__ == "__main__":
     unittest.main()

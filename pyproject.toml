@@ -132,6 +132,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # imported but unused
 "tests/*" = ["S101"]  # use of assert
+"*.ipynb" = ["E402", "E722", "UP031", "B905", "F821", "F811", "W293", "F841"]  # ignore notebook linting issues
 
 [tool.ruff.lint.isort]
 known-first-party = ["ethnicolr"]

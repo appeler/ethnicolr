@@ -1,34 +1,31 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Census Last Name Data Module.
 
 Enriches input data with demographic percentages from U.S. Census (2000 or 2010).
 """
 
-import sys
-import os
-import logging
-from typing import List, Optional
-import pandas as pd
 import importlib.resources as resources
+import logging
+import os
+import sys
+
+import pandas as pd
+
 from .ethnicolr_class import EthnicolrModelClass
 from .utils import arg_parser
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # Constants
 CENSUS2000 = str(resources.files("ethnicolr") / "data/census/census_2000.csv")
 CENSUS2010 = str(resources.files("ethnicolr") / "data/census/census_2010.csv")
-CENSUS_COLS = [
-    'pctwhite', 'pctblack', 'pctapi', 'pctaian',
-    'pct2prace', 'pcthispanic'
-]
+CENSUS_COLS = ["pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic"]
+
 
 class CensusLnData:
     """Handles Census Last Name demographic enrichment."""
@@ -37,10 +34,9 @@ class CensusLnData:
     census_year = None
 
     @classmethod
-    def census_ln(cls,
-                  df: pd.DataFrame,
-                  lname_col: str,
-                  year: int = 2000) -> pd.DataFrame:
+    def census_ln(
+        cls, df: pd.DataFrame, lname_col: str, year: int = 2000
+    ) -> pd.DataFrame:
         if year not in [2000, 2010]:
             raise ValueError("Census year must be either 2000 or 2010")
 
@@ -59,15 +55,16 @@ class CensusLnData:
 
             try:
                 census_df = pd.read_csv(
-                    census_file,
-                    usecols=['name'] + CENSUS_COLS
-                ).dropna(subset=['name'])
+                    census_file, usecols=["name"] + CENSUS_COLS
+                ).dropna(subset=["name"])
 
                 census_df.columns = [temp_col] + CENSUS_COLS
                 cls.census_df = census_df
                 cls.census_year = year
 
-                logger.info(f"Loaded {len(cls.census_df)} last names from Census {year}")
+                logger.info(
+                    f"Loaded {len(cls.census_df)} last names from Census {year}"
+                )
             except Exception as e:
                 logger.error(f"Failed to load Census data: {e}")
                 raise
@@ -75,7 +72,7 @@ class CensusLnData:
         logger.info(f"Merging demographic data for {len(df)} records...")
         start_cols = set(df.columns)
 
-        rdf = pd.merge(df, cls.census_df, how='left', on=temp_col)
+        rdf = pd.merge(df, cls.census_df, how="left", on=temp_col)
 
         if temp_col in df.columns:
             df.drop(columns=[temp_col], inplace=True)
@@ -83,7 +80,9 @@ class CensusLnData:
             rdf.drop(columns=[temp_col], inplace=True)
 
         matched = rdf.dropna(subset=[CENSUS_COLS[0]]).shape[0]
-        logger.info(f"Matched {matched} of {len(rdf)} rows ({matched / len(rdf) * 100:.1f}%)")
+        logger.info(
+            f"Matched {matched} of {len(rdf)} rows ({matched / len(rdf) * 100:.1f}%)"
+        )
 
         new_cols = set(rdf.columns) - start_cols
         logger.info(f"Added columns: {', '.join(sorted(new_cols))}")
@@ -95,7 +94,7 @@ class CensusLnData:
 census_ln = CensusLnData.census_ln
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
@@ -105,7 +104,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             title="Append Census demographic data by last name",
             default_out="census-output.csv",
             default_year=2010,
-            year_choices=[2000, 2010]
+            year_choices=[2000, 2010],
         )
 
         logger.info(f"Reading input file: {args.input}")

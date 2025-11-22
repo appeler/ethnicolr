@@ -53,7 +53,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/_build/html
+          path: docs/build/html
 
   deploy:
     if: github.ref == 'refs/heads/master'

@@ -1,17 +1,17 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Wikipedia Last Name-based Race/Ethnicity Prediction Module.
 
 Predicts race/ethnicity from last names using an LSTM model trained on Wikipedia data.
 """
 
-import sys
-import os
 import logging
-from typing import List, Optional
+import os
+import sys
+
 import pandas as pd
 from pkg_resources import resource_filename
+
 from .ethnicolr_class import EthnicolrModelClass
 from .utils import arg_parser
 
@@ -188,7 +188,7 @@ class WikiLnModel(EthnicolrModelClass):
 pred_wiki_ln = WikiLnModel.pred_wiki_ln
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 

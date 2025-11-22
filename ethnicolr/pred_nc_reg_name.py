@@ -1,17 +1,17 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 North Carolina Voter Registration Name-based Race/Ethnicity Prediction Module.
 
 Predicts race/ethnicity using full names based on an LSTM model trained on NC voter data (12-category).
 """
 
-import sys
-import os
 import logging
-from typing import List, Optional
+import os
+import sys
+
 import pandas as pd
 from pkg_resources import resource_filename
+
 from .ethnicolr_class import EthnicolrModelClass
 from .utils import arg_parser
 
@@ -208,7 +208,7 @@ class NCRegNameModel(EthnicolrModelClass):
 pred_nc_reg_name = NCRegNameModel.pred_nc_reg_name
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 

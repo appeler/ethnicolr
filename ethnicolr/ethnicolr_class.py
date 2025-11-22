@@ -1,16 +1,15 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import logging
+import warnings
 from importlib.resources import files
 from itertools import chain
-import warnings
 
 import numpy as np
 import pandas as pd
+from tensorflow.keras.layers import LSTM as _KerasLSTM
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
-from tensorflow.keras.layers import LSTM as _KerasLSTM
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +69,7 @@ class EthnicolrModelClass:
 
         final_length = len(df)
         logger.info(
-            f"Data filtering summary: {original_length} → {final_length} rows (kept {final_length/original_length*100:.1f}%)"
+            f"Data filtering summary: {original_length} → {final_length} rows (kept {final_length / original_length * 100:.1f}%)"
         )
 
         return df
@@ -78,9 +77,10 @@ class EthnicolrModelClass:
     @staticmethod
     def n_grams(seq, n: int = 1):
         """Returns an iterator over n-grams given a sequence"""
-        shiftToken = lambda i: (el for j, el in enumerate(seq) if j >= i)
-        shiftedTokens = (shiftToken(i) for i in range(n))
-        return zip(*shiftedTokens)
+        def shift_token(i):
+            return (el for j, el in enumerate(seq) if j >= i)
+        shiftedTokens = (shift_token(i) for i in range(n))
+        return zip(*shiftedTokens, strict=False)
 
     @staticmethod
     def range_ngrams(seq, ngramRange=(1, 2)):
@@ -95,7 +95,7 @@ class EthnicolrModelClass:
         if isinstance(n, tuple):
             ngram_iter = EthnicolrModelClass.range_ngrams(text, n)
         else:
-            ngram_iter = zip(*[text[i:] for i in range(n)])
+            ngram_iter = zip(*[text[i:] for i in range(n)], strict=False)
 
         return [
             vocab.index("".join(gram)) if "".join(gram) in vocab else 0
