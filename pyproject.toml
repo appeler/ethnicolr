@@ -28,8 +28,8 @@ classifiers = [
     "Programming Language :: Python :: 3.13"
 ]
 dependencies = [
-  "pandas>=1.3.0",
-  "numpy"
+  "pandas>=2.2.0",
+  "numpy>=1.24.4"
 ]
 
 [project.urls]
@@ -52,14 +52,14 @@ ethnicolr_download_models = "ethnicolr.utils.download:main"
 
 [project.optional-dependencies]
 macos = [
-  "tensorflow-macos==2.13.0",  # Apple Silicon only
-  "keras==2.13.1"              # must match TF version
+  "tensorflow-macos>=2.15.0",  # Apple Silicon compatible with newer numpy
+  "keras>=2.15.0"              # must match TF version
 ]
 linux = [
-  "tensorflow>=2.13,<2.14"
+  "tensorflow>=2.15.0"
 ]
 inference = [
-  "tensorflow>=2.13,<2.14"
+  "tensorflow>=2.15.0"
 ]
 base = ["pandas", "numpy"]
 dev = [
@@ -98,6 +98,30 @@ exclude = [
 [tool.hatch.build.targets.wheel]
 packages = ["ethnicolr"]
 
+[dependency-groups]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-xdist>=3.0",
+    "ruff>=0.7.0",
+    "mypy>=1.0",
+    "black>=24.0",
+    "isort>=5.0",
+    "pre-commit>=3.0",
+]
+test = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-xdist>=3.0",
+]
+docs = [
+    "sphinx>=7.0",
+    "furo>=2024.1.29",
+    "sphinx-autodoc-typehints>=1.25",
+    "sphinx-copybutton>=0.5",
+    "myst-parser>=2.0",
+]
+
 
 # Ruff configuration
 [tool.ruff]
@@ -111,6 +135,8 @@ exclude = [
     ".venv",
     "docs",
     ".eggs",
+    "*.ipynb",
+    "ethnicolr/models/*.ipynb",
 ]
 
 [tool.ruff.lint]

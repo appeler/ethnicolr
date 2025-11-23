@@ -28,7 +28,7 @@ ethnicolr is a Python package that predicts race and ethnicity from names using 
 ### Documentation
 - Build documentation locally: `pip install -e .[docs]` then `cd docs && make html`
 - View built docs: Open `docs/build/html/index.html` in browser
-- Documentation is automatically deployed to GitHub Pages on pushes to master
+- Documentation is automatically deployed to GitHub Pages on pushes to main
 - Live documentation: https://appeler.github.io/ethnicolr/
 - Documentation configuration reads metadata from `pyproject.toml` automatically
 

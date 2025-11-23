@@ -61,9 +61,9 @@ def app():
     predict race and ethnicity based on first and last name or just the last name.'
 
     #### Aim
-    
+
     We are releasing this software in the hope that it enables activists and researchers\
-    
+
     1. Highlight biases
     2. Fight biases
     3. Prevent biases
@@ -108,14 +108,6 @@ def app():
         function = sidebar_options[selected_function]
         if st.button("Run"):
             transformed_df = function(df, lname_col=lname_col, year=year)
-            group_cols = [
-                "pctwhite",
-                "pctblack",
-                "pctapi",
-                "pctaian",
-                "pct2prace",
-                "pcthispanic",
-            ]
             st.dataframe(transformed_df)
             download_file(transformed_df)
 

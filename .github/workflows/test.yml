@@ -2,9 +2,9 @@ name: test
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -13,27 +13,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      
       - name: Install uv
         uses: astral-sh/setup-uv@v3
         with:
           version: "latest"
       
+      - name: Set up Python
+        run: uv python install 3.11
+      
       - name: Install dependencies
-        run: |
-          uv pip install --system ruff mypy
+        run: uv sync --group dev
       
       - name: Run ruff
         run: |
-          ruff check .
-          ruff format --check .
+          uv run ruff check .
+          uv run ruff format --check .
       
       - name: Run mypy
-        run: mypy ethnicolr --ignore-missing-imports
+        run: uv run mypy ethnicolr --ignore-missing-imports
         continue-on-error: true
 
   test:
@@ -41,34 +38,32 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.11', '3.12', '3.13']
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
         with:
           version: "latest"
 
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
       - name: Install dependencies
         run: |
-          uv pip install --system -e ".[test]"
+          uv sync --group test
           
           # Add TensorFlow depending on platform
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            uv pip install --system tensorflow-macos==2.13.0 keras==2.13.1
+            uv add tensorflow-macos keras
           else
-            uv pip install --system "tensorflow>=2.13,<2.14"
+            uv add tensorflow
           fi
 
       - name: Build package
         run: uv build
 
       - name: Run tests
-        run: pytest ethnicolr/tests/ -v --cov=ethnicolr
+        run: uv run pytest ethnicolr/tests/ -v --cov=ethnicolr

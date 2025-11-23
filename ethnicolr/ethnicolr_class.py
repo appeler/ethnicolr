@@ -77,8 +77,10 @@ class EthnicolrModelClass:
     @staticmethod
     def n_grams(seq, n: int = 1):
         """Returns an iterator over n-grams given a sequence"""
+
         def shift_token(i):
             return (el for j, el in enumerate(seq) if j >= i)
+
         shiftedTokens = (shift_token(i) for i in range(n))
         return zip(*shiftedTokens, strict=False)
 

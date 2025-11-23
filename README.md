@@ -142,7 +142,7 @@ or a CSV.
 
 - Output: Appends the following columns to the pandas DataFrame or CSV:
   pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic. See
-  [here](https://github.com/appeler/ethnicolr/blob/master/ethnicolr/data/census/census_2000.pdf) for what the column names mean.
+  [here](https://github.com/appeler/ethnicolr/blob/main/ethnicolr/data/census/census_2000.pdf) for what the column names mean.
 
   ``` literal-block
   >>> import pandas as pd
