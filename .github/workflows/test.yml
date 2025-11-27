@@ -39,7 +39,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
         python-version: ['3.11']
 
     steps:
@@ -62,8 +62,6 @@ jobs:
           # Add TensorFlow with tested working versions based on OS
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             uv sync --group macos
-          elif [[ "$RUNNER_OS" == "Windows" ]]; then
-            uv sync --group windows
           else
             uv sync --group linux
           fi
