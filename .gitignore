@@ -17,3 +17,4 @@ docs/build
 docs/source/_build
 /testenv
 /testenv311
+coverage.xml

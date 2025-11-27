@@ -104,8 +104,12 @@ dev = [
 ]
 test = [
     "pytest>=7.0",
-    "pytest-cov>=4.0",
+    "pytest-cov>=4.0", 
     "pytest-xdist>=3.0",
+    # Include TensorFlow for tests since all test modules import it
+    "tensorflow>=2.16.2,<=2.17.0",
+    "typing-extensions==4.4.0",
+    "keras>=3.12.0"
 ]
 docs = [
     "sphinx>=7.0",
