@@ -200,9 +200,10 @@ class EthnicolrModelClass:
             summary.columns = [
                 "_".join(filter(None, map(str, col))) for col in summary.columns
             ]
-            summary.columns = summary.columns.str.replace(
-                "<lambda_0>", "lb"
-            ).str.replace("<lambda_1>", "ub")
+            summary.columns = [
+                col.replace("<lambda_0>", "lb").replace("<lambda_1>", "ub")
+                for col in summary.columns
+            ]
 
             # Choose race with highest mean
             means = [col for col in summary.columns if col.endswith("_mean")]

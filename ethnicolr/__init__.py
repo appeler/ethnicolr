@@ -24,9 +24,15 @@ _LAZY_IMPORTS = {
     "census_ln": ("ethnicolr.census_ln", "census_ln"),
     "pred_census_ln": ("ethnicolr.pred_census_ln", "pred_census_ln"),
     "pred_fl_reg_ln": ("ethnicolr.pred_fl_reg_ln", "pred_fl_reg_ln"),
-    "pred_fl_reg_ln_five_cat": ("ethnicolr.pred_fl_reg_ln_five_cat", "pred_fl_reg_ln_five_cat"),
+    "pred_fl_reg_ln_five_cat": (
+        "ethnicolr.pred_fl_reg_ln_five_cat",
+        "pred_fl_reg_ln_five_cat",
+    ),
     "pred_fl_reg_name": ("ethnicolr.pred_fl_reg_name", "pred_fl_reg_name"),
-    "pred_fl_reg_name_five_cat": ("ethnicolr.pred_fl_reg_name_five_cat", "pred_fl_reg_name_five_cat"),
+    "pred_fl_reg_name_five_cat": (
+        "ethnicolr.pred_fl_reg_name_five_cat",
+        "pred_fl_reg_name_five_cat",
+    ),
     "pred_nc_reg_name": ("ethnicolr.pred_nc_reg_name", "pred_nc_reg_name"),
     "pred_wiki_ln": ("ethnicolr.pred_wiki_ln", "pred_wiki_ln"),
     "pred_wiki_name": ("ethnicolr.pred_wiki_name", "pred_wiki_name"),
