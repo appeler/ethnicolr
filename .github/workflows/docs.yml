@@ -34,16 +34,13 @@ jobs:
       - name: Set up Python
         run: uv python install 3.11
 
-      - name: Install documentation dependencies
-        run: uv sync --group docs
-
-      - name: Install TensorFlow for documentation imports
-        run: uv sync --group linux
+      - name: Install dependencies
+        run: |
+          uv sync --group docs
 
       - name: Build documentation
         run: |
-          cd docs
-          make html
+          uv run sphinx-build -b html docs/source docs/build/html
 
       - name: Setup Pages
         if: github.ref == 'refs/heads/master'
