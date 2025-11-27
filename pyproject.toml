@@ -66,9 +66,9 @@ linux = [
   "keras>=3.12.0"
 ]
 windows = [
-  "tensorflow-cpu>=2.16.0,<=2.20.0",  # CPU-only TensorFlow avoids tensorflow-io-gcs-filesystem dependency
-  "typing-extensions==4.4.0", 
-  "keras>=3.12.0"
+  "tensorflow==2.15.0",  # Last stable version with Windows compatibility
+  "tensorflow-io-gcs-filesystem==0.31.0",  # Last version with Windows wheels
+  "typing-extensions==4.4.0"
 ]
 base = ["pandas", "numpy"]
 dev = [
@@ -133,9 +133,9 @@ macos = [
     "keras>=3.12.0"
 ]
 windows = [
-    "tensorflow-cpu>=2.16.0,<=2.20.0",  # CPU-only TensorFlow avoids tensorflow-io-gcs-filesystem dependency
-    "typing-extensions==4.4.0", 
-    "keras>=3.12.0"
+    "tensorflow==2.15.0",  # Last stable version with Windows compatibility
+    "tensorflow-io-gcs-filesystem==0.31.0",  # Last version with Windows wheels
+    "typing-extensions==4.4.0"
 ]
 
 
