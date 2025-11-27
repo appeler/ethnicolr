@@ -34,8 +34,11 @@ jobs:
       - name: Set up Python
         run: uv python install 3.11
 
-      - name: Install dependencies
+      - name: Install documentation dependencies
         run: uv sync --group docs
+
+      - name: Install TensorFlow for documentation imports
+        run: uv sync --group linux
 
       - name: Build documentation
         run: |
