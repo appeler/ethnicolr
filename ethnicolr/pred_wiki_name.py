@@ -5,15 +5,17 @@ Wikipedia Name-based Race/Ethnicity Prediction Module.
 Predicts race/ethnicity using full names based on LSTM models trained on Wikipedia data.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import re
 import sys
 import unicodedata
+from importlib import resources
 
 import numpy as np
 import pandas as pd
-from pkg_resources import resource_filename
 
 from .ethnicolr_class import EthnicolrModelClass
 from .utils import arg_parser
@@ -58,9 +60,9 @@ class WikiNameModel(EthnicolrModelClass):
     @classmethod
     def get_model_paths(cls):
         return (
-            resource_filename(__name__, cls.MODELFN),
-            resource_filename(__name__, cls.VOCABFN),
-            resource_filename(__name__, cls.RACEFN),
+            str(resources.files(__name__.split(".")[0]) / cls.MODELFN),
+            str(resources.files(__name__.split(".")[0]) / cls.VOCABFN),
+            str(resources.files(__name__.split(".")[0]) / cls.RACEFN),
         )
 
     @classmethod

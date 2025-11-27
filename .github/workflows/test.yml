@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ['3.11', '3.12', '3.13']
+        python-version: ['3.11']
 
     steps:
       - uses: actions/checkout@v4
@@ -55,11 +55,11 @@ jobs:
         run: |
           uv sync --group test
           
-          # Add TensorFlow depending on platform
+          # Add TensorFlow with tested working versions
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            uv add tensorflow-macos keras
+            uv sync --group macos
           else
-            uv add tensorflow
+            uv sync --group linux
           fi
 
       - name: Build package

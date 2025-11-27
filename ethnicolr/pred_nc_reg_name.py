@@ -5,12 +5,14 @@ North Carolina Voter Registration Name-based Race/Ethnicity Prediction Module.
 Predicts race/ethnicity using full names based on an LSTM model trained on NC voter data (12-category).
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import sys
+from importlib import resources
 
 import pandas as pd
-from pkg_resources import resource_filename
 
 from .ethnicolr_class import EthnicolrModelClass
 from .utils import arg_parser
@@ -37,9 +39,9 @@ class NCRegNameModel(EthnicolrModelClass):
     @classmethod
     def get_model_paths(cls):
         return (
-            resource_filename(__name__, cls.MODELFN),
-            resource_filename(__name__, cls.VOCABFN),
-            resource_filename(__name__, cls.RACEFN),
+            str(resources.files(__name__.split(".")[0]) / cls.MODELFN),
+            str(resources.files(__name__.split(".")[0]) / cls.VOCABFN),
+            str(resources.files(__name__.split(".")[0]) / cls.RACEFN),
         )
 
     @classmethod

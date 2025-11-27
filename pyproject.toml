@@ -7,7 +7,7 @@ name = "ethnicolr"
 version = "0.18.4"
 description = "Predict Race/Ethnicity Based on Sequence of Characters in Names"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11,<3.12"
 license = {text = "MIT"}
 authors = [
     
@@ -22,14 +22,11 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Utilities",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13"
+    "Programming Language :: Python :: 3.11"
 ]
 dependencies = [
   "pandas>=2.2.0",
-  "numpy>=1.24.4"
+  "numpy>=1.26.0,<3.0.0"
 ]
 
 [project.urls]
@@ -51,15 +48,22 @@ pred_nc_reg_name = "ethnicolr.pred_nc_reg_name:main"
 ethnicolr_download_models = "ethnicolr.utils.download:main"
 
 [project.optional-dependencies]
+# Tested working combinations for ML functionality (Python 3.11 only)
+inference = [
+  "tensorflow>=2.16.2,<=2.17.0",  # Tested working versions
+  "typing-extensions==4.4.0",     # Required for TensorFlow compatibility
+  "keras>=3.12.0"                 # Compatible with TensorFlow versions above
+]
+# Platform-specific inference groups (alias for convenience)
 macos = [
-  "tensorflow-macos>=2.15.0",  # Apple Silicon compatible with newer numpy
-  "keras>=2.15.0"              # must match TF version
+  "tensorflow>=2.16.2,<=2.17.0", 
+  "typing-extensions==4.4.0",
+  "keras>=3.12.0"
 ]
 linux = [
-  "tensorflow>=2.15.0"
-]
-inference = [
-  "tensorflow>=2.15.0"
+  "tensorflow>=2.16.2,<=2.17.0",
+  "typing-extensions==4.4.0", 
+  "keras>=3.12.0"
 ]
 base = ["pandas", "numpy"]
 dev = [
@@ -68,8 +72,6 @@ dev = [
     "pytest-xdist>=3.0",
     "ruff>=0.7.0",
     "mypy>=1.0",
-    "black>=24.0",
-    "isort>=5.0",
     "pre-commit>=3.0",
 ]
 test = [
@@ -85,18 +87,6 @@ docs = [
     "myst-parser>=2.0",
 ]
 
-[tool.hatch.build]
-exclude = [
-    "/.github",
-    "/.venv",
-    "/docs",
-    "/tests",
-    "/.gitignore",
-    "/.pre-commit-config.yaml",
-]
-
-[tool.hatch.build.targets.wheel]
-packages = ["ethnicolr"]
 
 [dependency-groups]
 dev = [
@@ -105,8 +95,6 @@ dev = [
     "pytest-xdist>=3.0",
     "ruff>=0.7.0",
     "mypy>=1.0",
-    "black>=24.0",
-    "isort>=5.0",
     "pre-commit>=3.0",
 ]
 test = [
@@ -121,12 +109,18 @@ docs = [
     "sphinx-copybutton>=0.5",
     "myst-parser>=2.0",
 ]
+# Tested working ML dependencies
+inference = [
+    "tensorflow>=2.16.2,<=2.17.0",
+    "typing-extensions==4.4.0", 
+    "keras>=3.12.0"
+]
 
 
 # Ruff configuration
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py311"
 exclude = [
     ".git",
     "__pycache__",
@@ -163,16 +157,6 @@ ignore = [
 [tool.ruff.lint.isort]
 known-first-party = ["ethnicolr"]
 
-# Black configuration
-[tool.black]
-line-length = 88
-target-version = ["py310", "py311", "py312"]
-
-# isort configuration
-[tool.isort]
-profile = "black"
-line_length = 88
-known_first_party = ["ethnicolr"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -192,7 +176,7 @@ markers = [
 
 # mypy configuration
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 check_untyped_defs = true

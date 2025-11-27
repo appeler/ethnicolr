@@ -1,16 +1,18 @@
+from __future__ import annotations
+
 import argparse
 import os
 import sys
 
 
 def arg_parser(
-    argv,
+    argv: list[str],
     title: str,
     default_out: str,
     default_year: int,
-    year_choices: list,
+    year_choices: list[int],
     first: bool = False,
-):
+) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=title, formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )

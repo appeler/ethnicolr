@@ -5,12 +5,14 @@ Census Last Name Race/Ethnicity Prediction Module.
 Uses LSTM models trained on U.S. Census data to predict race/ethnicity from last names.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import sys
+from importlib import resources
 
 import pandas as pd
-from pkg_resources import resource_filename
 
 from .ethnicolr_class import EthnicolrModelClass
 from .utils import arg_parser
@@ -31,12 +33,11 @@ class CensusLnModel(EthnicolrModelClass):
 
     @classmethod
     def get_model_paths(cls, year):
+        package = resources.files(__name__.split(".")[0])
         return (
-            resource_filename(__name__, f"models/census/lstm/census{year}_ln_lstm.h5"),
-            resource_filename(
-                __name__, f"models/census/lstm/census{year}_ln_vocab.csv"
-            ),
-            resource_filename(__name__, f"models/census/lstm/census{year}_race.csv"),
+            str(package / f"models/census/lstm/census{year}_ln_lstm.h5"),
+            str(package / f"models/census/lstm/census{year}_ln_vocab.csv"),
+            str(package / f"models/census/lstm/census{year}_race.csv"),
         )
 
     @classmethod
