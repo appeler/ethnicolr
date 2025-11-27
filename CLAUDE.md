@@ -22,8 +22,9 @@ ethnicolr is a Python package that predicts race and ethnicity from names using 
 ### Installation
 - Install package in development mode: `pip install -e .`
 - Install with optional dependencies: `pip install -e .[dev,test]`
-- For macOS with Apple Silicon: `pip install -e .[macos]`
-- For Linux: `pip install -e .[linux]`
+- For macOS: `pip install -e .[macos]` or `uv sync --group macos`
+- For Linux: `pip install -e .[linux]` or `uv sync --group linux`
+- For Windows: `pip install -e .[windows]` or `uv sync --group windows`
 
 ### Documentation
 - Build documentation locally: `pip install -e .[docs]` then `cd docs && make html`
@@ -69,7 +70,7 @@ The package provides CLI commands defined in pyproject.toml:
 - **TensorFlow/Keras**: For LSTM model inference (version 2.13.x)
 - **pandas**: Data manipulation and CSV I/O
 - **numpy**: Numerical operations
-- Models require platform-specific TensorFlow installations (tensorflow-macos for Apple Silicon)
+- Models work with standard TensorFlow installations across all platforms (Windows, macOS, Linux)
 
 ## Important Notes
 

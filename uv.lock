@@ -213,6 +213,11 @@ test = [
     { name = "pytest-cov" },
     { name = "pytest-xdist" },
 ]
+windows = [
+    { name = "keras" },
+    { name = "tensorflow" },
+    { name = "typing-extensions" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -235,10 +240,25 @@ inference = [
     { name = "tensorflow" },
     { name = "typing-extensions" },
 ]
+linux = [
+    { name = "keras" },
+    { name = "tensorflow" },
+    { name = "typing-extensions" },
+]
+macos = [
+    { name = "keras" },
+    { name = "tensorflow" },
+    { name = "typing-extensions" },
+]
 test = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-xdist" },
+]
+windows = [
+    { name = "keras" },
+    { name = "tensorflow" },
+    { name = "typing-extensions" },
 ]
 
 [package.metadata]
@@ -247,6 +267,7 @@ requires-dist = [
     { name = "keras", marker = "extra == 'inference'", specifier = ">=3.12.0" },
     { name = "keras", marker = "extra == 'linux'", specifier = ">=3.12.0" },
     { name = "keras", marker = "extra == 'macos'", specifier = ">=3.12.0" },
+    { name = "keras", marker = "extra == 'windows'", specifier = ">=3.12.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=2.0" },
     { name = "numpy", specifier = ">=1.26.0,<3.0.0" },
@@ -267,11 +288,13 @@ requires-dist = [
     { name = "tensorflow", marker = "extra == 'inference'", specifier = ">=2.16.2,<=2.17.0" },
     { name = "tensorflow", marker = "extra == 'linux'", specifier = ">=2.16.2,<=2.17.0" },
     { name = "tensorflow", marker = "extra == 'macos'", specifier = ">=2.16.2,<=2.17.0" },
+    { name = "tensorflow", marker = "extra == 'windows'", specifier = ">=2.16.2,<=2.17.0" },
     { name = "typing-extensions", marker = "extra == 'inference'", specifier = "==4.4.0" },
     { name = "typing-extensions", marker = "extra == 'linux'", specifier = "==4.4.0" },
     { name = "typing-extensions", marker = "extra == 'macos'", specifier = "==4.4.0" },
+    { name = "typing-extensions", marker = "extra == 'windows'", specifier = "==4.4.0" },
 ]
-provides-extras = ["inference", "macos", "linux", "base", "dev", "test", "docs"]
+provides-extras = ["inference", "macos", "linux", "windows", "base", "dev", "test", "docs"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -294,10 +317,25 @@ inference = [
     { name = "tensorflow", specifier = ">=2.16.2,<=2.17.0" },
     { name = "typing-extensions", specifier = "==4.4.0" },
 ]
+linux = [
+    { name = "keras", specifier = ">=3.12.0" },
+    { name = "tensorflow", specifier = ">=2.16.2,<=2.17.0" },
+    { name = "typing-extensions", specifier = "==4.4.0" },
+]
+macos = [
+    { name = "keras", specifier = ">=3.12.0" },
+    { name = "tensorflow", specifier = ">=2.16.2,<=2.17.0" },
+    { name = "typing-extensions", specifier = "==4.4.0" },
+]
 test = [
     { name = "pytest", specifier = ">=7.0" },
     { name = "pytest-cov", specifier = ">=4.0" },
     { name = "pytest-xdist", specifier = ">=3.0" },
+]
+windows = [
+    { name = "keras", specifier = ">=3.12.0" },
+    { name = "tensorflow", specifier = ">=2.16.2,<=2.17.0" },
+    { name = "typing-extensions", specifier = "==4.4.0" },
 ]
 
 [[package]]

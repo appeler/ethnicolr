@@ -65,6 +65,11 @@ linux = [
   "typing-extensions==4.4.0", 
   "keras>=3.12.0"
 ]
+windows = [
+  "tensorflow>=2.16.2,<=2.17.0",
+  "typing-extensions==4.4.0", 
+  "keras>=3.12.0"
+]
 base = ["pandas", "numpy"]
 dev = [
     "pytest>=7.0",
@@ -111,6 +116,22 @@ docs = [
 ]
 # Tested working ML dependencies
 inference = [
+    "tensorflow>=2.16.2,<=2.17.0",
+    "typing-extensions==4.4.0", 
+    "keras>=3.12.0"
+]
+# Platform-specific ML dependencies (for CI)
+linux = [
+    "tensorflow>=2.16.2,<=2.17.0",
+    "typing-extensions==4.4.0", 
+    "keras>=3.12.0"
+]
+macos = [
+    "tensorflow>=2.16.2,<=2.17.0", 
+    "typing-extensions==4.4.0",
+    "keras>=3.12.0"
+]
+windows = [
     "tensorflow>=2.16.2,<=2.17.0",
     "typing-extensions==4.4.0", 
     "keras>=3.12.0"
