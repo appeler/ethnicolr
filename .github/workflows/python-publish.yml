@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
+      contents: write  # required for creating releases
       id-token: write  # required for trusted publishing
 
     steps:
@@ -32,6 +33,38 @@ jobs:
 
       - name: Build package
         run: uv build
+
+      - name: Extract version from tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Extract release notes
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          # Extract release notes for current version from CHANGELOG.md
+          awk '/^## \['"$RELEASE_VERSION"'\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md > release_notes.txt
+          # If no specific version found, use a generic message
+          if [ ! -s release_notes.txt ]; then
+            echo "Release $RELEASE_VERSION of ethnicolr" > release_notes.txt
+            echo "" >> release_notes.txt
+            echo "See [CHANGELOG.md](https://github.com/appeler/ethnicolr/blob/master/CHANGELOG.md) for detailed changes." >> release_notes.txt
+          fi
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ethnicolr v${{ env.RELEASE_VERSION }}
+          tag_name: ${{ env.TAG_NAME }}
+          body_path: release_notes.txt
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+          draft: false
+          prerelease: false
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
