@@ -33,6 +33,7 @@ class CensusLnModel(EthnicolrModelClass):
     LSTM model trained on U.S. Census data for predicting race/ethnicity
     from last names. Supports both 2000 and 2010 Census data.
     """
+
     NGRAMS = 2
     FEATURE_LEN = 20
 

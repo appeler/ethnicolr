@@ -43,6 +43,7 @@ class EthnicolrModelClass:
         model: Loaded TensorFlow/Keras LSTM model.
         model_year: Year of the loaded model.
     """
+
     vocab = None
     race = None
     model = None
