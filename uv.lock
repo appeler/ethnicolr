@@ -215,7 +215,7 @@ test = [
 ]
 windows = [
     { name = "keras" },
-    { name = "tensorflow" },
+    { name = "tensorflow-cpu" },
     { name = "typing-extensions" },
 ]
 
@@ -260,7 +260,7 @@ test = [
 ]
 windows = [
     { name = "keras" },
-    { name = "tensorflow" },
+    { name = "tensorflow-cpu" },
     { name = "typing-extensions" },
 ]
 
@@ -291,7 +291,7 @@ requires-dist = [
     { name = "tensorflow", marker = "extra == 'inference'", specifier = ">=2.16.2,<=2.17.0" },
     { name = "tensorflow", marker = "extra == 'linux'", specifier = ">=2.16.2,<=2.17.0" },
     { name = "tensorflow", marker = "extra == 'macos'", specifier = ">=2.16.2,<=2.17.0" },
-    { name = "tensorflow", marker = "extra == 'windows'", specifier = ">=2.16.2,<=2.17.0" },
+    { name = "tensorflow-cpu", marker = "extra == 'windows'", specifier = ">=2.16.2,<=2.17.0" },
     { name = "typing-extensions", marker = "extra == 'inference'", specifier = "==4.4.0" },
     { name = "typing-extensions", marker = "extra == 'linux'", specifier = "==4.4.0" },
     { name = "typing-extensions", marker = "extra == 'macos'", specifier = "==4.4.0" },
@@ -340,7 +340,7 @@ test = [
 ]
 windows = [
     { name = "keras", specifier = ">=3.12.0" },
-    { name = "tensorflow", specifier = ">=2.16.2,<=2.17.0" },
+    { name = "tensorflow-cpu", specifier = ">=2.16.2,<=2.17.0" },
     { name = "typing-extensions", specifier = "==4.4.0" },
 ]
 
@@ -1158,6 +1158,72 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/76/81/a03d7724df23d476af954673ae79836a5ca8d6fde66f88483dbe26f61a23/tensorflow-2.17.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:ca82f98ea38fa6c9e08ccc69eb6c2fab5b35b30a8999115b8b63b6f02fc69d9d", size = 223945591, upload-time = "2024-07-11T16:46:48.327Z" },
     { url = "https://files.pythonhosted.org/packages/63/4e/f5404467b31cf640ed8de31a283d104c845be6fa430dac9daef0c4385af8/tensorflow-2.17.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8339777b1b5ebd8ffadaa8196f786e65fbb081a371d8e87b52f24563392d8552", size = 601301478, upload-time = "2024-07-11T16:47:05.705Z" },
     { url = "https://files.pythonhosted.org/packages/ed/b6/62345568cd07de5d9254fcf64d7e44aacbb6abde11ea953b3cb320e58d19/tensorflow-2.17.0-cp311-cp311-win_amd64.whl", hash = "sha256:ef615c133cf4d592a073feda634ccbeb521a554be57de74f8c318d38febbeab5", size = 2046, upload-time = "2024-07-11T16:52:09.532Z" },
+]
+
+[[package]]
+name = "tensorflow-cpu"
+version = "2.17.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "absl-py" },
+    { name = "astunparse" },
+    { name = "flatbuffers" },
+    { name = "gast" },
+    { name = "google-pasta" },
+    { name = "grpcio" },
+    { name = "h5py" },
+    { name = "keras" },
+    { name = "libclang" },
+    { name = "ml-dtypes" },
+    { name = "numpy" },
+    { name = "opt-einsum" },
+    { name = "packaging" },
+    { name = "protobuf" },
+    { name = "requests" },
+    { name = "setuptools" },
+    { name = "six" },
+    { name = "tensorboard" },
+    { name = "tensorflow-intel", marker = "sys_platform == 'win32'" },
+    { name = "tensorflow-io-gcs-filesystem" },
+    { name = "termcolor" },
+    { name = "typing-extensions" },
+    { name = "wrapt" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4e/ff/f728c2c8d0049a87b79477d0c4cc40e16024b18f9c289eb017094eff84fa/tensorflow_cpu-2.17.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e7f383ffe153d67de338b0fc26ab44546466ec016fe4dbff74bfd206d1894285", size = 221240309, upload-time = "2024-07-11T16:48:59.914Z" },
+    { url = "https://files.pythonhosted.org/packages/0b/85/c50f9667bb9639da90d790ff2c8ccef3e6e4bf5418a5be86f08ee02c2f56/tensorflow_cpu-2.17.0-cp311-cp311-win_amd64.whl", hash = "sha256:266563f6cac54d459ff1fe80276795a845c1e59688bcdf08670df8dc4db69de0", size = 2084, upload-time = "2024-07-11T16:54:20.327Z" },
+]
+
+[[package]]
+name = "tensorflow-intel"
+version = "2.17.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "absl-py" },
+    { name = "astunparse" },
+    { name = "flatbuffers" },
+    { name = "gast" },
+    { name = "google-pasta" },
+    { name = "grpcio" },
+    { name = "h5py" },
+    { name = "keras" },
+    { name = "libclang" },
+    { name = "ml-dtypes" },
+    { name = "numpy" },
+    { name = "opt-einsum" },
+    { name = "packaging" },
+    { name = "protobuf" },
+    { name = "requests" },
+    { name = "setuptools" },
+    { name = "six" },
+    { name = "tensorboard" },
+    { name = "tensorflow-io-gcs-filesystem" },
+    { name = "termcolor" },
+    { name = "typing-extensions" },
+    { name = "wrapt" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/66/03/5c447feceb72f5a38ac2aa79d306fa5b5772f982c2b480c1329c7e382900/tensorflow_intel-2.17.0-cp311-cp311-win_amd64.whl", hash = "sha256:3f13d4f82e8ca7a217b2e8ff98ce5e396a68cfce9607a13d31c9ba0ce66ba5ce", size = 385035576, upload-time = "2024-07-11T17:12:19.764Z" },
 ]
 
 [[package]]
