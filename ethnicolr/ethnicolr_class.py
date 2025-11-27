@@ -30,6 +30,19 @@ class _CompatLSTM(_KerasLSTM):
 
 
 class EthnicolrModelClass:
+    """Base class for ethnicolr machine learning models.
+
+    Provides common functionality for LSTM-based race/ethnicity prediction models.
+    Handles model loading, text preprocessing, n-gram generation, and prediction
+    with confidence intervals. Serves as the foundation for all prediction modules
+    in the ethnicolr package.
+
+    Attributes:
+        vocab: Vocabulary list loaded from model files.
+        race: Race/ethnicity labels loaded from model files.
+        model: Loaded TensorFlow/Keras LSTM model.
+        model_year: Year of the loaded model.
+    """
     vocab = None
     race = None
     model = None
@@ -76,7 +89,22 @@ class EthnicolrModelClass:
 
     @staticmethod
     def n_grams(seq, n: int = 1):
-        """Returns an iterator over n-grams given a sequence"""
+        """Generate n-grams from a sequence.
+
+        Creates overlapping n-grams from an input sequence by shifting tokens.
+        Used for feature extraction in LSTM models.
+
+        Args:
+            seq: Input sequence (string or list) to generate n-grams from.
+            n: Size of n-grams to generate (default 1 for unigrams).
+
+        Returns:
+            Iterator yielding tuples of n consecutive elements.
+
+        Example:
+            >>> list(EthnicolrModelClass.n_grams('hello', 2))
+            [('h', 'e'), ('e', 'l'), ('l', 'l'), ('l', 'o')]
+        """
 
         def shift_token(i):
             return (el for j, el in enumerate(seq) if j >= i)
@@ -86,13 +114,45 @@ class EthnicolrModelClass:
 
     @staticmethod
     def range_ngrams(seq, ngramRange=(1, 2)):
-        """Returns iterator over all n-grams for n in range"""
+        """Generate n-grams for a range of n values.
+
+        Creates n-grams of multiple sizes from a single sequence, useful for
+        models that use multiple n-gram features simultaneously.
+
+        Args:
+            seq: Input sequence to generate n-grams from.
+            ngramRange: Tuple (start, stop) defining the range of n-gram sizes.
+                       Default (1, 2) generates unigrams only.
+
+        Returns:
+            Iterator yielding n-grams of all specified sizes.
+
+        Example:
+            >>> list(EthnicolrModelClass.range_ngrams('abc', (1, 3)))
+            [('a',), ('b',), ('c',), ('a', 'b'), ('b', 'c')]
+        """
         return chain(*(EthnicolrModelClass.n_grams(seq, i) for i in range(*ngramRange)))
 
     @staticmethod
     def find_ngrams(vocab, text: str, n) -> list:
-        """
-        Generate n-grams from a string and return their indices in the vocabulary.
+        """Convert text n-grams to vocabulary indices.
+
+        Generates n-grams from input text and maps them to indices in a
+        pre-defined vocabulary. Unknown n-grams are mapped to index 0.
+
+        Args:
+            vocab: List of vocabulary items for index lookup.
+            text: Input string to process.
+            n: N-gram size, or tuple (start, stop) for range of sizes.
+
+        Returns:
+            List of vocabulary indices corresponding to text n-grams.
+            Unknown n-grams map to index 0.
+
+        Example:
+            >>> vocab = ['<UNK>', 'th', 'he', 'sm']
+            >>> EthnicolrModelClass.find_ngrams(vocab, 'smith', 2)
+            [3, 0, 0, 0]  # 'sm' found at index 3, others unknown
         """
         if isinstance(n, tuple):
             ngram_iter = EthnicolrModelClass.range_ngrams(text, n)
@@ -117,7 +177,43 @@ class EthnicolrModelClass:
         num_iter: int,
         conf_int: float,
     ) -> pd.DataFrame:
-        # Load resources
+        """Transform names to features and generate predictions.
+
+        Core prediction method that loads models, converts names to n-gram features,
+        and generates race/ethnicity predictions with optional confidence intervals.
+        Handles both point predictions and Monte Carlo sampling for uncertainty.
+
+        Args:
+            df: Input DataFrame containing names to predict.
+            newnamecol: Column name containing the names to predict on.
+            vocab_fn: Path to vocabulary file for n-gram mapping.
+            race_fn: Path to race/ethnicity labels file.
+            model_fn: Path to trained LSTM model file.
+            ngrams: N-gram size (int) or range (tuple) for feature extraction.
+            maxlen: Maximum sequence length for padding/truncation.
+            num_iter: Number of Monte Carlo iterations for confidence intervals.
+            conf_int: Confidence interval level (1.0 for point prediction).
+
+        Returns:
+            DataFrame with original data plus prediction columns:
+            - 'race': Predicted race/ethnicity category
+            - Probability columns for each race/ethnicity
+            - Confidence interval bounds (if conf_int < 1.0)
+
+        Raises:
+            FileNotFoundError: If model files don't exist.
+            ValueError: If required columns are missing.
+
+        Example:
+            >>> df = pd.DataFrame({'name': ['Smith', 'Garcia']})
+            >>> result = cls.transform_and_pred(
+            ...     df, 'name', 'vocab.csv', 'race.csv', 'model.h5',
+            ...     ngrams=2, maxlen=20, num_iter=100, conf_int=0.95
+            ... )
+            >>> print(result.columns)
+            ['name', 'race', 'white', 'black', 'asian', 'hispanic', ...]
+        """
+        # Load model resources and prepare data
         vocab_path = files("ethnicolr") / vocab_fn
         model_path = files("ethnicolr") / model_fn
         race_path = files("ethnicolr") / race_fn

@@ -28,7 +28,11 @@ CENSUS_COLS = ["pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthis
 
 
 class CensusLnData:
-    """Handles Census Last Name demographic enrichment."""
+    """Census last name demographic data enrichment.
+
+    Provides functionality to enrich DataFrames with U.S. Census demographic
+    percentages based on last names. Supports both 2000 and 2010 Census data.
+    """
 
     census_df = None
     census_year = None
@@ -37,6 +41,37 @@ class CensusLnData:
     def census_ln(
         cls, df: pd.DataFrame, lname_col: str, year: int = 2000
     ) -> pd.DataFrame:
+        """Append Census demographic percentages by last name.
+
+        Merges input DataFrame with U.S. Census surname data to add
+        demographic percentage columns for race/ethnicity categories.
+
+        Args:
+            df: Input DataFrame containing last names.
+            lname_col: Column name containing last names.
+            year: Census year (2000 or 2010).
+
+        Returns:
+            DataFrame with original data plus Census demographic columns:
+            - 'pctwhite': Percentage white
+            - 'pctblack': Percentage black
+            - 'pctapi': Percentage Asian/Pacific Islander
+            - 'pctaian': Percentage American Indian/Alaska Native
+            - 'pct2prace': Percentage two or more races
+            - 'pcthispanic': Percentage Hispanic
+
+        Raises:
+            ValueError: If year not in [2000, 2010] or column missing.
+
+        Example:
+            >>> import pandas as pd
+            >>> df = pd.DataFrame({'surname': ['Smith', 'Garcia']})
+            >>> result = CensusLnData.census_ln(df, 'surname', 2010)
+            >>> print(result[['surname', 'pctwhite', 'pcthispanic']].head())
+              surname  pctwhite  pcthispanic
+            0   Smith      70.9          2.3
+            1  Garcia       3.7         92.8
+        """
         if year not in [2000, 2010]:
             raise ValueError("Census year must be either 2000 or 2010")
 
@@ -95,6 +130,17 @@ census_ln = CensusLnData.census_ln
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Command-line interface for Census demographic data enrichment.
+
+    Provides CLI access to Census-based demographic percentage lookup
+    by last name. Processes CSV files and outputs enriched data.
+
+    Args:
+        argv: Command-line arguments (uses sys.argv if None).
+
+    Returns:
+        Exit code: 0 success, 1 general error, 2 missing files, 3 invalid data.
+    """
     if argv is None:
         argv = sys.argv[1:]
 
@@ -117,7 +163,7 @@ def main(argv: list[str] | None = None) -> int:
             logger.warning(f"Overwriting existing file: {args.output}")
 
         rdf.to_csv(args.output, index=False, encoding="utf-8")
-        logger.info(f"📦 Output written: {args.output} ({len(rdf)} rows)")
+        logger.info(f"Output written: {args.output} ({len(rdf)} rows)")
 
         return 0
 

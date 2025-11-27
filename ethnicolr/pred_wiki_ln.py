@@ -25,8 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 class WikiLnModel(EthnicolrModelClass):
-    """
-    Wikipedia Last Name prediction model.
+    """Wikipedia-based last name prediction model.
+
+    LSTM model trained on Wikipedia data for predicting race/ethnicity
+    from last names only. Provides detailed ethnic categories.
     """
 
     MODELFN = "models/wiki/lstm/wiki_ln_lstm.h5"
@@ -38,6 +40,11 @@ class WikiLnModel(EthnicolrModelClass):
 
     @classmethod
     def get_model_paths(cls):
+        """Get file paths for Wikipedia last name model components.
+
+        Returns:
+            Tuple of (model_path, vocab_path, race_path) as strings.
+        """
         return (
             str(resources.files(__name__.split(".")[0]) / cls.MODELFN),
             str(resources.files(__name__.split(".")[0]) / cls.VOCABFN),
@@ -46,6 +53,14 @@ class WikiLnModel(EthnicolrModelClass):
 
     @classmethod
     def check_models_exist(cls):
+        """Verify that all required model files exist.
+
+        Raises:
+            FileNotFoundError: If any model files are missing.
+
+        Returns:
+            True if all files exist.
+        """
         model_path, vocab_path, race_path = cls.get_model_paths()
         missing_files = [
             path
@@ -72,8 +87,38 @@ class WikiLnModel(EthnicolrModelClass):
         num_iter: int = 100,
         conf_int: float = 1.0,
     ) -> pd.DataFrame:
-        """
-        Predict race/ethnicity using only the last name column.
+        """Predict race/ethnicity from last names using Wikipedia model.
+
+        Uses LSTM trained on Wikipedia data to predict detailed ethnic
+        categories from last names. Handles missing/empty names gracefully.
+
+        Args:
+            df: Input DataFrame containing last names.
+            lname_col: Column name containing last names.
+            num_iter: Monte Carlo iterations for confidence intervals.
+            conf_int: Confidence level (1.0 for point estimates).
+
+        Returns:
+            DataFrame with original data plus prediction columns:
+            - 'race': Predicted ethnicity category
+            - Probability columns for each ethnicity
+            - 'processing_status': Name processing outcome
+            - 'name_normalized': Normalized last name
+            - Confidence bounds if conf_int < 1.0
+
+        Raises:
+            ValueError: If last name column is missing.
+            FileNotFoundError: If model files are not found.
+
+        Example:
+            >>> import pandas as pd
+            >>> df = pd.DataFrame({'surname': ['Smith', 'Garcia', 'Wang']})
+            >>> result = WikiLnModel.pred_wiki_ln(df, 'surname')
+            >>> print(result[['surname', 'race']].head())
+              surname        race
+            0   Smith  GreaterEuropean
+            1  Garcia      Hispanic
+            2    Wang      EastAsian
         """
         if lname_col not in df.columns:
             raise ValueError(
@@ -191,6 +236,17 @@ pred_wiki_ln = WikiLnModel.pred_wiki_ln
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Command-line interface for Wikipedia last name predictions.
+
+    Provides CLI access to Wikipedia-based race/ethnicity prediction
+    using last names only. Processes CSV files and outputs predictions.
+
+    Args:
+        argv: Command-line arguments (uses sys.argv if None).
+
+    Returns:
+        Exit code: 0 success, 1 general error, 2 missing files, 3 invalid data.
+    """
     if argv is None:
         argv = sys.argv[1:]
 
@@ -215,7 +271,7 @@ def main(argv: list[str] | None = None) -> int:
             logger.warning(f"Overwriting existing file: {args.output}")
 
         rdf.to_csv(args.output, index=False, encoding="utf-8")
-        logger.info(f"📦 Output written: {args.output} ({len(rdf)} rows)")
+        logger.info(f"Output written: {args.output} ({len(rdf)} rows)")
 
         return 0
 

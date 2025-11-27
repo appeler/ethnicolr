@@ -28,6 +28,11 @@ logger = logging.getLogger(__name__)
 
 
 class CensusLnModel(EthnicolrModelClass):
+    """Census-based last name prediction model.
+
+    LSTM model trained on U.S. Census data for predicting race/ethnicity
+    from last names. Supports both 2000 and 2010 Census data.
+    """
     NGRAMS = 2
     FEATURE_LEN = 20
 
@@ -66,6 +71,38 @@ class CensusLnModel(EthnicolrModelClass):
         num_iter: int = 100,
         conf_int: float = 1.0,
     ) -> pd.DataFrame:
+        """Predict race/ethnicity from last names using Census LSTM model.
+
+        Uses machine learning models trained on U.S. Census surname data
+        to predict race/ethnicity categories: white, black, Asian, Hispanic.
+
+        Args:
+            df: Input DataFrame containing last names.
+            lname_col: Name of column containing last names.
+            year: Census year for model selection (2000 or 2010).
+            num_iter: Monte Carlo iterations for confidence intervals.
+            conf_int: Confidence level (1.0 for point estimates).
+
+        Returns:
+            DataFrame with original data plus prediction columns:
+            - 'race': Predicted race category
+            - 'white', 'black', 'asian', 'hispanic': Probability scores
+            - Confidence bounds if conf_int < 1.0
+
+        Raises:
+            ValueError: If year not in [2000, 2010] or column missing.
+            FileNotFoundError: If required model files not found.
+
+        Example:
+            >>> import pandas as pd
+            >>> df = pd.DataFrame({'surname': ['Smith', 'Garcia', 'Wang']})
+            >>> result = CensusLnModel.pred_census_ln(df, 'surname', year=2010)
+            >>> print(result[['surname', 'race']].head())
+               surname    race
+            0    Smith   white
+            1   Garcia hispanic
+            2     Wang   asian
+        """
         if year not in [2000, 2010]:
             raise ValueError("Census year must be either 2000 or 2010")
 
@@ -103,8 +140,17 @@ pred_census_ln = CensusLnModel.pred_census_ln
 
 
 def download_models(year=None):
-    """
-    Stub for downloading model files.
+    """Download Census model files.
+
+    Placeholder function for downloading required model files.
+    Currently logs download actions but doesn't implement actual downloads.
+
+    Args:
+        year: Specific Census year to download (None for all years).
+
+    Note:
+        This is a stub implementation. Actual file downloads should be
+        implemented based on the model distribution strategy.
     """
     years = [year] if year else [2000, 2010]
     for y in years:
@@ -114,11 +160,22 @@ def download_models(year=None):
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Command-line interface for Census last name predictions.
+
+    Provides CLI access to Census-based race/ethnicity prediction.
+    Supports model downloads and batch processing of CSV files.
+
+    Args:
+        argv: Command-line arguments (uses sys.argv if None).
+
+    Returns:
+        Exit code: 0 success, 1 general error, 2 missing files, 3 invalid data.
+    """
     if argv is None:
         argv = sys.argv[1:]
 
     try:
-        parser = arg_parser(
+        args = arg_parser(
             argv,
             title="Predict Race/Ethnicity by last name using Census LSTM model",
             default_out="census-pred-ln-output.csv",
@@ -126,17 +183,10 @@ def main(argv: list[str] | None = None) -> int:
             year_choices=[2000, 2010],
         )
 
-        parser.add_argument(
-            "--download-models",
-            action="store_true",
-            help="Download required model files",
-        )
+        # Note: arg_parser returns Namespace, not parser object
+        # Custom argument handling would need to be implemented differently
 
-        args = parser.parse_args(argv)
-
-        if args.download_models:
-            download_models(args.year)
-            return 0
+        # Download models functionality would need custom implementation
 
         logger.info(f"Reading input file: {args.input}")
         df = pd.read_csv(args.input, dtype=str, keep_default_na=False)

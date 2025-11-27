@@ -13,6 +13,38 @@ def arg_parser(
     year_choices: list[int],
     first: bool = False,
 ) -> argparse.Namespace:
+    """Parse command-line arguments for ethnicolr CLI tools.
+
+    Creates a standardized argument parser for all ethnicolr prediction modules.
+    Handles input/output files, column specifications, model parameters, and
+    performs validation on argument values.
+
+    Args:
+        argv: Command-line arguments to parse, typically sys.argv[1:].
+        title: Description text for the argument parser.
+        default_out: Default output filename for predictions.
+        default_year: Default model year to use if not specified.
+        year_choices: Valid years for model selection.
+        first: Whether to include first name column argument.
+
+    Returns:
+        Parsed arguments namespace containing validated input parameters.
+
+    Raises:
+        SystemExit: If input file doesn't exist, confidence interval is invalid,
+            or iteration count is non-positive.
+
+    Example:
+        >>> args = arg_parser(
+        ...     ['input.csv', '-l', 'lastname', '-o', 'output.csv'],
+        ...     'Test prediction tool',
+        ...     'default-output.csv',
+        ...     2010,
+        ...     [2000, 2010]
+        ... )
+        >>> print(args.input)
+        'input.csv'
+    """
     parser = argparse.ArgumentParser(
         description=title, formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
@@ -60,7 +92,7 @@ def arg_parser(
 
     args = parser.parse_args(argv)
 
-    # 🔒 Additional sanity checks
+    # Additional input validation
     if not os.path.isfile(args.input):
         sys.exit(f"❌ Input file not found: {args.input}")
 

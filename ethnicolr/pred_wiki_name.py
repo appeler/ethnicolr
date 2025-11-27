@@ -34,6 +34,16 @@ def _normalize_name(name: str) -> str:
     This helper strips diacritics, drops any non-letter characters and
     collapses multiple spaces. The cleaned string is title cased to match
     the model's training format.
+
+    Args:
+        name: Input name string to normalize.
+
+    Returns:
+        Cleaned name with only ASCII letters, title cased.
+
+    Example:
+        >>> _normalize_name('José García-Smith')
+        'Jose Garcia Smith'
     """
     # Remove accents
     name = unicodedata.normalize("NFKD", str(name))
@@ -46,8 +56,11 @@ def _normalize_name(name: str) -> str:
 
 
 class WikiNameModel(EthnicolrModelClass):
-    """
-    Wikipedia Full Name prediction model.
+    """Wikipedia-based full name prediction model.
+
+    LSTM model trained on Wikipedia data for predicting race/ethnicity
+    from full names (first + last). Provides detailed ethnic categories
+    beyond the basic Census classifications.
     """
 
     MODELFN = "models/wiki/lstm/wiki_name_lstm.h5"
@@ -59,6 +72,11 @@ class WikiNameModel(EthnicolrModelClass):
 
     @classmethod
     def get_model_paths(cls):
+        """Get file paths for Wikipedia name model components.
+
+        Returns:
+            Tuple of (model_path, vocab_path, race_path) as strings.
+        """
         return (
             str(resources.files(__name__.split(".")[0]) / cls.MODELFN),
             str(resources.files(__name__.split(".")[0]) / cls.VOCABFN),
@@ -67,6 +85,14 @@ class WikiNameModel(EthnicolrModelClass):
 
     @classmethod
     def check_models_exist(cls):
+        """Verify that all required model files exist.
+
+        Raises:
+            FileNotFoundError: If any model files are missing.
+
+        Returns:
+            True if all files exist.
+        """
         model_path, vocab_path, race_path = cls.get_model_paths()
         missing_files = [
             path
@@ -94,6 +120,45 @@ class WikiNameModel(EthnicolrModelClass):
         num_iter: int = 100,
         conf_int: float = 1.0,
     ) -> pd.DataFrame:
+        """Predict race/ethnicity from full names using Wikipedia model.
+
+        Uses LSTM trained on Wikipedia biographical data to predict detailed
+        ethnic categories. Handles name normalization and provides comprehensive
+        processing status tracking.
+
+        Args:
+            df: Input DataFrame containing first and last names.
+            lname_col: Column name containing last names.
+            fname_col: Column name containing first names.
+            num_iter: Monte Carlo iterations for confidence intervals.
+            conf_int: Confidence level (1.0 for point estimates).
+
+        Returns:
+            DataFrame with original data plus prediction columns:
+            - 'race': Predicted ethnicity category
+            - Probability columns for each ethnicity
+            - 'processing_status': Name processing outcome
+            - 'name_normalized': Original combined name
+            - 'name_normalized_clean': Cleaned name used for prediction
+            - Confidence bounds if conf_int < 1.0
+
+        Raises:
+            ValueError: If required columns are missing.
+            FileNotFoundError: If model files are not found.
+
+        Example:
+            >>> import pandas as pd
+            >>> df = pd.DataFrame({
+            ...     'first': ['John', 'Maria', 'Chen'],
+            ...     'last': ['Smith', 'Garcia', 'Wang']
+            ... })
+            >>> result = WikiNameModel.pred_wiki_name(df, 'last', 'first')
+            >>> print(result[['first', 'last', 'race']].head())
+              first    last        race
+            0  John   Smith  GreaterEuropean
+            1 Maria  Garcia      Hispanic
+            2  Chen    Wang  EastAsian
+        """
         if lname_col not in df.columns:
             raise ValueError(f"The last name column '{lname_col}' doesn't exist.")
         if fname_col not in df.columns:
@@ -230,6 +295,17 @@ pred_wiki_name = WikiNameModel.pred_wiki_name
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Command-line interface for Wikipedia name predictions.
+
+    Provides CLI access to Wikipedia-based race/ethnicity prediction
+    using full names. Processes CSV files and outputs predictions.
+
+    Args:
+        argv: Command-line arguments (uses sys.argv if None).
+
+    Returns:
+        Exit code: 0 success, 1 general error, 2 missing files, 3 invalid data.
+    """
     if argv is None:
         argv = sys.argv[1:]
 
@@ -259,7 +335,7 @@ def main(argv: list[str] | None = None) -> int:
             logger.warning(f"Overwriting existing file: {args.output}")
 
         rdf.to_csv(args.output, index=False, encoding="utf-8")
-        logger.info(f"📦 Output written: {args.output} ({len(rdf)} rows)")
+        logger.info(f"Output written: {args.output} ({len(rdf)} rows)")
 
         return 0
 
