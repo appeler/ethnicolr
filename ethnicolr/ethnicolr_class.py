@@ -21,18 +21,13 @@ class _CompatLSTM:
     deprecated argument but simply ignores it, allowing legacy models to load
     on newer Keras versions."""
 
-    def __init__(self, *args, time_major=False, **kwargs):
+    def __new__(cls, *args, time_major=False, **kwargs):
         # ``time_major`` is unused but preserved for compatibility.
+        # Import inside __new__ for lazy loading
         from tensorflow.keras.layers import LSTM as _KerasLSTM
 
-        # Initialize the actual LSTM layer, ignoring time_major
-        self._lstm = _KerasLSTM(*args, **kwargs)
-
-    def __getattr__(self, name):
-        return getattr(self._lstm, name)
-
-    def __call__(self, *args, **kwargs):
-        return self._lstm(*args, **kwargs)
+        # Return actual LSTM instance, ignoring time_major parameter
+        return _KerasLSTM(*args, **kwargs)
 
 
 class EthnicolrModelClass:
