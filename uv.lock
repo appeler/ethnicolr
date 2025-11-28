@@ -1,6 +1,10 @@
 version = 1
 revision = 3
 requires-python = "==3.11.*"
+resolution-markers = [
+    "sys_platform == 'win32'",
+    "sys_platform != 'win32'",
+]
 
 [[package]]
 name = "absl-py"
@@ -193,21 +197,6 @@ docs = [
     { name = "sphinx-autodoc-typehints" },
     { name = "sphinx-copybutton" },
 ]
-inference = [
-    { name = "keras" },
-    { name = "tensorflow" },
-    { name = "typing-extensions" },
-]
-linux = [
-    { name = "keras" },
-    { name = "tensorflow" },
-    { name = "typing-extensions" },
-]
-macos = [
-    { name = "keras" },
-    { name = "tensorflow" },
-    { name = "typing-extensions" },
-]
 test = [
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -231,18 +220,18 @@ docs = [
     { name = "sphinx-copybutton" },
 ]
 inference = [
-    { name = "keras" },
     { name = "tensorflow" },
+    { name = "tensorflow-io-gcs-filesystem" },
     { name = "typing-extensions" },
 ]
 linux = [
-    { name = "keras" },
     { name = "tensorflow" },
+    { name = "tensorflow-io-gcs-filesystem" },
     { name = "typing-extensions" },
 ]
 macos = [
-    { name = "keras" },
     { name = "tensorflow" },
+    { name = "tensorflow-io-gcs-filesystem" },
     { name = "typing-extensions" },
 ]
 test = [
@@ -250,13 +239,15 @@ test = [
     { name = "pytest-cov" },
     { name = "pytest-xdist" },
 ]
+windows = [
+    { name = "tensorflow" },
+    { name = "tensorflow-io-gcs-filesystem" },
+    { name = "typing-extensions" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "furo", marker = "extra == 'docs'", specifier = ">=2024.1.29" },
-    { name = "keras", marker = "extra == 'inference'", specifier = ">=3.12.0" },
-    { name = "keras", marker = "extra == 'linux'", specifier = ">=3.12.0" },
-    { name = "keras", marker = "extra == 'macos'", specifier = ">=3.12.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=2.0" },
     { name = "numpy", specifier = ">=1.26.0,<3.0.0" },
@@ -274,14 +265,8 @@ requires-dist = [
     { name = "sphinx", marker = "extra == 'docs'", specifier = ">=7.0" },
     { name = "sphinx-autodoc-typehints", marker = "extra == 'docs'", specifier = ">=1.25" },
     { name = "sphinx-copybutton", marker = "extra == 'docs'", specifier = ">=0.5" },
-    { name = "tensorflow", marker = "extra == 'inference'", specifier = ">=2.16.2,<=2.17.0" },
-    { name = "tensorflow", marker = "extra == 'linux'", specifier = ">=2.16.2,<=2.17.0" },
-    { name = "tensorflow", marker = "extra == 'macos'", specifier = ">=2.16.2,<=2.17.0" },
-    { name = "typing-extensions", marker = "extra == 'inference'", specifier = "==4.4.0" },
-    { name = "typing-extensions", marker = "extra == 'linux'", specifier = "==4.4.0" },
-    { name = "typing-extensions", marker = "extra == 'macos'", specifier = "==4.4.0" },
 ]
-provides-extras = ["inference", "macos", "linux", "windows", "base", "dev", "test", "docs"]
+provides-extras = ["base", "dev", "test", "docs"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -300,18 +285,18 @@ docs = [
     { name = "sphinx-copybutton", specifier = ">=0.5" },
 ]
 inference = [
-    { name = "keras", specifier = ">=3.12.0" },
-    { name = "tensorflow", specifier = ">=2.16.2,<=2.17.0" },
+    { name = "tensorflow", specifier = ">=2.15.0,<2.18.0" },
+    { name = "tensorflow-io-gcs-filesystem", specifier = ">=0.31.0" },
     { name = "typing-extensions", specifier = "==4.4.0" },
 ]
 linux = [
-    { name = "keras", specifier = ">=3.12.0" },
-    { name = "tensorflow", specifier = ">=2.16.2,<=2.17.0" },
+    { name = "tensorflow", specifier = ">=2.15.0,<2.18.0" },
+    { name = "tensorflow-io-gcs-filesystem", specifier = ">=0.31.0" },
     { name = "typing-extensions", specifier = "==4.4.0" },
 ]
 macos = [
-    { name = "keras", specifier = ">=3.12.0" },
-    { name = "tensorflow", specifier = ">=2.16.2,<=2.17.0" },
+    { name = "tensorflow", specifier = ">=2.15.0,<2.18.0" },
+    { name = "tensorflow-io-gcs-filesystem", specifier = ">=0.31.0" },
     { name = "typing-extensions", specifier = "==4.4.0" },
 ]
 test = [
@@ -319,7 +304,11 @@ test = [
     { name = "pytest-cov", specifier = ">=4.0" },
     { name = "pytest-xdist", specifier = ">=3.0" },
 ]
-windows = []
+windows = [
+    { name = "tensorflow", specifier = ">=2.15.0,<2.18.0" },
+    { name = "tensorflow-io-gcs-filesystem", specifier = ">=0.31.0,<0.32.0" },
+    { name = "typing-extensions", specifier = "==4.4.0" },
+]
 
 [[package]]
 name = "execnet"
@@ -1139,13 +1128,13 @@ wheels = [
 
 [[package]]
 name = "tensorflow-io-gcs-filesystem"
-version = "0.37.1"
+version = "0.31.0"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/40/9b/b2fb82d0da673b17a334f785fc19c23483165019ddc33b275ef25ca31173/tensorflow_io_gcs_filesystem-0.37.1-cp311-cp311-macosx_10_14_x86_64.whl", hash = "sha256:32c50ab4e29a23c1f91cd0f9ab8c381a0ab10f45ef5c5252e94965916041737c", size = 2470224, upload-time = "2024-07-01T23:44:23.039Z" },
-    { url = "https://files.pythonhosted.org/packages/5b/cc/16634e76f3647fbec18187258da3ba11184a6232dcf9073dc44579076d36/tensorflow_io_gcs_filesystem-0.37.1-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:b02f9c5f94fd62773954a04f69b68c4d576d076fd0db4ca25d5479f0fbfcdbad", size = 3479613, upload-time = "2024-07-01T23:44:24.399Z" },
-    { url = "https://files.pythonhosted.org/packages/de/bf/ba597d3884c77d05a78050f3c178933d69e3f80200a261df6eaa920656cd/tensorflow_io_gcs_filesystem-0.37.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6e1f2796b57e799a8ca1b75bf47c2aaa437c968408cc1a402a9862929e104cda", size = 4842079, upload-time = "2024-07-01T23:44:26.825Z" },
-    { url = "https://files.pythonhosted.org/packages/66/7f/e36ae148c2f03d61ca1bff24bc13a0fef6d6825c966abef73fc6f880a23b/tensorflow_io_gcs_filesystem-0.37.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ee7c8ee5fe2fd8cb6392669ef16e71841133041fee8a330eff519ad9b36e4556", size = 5085736, upload-time = "2024-07-01T23:44:28.618Z" },
+    { url = "https://files.pythonhosted.org/packages/84/00/900ca310ff2e46eb3127f8f54af0b0000a6cc786be6a54dc2cfe841f4683/tensorflow_io_gcs_filesystem-0.31.0-cp311-cp311-macosx_10_14_x86_64.whl", hash = "sha256:8909c4344b0e96aa356230ab460ffafe5900c33c1aaced65fafae71d177a1966", size = 1642401, upload-time = "2023-02-25T19:31:40.204Z" },
+    { url = "https://files.pythonhosted.org/packages/e7/c4/0d44ef93add3432ce43f37fe0c205cc7b6fd685fca80054fb4a646a9dbe3/tensorflow_io_gcs_filesystem-0.31.0-cp311-cp311-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:e417faf8755aafe52d8f8c6b5ae5bae6e4fae8326ee3acd5e9181b83bbfbae87", size = 2381673, upload-time = "2023-02-25T19:31:41.992Z" },
+    { url = "https://files.pythonhosted.org/packages/a8/2b/3064195efa016fff942009fe965ecbbbbd7d70bf34ee22d4ff31a0f3443a/tensorflow_io_gcs_filesystem-0.31.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:37c40e3c4ee1f8dda3b545deea6b8839192c82037d8021db9f589908034ad975", size = 2572150, upload-time = "2023-02-25T19:31:43.874Z" },
+    { url = "https://files.pythonhosted.org/packages/ac/4e/9566a313927be582ca99455a9523a097c7888fc819695bdc08415432b202/tensorflow_io_gcs_filesystem-0.31.0-cp311-cp311-win_amd64.whl", hash = "sha256:4bb37d23f21c434687b11059cb7ffd094d52a7813368915ba1b7057e3c16e414", size = 1486315, upload-time = "2023-02-25T19:31:45.641Z" },
 ]
 
 [[package]]
