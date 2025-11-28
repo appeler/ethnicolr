@@ -24,12 +24,13 @@ class _CompatLSTM:
     def __init__(self, *args, time_major=False, **kwargs):
         # ``time_major`` is unused but preserved for compatibility.
         from tensorflow.keras.layers import LSTM as _KerasLSTM
+
         # Initialize the actual LSTM layer, ignoring time_major
         self._lstm = _KerasLSTM(*args, **kwargs)
-    
+
     def __getattr__(self, name):
         return getattr(self._lstm, name)
-    
+
     def __call__(self, *args, **kwargs):
         return self._lstm(*args, **kwargs)
 
@@ -256,6 +257,7 @@ class EthnicolrModelClass:
                     category=UserWarning,
                 )
                 from tensorflow.keras.models import load_model
+
                 cls.model = load_model(
                     model_path,
                     custom_objects={"LSTM": _CompatLSTM},
@@ -265,6 +267,7 @@ class EthnicolrModelClass:
         # Vectorize input
         X = [cls.find_ngrams(cls.vocab, name, ngrams) for name in df[newnamecol]]
         from tensorflow.keras.preprocessing import sequence
+
         X = sequence.pad_sequences(X, maxlen=maxlen)
 
         if conf_int == 1:
