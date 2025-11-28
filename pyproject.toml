@@ -113,7 +113,7 @@ macos = [
 ]
 windows = [
     "tensorflow>=2.15.0,<2.18.0",
-    "tensorflow-io-gcs-filesystem>=0.31.0",  # Use same range
+    "tensorflow-io-gcs-filesystem==0.31.0",  # Pin to exact Windows-compatible version
     "typing-extensions==4.4.0"
 ]
 
