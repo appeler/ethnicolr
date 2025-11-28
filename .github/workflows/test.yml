@@ -54,18 +54,15 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --group test
-
-      - name: Install TensorFlow dependencies
         shell: bash
         run: |
-          # Add TensorFlow with tested working versions based on OS
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            uv sync --group macos
-          elif [[ "$RUNNER_OS" == "Windows" ]]; then
-            uv sync --group windows
+          # Install test dependencies and TensorFlow together to avoid environment replacement
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            uv sync --group test --group windows
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            uv sync --group test --group macos
           else
-            uv sync --group linux
+            uv sync --group test --group linux
           fi
 
       - name: Build package
