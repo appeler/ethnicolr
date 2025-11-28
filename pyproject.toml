@@ -93,13 +93,14 @@ docs = [
     "sphinx-copybutton>=0.5",
     "myst-parser>=2.0",
 ]
-# Unified ML dependencies
+# Unified ML dependencies with platform-specific GCS filesystem handling
 inference = [
     "tensorflow>=2.15.0,<2.18.0",
-    "tensorflow-io-gcs-filesystem>=0.31.0",
+    "tensorflow-io-gcs-filesystem>=0.32.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "tensorflow-io-gcs-filesystem>=0.31.0; sys_platform != 'darwin' or platform_machine != 'arm64'",
     "typing-extensions==4.4.0"
 ]
-# Platform-specific aliases for CI (all point to same unified inference group)  
+# Platform-specific aliases for CI - use broader compatibility
 linux = [
     "tensorflow>=2.15.0,<2.18.0",
     "tensorflow-io-gcs-filesystem>=0.31.0",
@@ -107,15 +108,20 @@ linux = [
 ]
 macos = [
     "tensorflow>=2.15.0,<2.18.0", 
-    "tensorflow-io-gcs-filesystem>=0.32.0",  # 0.31.0 doesn't have ARM64 macOS wheels
+    "tensorflow-io-gcs-filesystem>=0.31.0",  # Use same range to avoid conflicts
     "typing-extensions==4.4.0"
 ]
 windows = [
     "tensorflow>=2.15.0,<2.18.0",
-    "tensorflow-io-gcs-filesystem>=0.31.0,<0.32.0",  # Allow 0.31.x but not newer
+    "tensorflow-io-gcs-filesystem>=0.31.0",  # Use same range
     "typing-extensions==4.4.0"
 ]
 
+
+# UV configuration  
+[tool.uv]
+# Only resolve dependencies for the current platform to avoid cross-platform conflicts
+environments = []
 
 # Ruff configuration
 [tool.ruff]
