@@ -1,222 +1,29 @@
-[build-system]
-requires = ["hatchling>=1.21.1"]
-build-backend = "hatchling.build"
-
-[project]
-name = "ethnicolr"
-version = "0.19.0"
-description = "Predict Race/Ethnicity Based on Sequence of Characters in Names"
-readme = "README.md"
-# TensorFlow officially supports Python 3.9–3.12 overall,
-# but on macOS the current guidance is Python 3.9–3.11, so we stay in the safe overlap. :contentReference[oaicite:0]{index=0}
-requires-python = ">=3.11,<3.12"
-license = { text = "MIT" }
-
-authors = [
-  { name = "Gaurav Sood", email = "contact@gsood.com" },
-  { name = "Suriyan Laohaprapanon", email = "suriyant@gmail.com" },
-]
-
-keywords = [
-  "race",
-  "ethnicity",
-  "names",
-  "demographics",
-  "machine-learning",
-  "nlp",
-]
-
-classifiers = [
-  "Development Status :: 5 - Production/Stable",
-  "Intended Audience :: Developers",
-  "Intended Audience :: Science/Research",
-  "Topic :: Scientific/Engineering :: Information Analysis",
-  "Topic :: Software Development :: Libraries :: Python Modules",
-  "Topic :: Utilities",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.11",
-]
-
-dependencies = [
-  "pandas>=2.2.0",
-  "numpy>=1.26.0,<3.0.0",
-]
-
-[project.urls]
-"Homepage" = "https://github.com/appeler/ethnicolr"
-"Bug Reports" = "https://github.com/appeler/ethnicolr/issues"
-"Documentation" = "https://appeler.github.io/ethnicolr/"
-"Source Code" = "https://github.com/appeler/ethnicolr"
-
-[project.scripts]
-census_ln = "ethnicolr.census_ln:main"
-pred_census_ln = "ethnicolr.pred_census_ln:main"
-pred_wiki_name = "ethnicolr.pred_wiki_name:main"
-pred_wiki_ln = "ethnicolr.pred_wiki_ln:main"
-pred_fl_reg_name = "ethnicolr.pred_fl_reg_name:main"
-pred_fl_reg_ln = "ethnicolr.pred_fl_reg_ln:main"
-pred_fl_reg_ln_five_cat = "ethnicolr.pred_fl_reg_ln_five_cat:main"
-pred_fl_reg_name_five_cat = "ethnicolr.pred_fl_reg_name_five_cat:main"
-pred_nc_reg_name = "ethnicolr.pred_nc_reg_name:main"
-ethnicolr_download_models = "ethnicolr.utils.download:main"
-
 [project.optional-dependencies]
-# Minimal convenience extra (doesn't add anything beyond base deps,
-# but keeps compatibility with existing usage like `ethnicolr[base]`.
+# Core install stays light
 base = [
   "pandas",
   "numpy",
 ]
 
-# Test stack + TF for local dev: `pip install "ethnicolr[test]"`
+# Inference only: TF + a pinned typing-extensions that works with 2.15.x
+# (TF itself will pull in tensorflow-io-gcs-filesystem where needed.)
+inference = [
+  "tensorflow>=2.15.0,<2.16.0",
+  "typing-extensions>=4.4,<5.0",
+]
+
+# If you still want tests / dev tooling, they can be separate extras
 test = [
   "pytest>=7.0",
   "pytest-cov>=4.0",
   "pytest-xdist>=3.0",
-  # Runtime ML deps (same as `inference`)
-  "tensorflow>=2.15.0,<2.16.0",
-  # 0.36.0 is the TF‑IO version that matches TF 2.15.x. :contentReference[oaicite:1]{index=1}
-  "tensorflow-io-gcs-filesystem>=0.36.0,<0.37.0",
-  "typing-extensions==4.4.0",
 ]
 
-# Full dev stack: `pip install "ethnicolr[dev]"`
 dev = [
   "pytest>=7.0",
   "pytest-cov>=4.0",
   "pytest-xdist>=3.0",
   "ruff>=0.7.0",
+  "mypy>=1.0",
   "pre-commit>=3.0",
-  "tensorflow>=2.15.0,<2.16.0",
-  "tensorflow-io-gcs-filesystem>=0.36.0,<0.37.0",
-  "typing-extensions==4.4.0",
-]
-
-# Docs build: `pip install "ethnicolr[docs]"`
-docs = [
-  "sphinx>=7.0",
-  "furo>=2024.1.29",
-  "sphinx-autodoc-typehints>=1.25",
-  "sphinx-copybutton>=0.5",
-  "myst-parser>=2.0",
-]
-
-# Explicit runtime ML extra: `pip install "ethnicolr[inference]"`
-# This is what CI uses for TF/TF‑IO. The range is chosen so TF and TF‑IO
-# versions stay in the officially compatible 2.15.x + 0.36.x band. :contentReference[oaicite:2]{index=2}
-inference = [
-  "tensorflow>=2.15.0,<2.16.0",
-  "tensorflow-io-gcs-filesystem>=0.36.0,<0.37.0",
-  "typing-extensions==4.4.0",
-]
-
-# --- uv dependency groups (for `uv sync --group ...`) ---
-[dependency-groups]
-dev = [
-  "pytest>=7.0",
-  "pytest-cov>=4.0",
-  "pytest-xdist>=3.0",
-  "ruff>=0.7.0",
-  "pre-commit>=3.0",
-  "tensorflow>=2.15.0,<2.16.0",
-  "tensorflow-io-gcs-filesystem>=0.36.0,<0.37.0",
-  "typing-extensions==4.4.0",
-]
-test = [
-  "pytest>=7.0",
-  "pytest-cov>=4.0",
-  "pytest-xdist>=3.0",
-  "tensorflow>=2.15.0,<2.16.0",
-  "tensorflow-io-gcs-filesystem>=0.36.0,<0.37.0",
-  "typing-extensions==4.4.0",
-]
-docs = [
-  "sphinx>=7.0",
-  "furo>=2024.1.29",
-  "sphinx-autodoc-typehints>=1.25",
-  "sphinx-copybutton>=0.5",
-  "myst-parser>=2.0",
-]
-inference = [
-  "tensorflow>=2.15.0,<2.16.0",
-  "tensorflow-io-gcs-filesystem>=0.36.0,<0.37.0",
-  "typing-extensions==4.4.0",
-]
-
-# UV configuration
-[tool.uv]
-# Only resolve deps for the current platform
-environments = []
-
-# Ruff configuration
-[tool.ruff]
-line-length = 88
-target-version = "py311"
-exclude = [
-  ".git",
-  "__pycache__",
-  "build",
-  "dist",
-  ".venv",
-  "docs",
-  ".eggs",
-  "*.ipynb",
-  "ethnicolr/models/*.ipynb",
-]
-
-[tool.ruff.lint]
-select = [
-  "E",  # pycodestyle errors
-  "W",  # pycodestyle warnings
-  "F",  # pyflakes
-  "I",  # isort
-  "B",  # flake8-bugbear
-  "C4", # flake8-comprehensions
-  "UP", # pyupgrade
-]
-ignore = [
-  "E501",  # line too long
-  "B008",  # function calls in argument defaults
-  "C901",  # too complex
-]
-
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
-"tests/*" = ["S101"]
-"*.ipynb" = ["E402", "E722", "UP031", "B905", "F821", "F811", "W293", "F841"]
-
-[tool.ruff.lint.isort]
-known-first-party = ["ethnicolr"]
-
-[tool.pytest.ini_options]
-minversion = "7.0"
-testpaths = ["ethnicolr/tests"]
-python_files = "test_*.py"
-addopts = [
-  "-ra",
-  "--strict-markers",
-  "--cov=ethnicolr",
-  "--cov-report=term-missing",
-  "--cov-report=html",
-  "--cov-report=xml",
-]
-markers = [
-  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-]
-
-
-[tool.coverage.run]
-source = ["ethnicolr"]
-branch = true
-
-[tool.coverage.report]
-exclude_lines = [
-  "pragma: no cover",
-  "def __repr__",
-  "if self.debug",
-  "raise AssertionError",
-  "raise NotImplementedError",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
 ]
