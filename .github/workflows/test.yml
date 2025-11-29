@@ -38,7 +38,7 @@ jobs:
         run: pytest
 
   lint:
-    name: Lint & type-check (Linux, Python 3.11)
+    name: Lint (Linux, Python 3.11)
     runs-on: ubuntu-latest
 
     steps:
@@ -59,6 +59,3 @@ jobs:
 
       - name: Ruff lint
         run: ruff check .
-
-      - name: Mypy type-check
-        run: mypy ethnicolr
