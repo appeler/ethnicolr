@@ -803,5 +803,5 @@ License](https://opensource.org/licenses/MIT).
 - [appeler/ethnicolr2](https://github.com/appeler/ethnicolr2) — Ethnicolr implementation with new models in pytorch
 - [appeler/ethnicolor](https://github.com/appeler/ethnicolor) — Race and Ethnicity based on name using data from census, voter reg. files, etc.
 - [appeler/instate](https://github.com/appeler/instate) — instate: predict the state of residence from last name using the indian electoral rolls
-- [appeler/search_names](https://github.com/appeler/search_names) — Search a long list of names (patterns) in a large text corpus systematically and quickly
 - [appeler/nc_race_ethnicity](https://github.com/appeler/nc_race_ethnicity) — Evaluation of some of the ethnicolr models on the NC Voter Registration Data + New Models Based on NC Voter Registration Data.
+- [appeler/naampy](https://github.com/appeler/naampy) — Infer Sociodemographic Characteristics from Names Using Indian Electoral Rolls
