@@ -90,7 +90,7 @@ python -m ethnicolr.cli predict census data.csv -l surname -o results.csv
 # Census-based prediction (most common)
 python -m ethnicolr.cli predict census data.csv -l surname
 
-# With specific census year and confidence intervals  
+# With specific census year and confidence intervals
 python -m ethnicolr.cli predict census data.csv -l surname -y 2010 -c 0.95 -i 200
 
 # Florida voter registration model
@@ -132,7 +132,7 @@ python -m ethnicolr.cli quick-predict data.csv -l surname -f firstname
 All prediction commands support these common options:
 
 - `-l, --last-column`: Column containing last names (required)
-- `-f, --first-column`: Column containing first names (when supported)  
+- `-f, --first-column`: Column containing first names (when supported)
 - `-o, --output`: Output file path (auto-generated if not specified)
 - `-c, --confidence`: Confidence interval level (0.0-1.0)
 - `-i, --iterations`: Monte Carlo iterations for confidence intervals
@@ -811,7 +811,7 @@ tally campaign contributions by race.
   pred_census_ln](ethnicolr/examples/ethnicolr_app_contrib20xx.ipynb)
 - [Contrib 2000/2010 using
   pred_fl_reg_name](ethnicolr/examples/ethnicolr_app_contrib20xx-fl_reg.ipynb)
-  
+
 Data on race of all the people in the [DIME
 data](https://data.stanford.edu/dime) is posted
 [here](http://dx.doi.org/10.7910/DVN/M5K7VR). The
@@ -837,10 +837,10 @@ registration data from early 2017.
     had racial data on about 47% of their members, so they used it to learn
     the race of the remaining 53%. On the data they had labels for, they
     found .9 AUC and 83% accuracy for the last name model.
-    
+
 3.  Evaluation on NC Data:
     [https://github.com/appeler/nc_race_ethnicity](https://github.com/appeler/nc_race_ethnicity)
-    
+
 ### Authors
 
 Suriyan Laohaprapanon and Gaurav Sood

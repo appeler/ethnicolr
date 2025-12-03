@@ -11,7 +11,7 @@ ethnicolr: Predict Race and Ethnicity From Name
    :caption: Contents:
 
    ethnicolr
-   
+
 Indices and tables
 ==================
 

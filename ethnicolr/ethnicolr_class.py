@@ -451,7 +451,7 @@ class EthnicolrModelClass(AbstractLSTMModel):
         # Clean up
         if rowindex_added:
             final_df.drop(columns=["__rowindex"], inplace=True, errors="ignore")
-        
+
         # Restore original index
         final_df.index = original_index
         return final_df

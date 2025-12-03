@@ -61,9 +61,9 @@ class TestWikiLastNamePrediction:
                 "GreaterEuropean"
             )
             european_accuracy = european_predictions.mean()
-            assert european_accuracy >= 0.5, (
-                f"European accuracy too low: {european_accuracy}"
-            )
+            assert (
+                european_accuracy >= 0.5
+            ), f"European accuracy too low: {european_accuracy}"
 
 
 class TestWikiFullNamePrediction:

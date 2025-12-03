@@ -12,32 +12,32 @@ ethnicolr: Predict Race and Ethnicity From Name
 .. image:: https://pepy.tech/badge/ethnicolr
     :target: https://pepy.tech/project/ethnicolr
 
-We exploit the US census data, the Florida voting registration data, and 
+We exploit the US census data, the Florida voting registration data, and
 the Wikipedia data collected by Skiena and colleagues, to predict race
-and ethnicity based on first and last name or just the last name. The granularity 
-at which we predict the race depends on the dataset. For instance, 
-Skiena et al.' Wikipedia data is at the ethnic group level, while the 
-census data we use in the model (the raw data has additional categories of 
-Native Americans and Bi-racial) merely categorizes between Non-Hispanic Whites, 
+and ethnicity based on first and last name or just the last name. The granularity
+at which we predict the race depends on the dataset. For instance,
+Skiena et al.' Wikipedia data is at the ethnic group level, while the
+census data we use in the model (the raw data has additional categories of
+Native Americans and Bi-racial) merely categorizes between Non-Hispanic Whites,
 Non-Hispanic Blacks, Asians, and Hispanics.
 
 DIME Race
 -----------
-Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__ 
-is posted `here <http://dx.doi.org/10.7910/DVN/M5K7VR>`__ The underlying python scripts 
-are posted `here <https://github.com/appeler/dime_race>`__ 
+Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__
+is posted `here <http://dx.doi.org/10.7910/DVN/M5K7VR>`__ The underlying python scripts
+are posted `here <https://github.com/appeler/dime_race>`__
 
 Caveats and Notes
 -----------------------
 
-If you picked a random individual with last name 'Smith' from the US in 2010  
+If you picked a random individual with last name 'Smith' from the US in 2010
 and asked us to guess this person's race (measured as crudely as by the census),
-the best guess would be based on what is available from the aggregated Census file. 
+the best guess would be based on what is available from the aggregated Census file.
 It is the Bayes Optimal Solution. So what good are last name only predictive models
 for? A few things---if you want to impute ethnicity at a more granular level,
-guess the race of people in different years (than when the census was conducted 
-if some assumptions hold), guess the race of people in different countries (again if some 
-assumptions hold), when names are slightly different (again with some assumptions), etc. 
+guess the race of people in different years (than when the census was conducted
+if some assumptions hold), guess the race of people in different countries (again if some
+assumptions hold), when names are slightly different (again with some assumptions), etc.
 The big benefit comes from when both the first name and last name is known.
 
 Install
@@ -50,11 +50,11 @@ We strongly recommend installing `ethnicolor` inside a Python virtual environmen
 
     pip install ethnicolr
 
-Or 
+Or
 
 ::
-   
-   conda install -c soodoku ethnicolr 
+
+   conda install -c soodoku ethnicolr
 
 Notes:
  - The models are run and verified on TensorFlow 2.x using Python 3.7 and 3.8 and lower will work. TensorFlow 1.x has been deprecated.
@@ -63,7 +63,7 @@ Notes:
 General API
 ------------------
 
-To see the available command line options for any function, please type in 
+To see the available command line options for any function, please type in
 ``<function-name> --help``
 
 ::
@@ -99,7 +99,7 @@ To append census data from 2010 to a `file with column header in the first row <
 
 ::
 
-   census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv   
+   census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv
 
 
 To predict race/ethnicity using `Wikipedia full name model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__, if the input file doesn't have any column headers, you must using ``-l`` and ``-f`` to specify the index of column carrying the last name and first name respectively (first column has index 0).
@@ -128,7 +128,7 @@ where the data is:
   -  What it does:
 
      - Removes extra space
-     - For names in the `census file <ethnicolr/data/census>`__, it appends 
+     - For names in the `census file <ethnicolr/data/census>`__, it appends
        relevant data of what probability the name provided is of a certain race/ethnicity
 
 
@@ -143,9 +143,9 @@ where the data is:
  +------------+--------------------------------------------------------------------------------------------------------------------------+
 
 
--  Output: Appends the following columns to the pandas DataFrame or CSV: 
-   pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic. 
-   See `here <https://github.com/appeler/ethnicolr/blob/master/ethnicolr/data/census/census_2000.pdf>`__ 
+-  Output: Appends the following columns to the pandas DataFrame or CSV:
+   pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic.
+   See `here <https://github.com/appeler/ethnicolr/blob/master/ethnicolr/data/census/census_2000.pdf>`__
    for what the column names mean.
 
    ::
@@ -178,9 +178,9 @@ where the data is:
    -  What it does:
 
       -  Removes extra space.
-      -  Uses the `last name census 2000 
-         model <ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb>`__ or 
-         `last name census 2010 model <ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb>`__ 
+      -  Uses the `last name census 2000
+         model <ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb>`__ or
+         `last name census 2010 model <ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb>`__
          to predict the race and ethnicity.
 
 
@@ -250,10 +250,10 @@ where the data is:
 
 
    -  Output: Appends the following columns to the pandas DataFrame or CSV:
-      race (categorical variable --- category with the highest probability). 
+      race (categorical variable --- category with the highest probability).
       For each race it will provide the mean, standard error, lower & upper
       bound of confidence interval
-      
+
    ::
       "Asian,GreaterEastAsian,EastAsian",
       "Asian,GreaterEastAsian,Japanese", "Asian,IndianSubContinent",
@@ -262,7 +262,7 @@ where the data is:
       "GreaterEuropean,Jewish","GreaterEuropean,WestEuropean,French",
       "GreaterEuropean,WestEuropean,Germanic","GreaterEuropean,WestEuropean,Hispanic",
       "GreaterEuropean,WestEuropean,Italian","GreaterEuropean,WestEuropean,Nordic".
-      
+
 
    ::
 
@@ -282,14 +282,14 @@ where the data is:
 
       >>> odf = pred_wiki_ln(df,'last', conf_int=0.9)
       ['Asian,GreaterEastAsian,EastAsian', 'Asian,GreaterEastAsian,Japanese', 'Asian,IndianSubContinent', 'GreaterAfrican,Africans', 'GreaterAfrican,Muslim', 'GreaterEuropean,British', 'GreaterEuropean,EastEuropean', 'GreaterEuropean,Jewish', 'GreaterEuropean,WestEuropean,French', 'GreaterEuropean,WestEuropean,Germanic', 'GreaterEuropean,WestEuropean,Hispanic', 'GreaterEuropean,WestEuropean,Italian', 'GreaterEuropean,WestEuropean,Nordic']
-      
+
       >>> odf
          last  first                         true_race  ...  GreaterEuropean,WestEuropean,Nordic_lb  GreaterEuropean,WestEuropean,Nordic_ub                              race
       0  Smith   john           GreaterEuropean,British                               0.016103  ...                                 0.014135                                0.007382                                0.048828           GreaterEuropean,British
       1  Zhang  simon  Asian,GreaterEastAsian,EastAsian                               0.863391  ...                                 0.017452                                0.001844                                0.027252  Asian,GreaterEastAsian,EastAsian
 
       [2 rows x 56 columns]
-      
+
       >>> odf.iloc[0, :8]
       last                                                       Smith
       first                                                       john
@@ -400,7 +400,7 @@ where the data is:
       ...             {"last": "sawyer", "first": "john", "true_race": "nh_white"},
       ...             {"last": "torres", "first": "raul", "true_race": "hispanic"},
       ...         ]
-      
+
       >>> df = pd.DataFrame(names)
 
       >>> from ethnicolr import pred_fl_reg_ln, pred_fl_reg_name, pred_fl_reg_ln_five_cat, pred_fl_reg_name_five_cat
@@ -466,7 +466,7 @@ where the data is:
       Asian), hispanic, nh\_black, nh\_white. For each race it will provide
       the mean, standard error, lower & upper bound of confidence interval
 
-   
+
    *(Using the same dataframe from example above)*
    ::
 
@@ -758,7 +758,7 @@ To illustrate how the package can be used, we impute the race of the campaign co
 - `Contrib 2000/2010 using pred_census_ln <ethnicolr/examples/ethnicolr_app_contrib20xx.ipynb>`__
 - `Contrib 2000/2010 using pred_fl_reg_name <ethnicolr/examples/ethnicolr_app_contrib20xx-fl_reg.ipynb>`__
 
-Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__ is posted `here <http://dx.doi.org/10.7910/DVN/M5K7VR>`__ The underlying python scripts are posted `here <https://github.com/appeler/dime_race>`__ 
+Data on race of all the people in the `DIME data <https://data.stanford.edu/dime>`__ is posted `here <http://dx.doi.org/10.7910/DVN/M5K7VR>`__ The underlying python scripts are posted `here <https://github.com/appeler/dime_race>`__
 
 Data
 ----------

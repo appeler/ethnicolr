@@ -30,7 +30,7 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install package (tests + TF runtime)
-        # Extras come from [project.optional-dependencies] in pyproject.toml  
+        # Extras come from [project.optional-dependencies] in pyproject.toml
         run: |
           uv sync --group test --group inference
           uv pip install -e .

@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved type hints with `from __future__ import annotations`
 
 ### Fixed
-- TensorFlow compatibility issues with `typing_extensions` 
+- TensorFlow compatibility issues with `typing_extensions`
 - Lazy imports implementation to avoid loading TensorFlow unnecessarily
 - MyPy type checking errors in prediction modules
 - Cross-platform dependency resolution and testing

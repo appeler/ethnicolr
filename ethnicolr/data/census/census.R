@@ -1,6 +1,6 @@
 # census data
 
-# Set dir. 
+# Set dir.
 setwd(githubdir)
 setwd("ethnicolor/data-raw")
 
@@ -14,20 +14,20 @@ cs2000 <- read.csv("census_2000.csv")
 # Lots of "(S)" in the data --- these are suppressed proportions where count is 1 to 4
 # Imputing (S): Split 'remaining' percentage equally between the "(S)" though 0 is reasonable too
 
-# Convert to numeric 
+# Convert to numeric
 cs2000[,c("pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic")] <- lapply(cs2000[,c("pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic")], as.numeric)
 
-# Missing percentage 
+# Missing percentage
 cs2000$remaining_perc <- 100 - rowSums(cs2000[,c("pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic")], na.rm=T)
 
 # 4649 rows have negative remaining perc., likely due to rounding error
 # For these rows, there shouldn't be NAs, but if there are there they should be imputed to 0
 # No NAs: summary(is.na(cs2000[cs2000$remaining_perc <= 0, c("pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic")]))
 
-# Total NAs per row 
+# Total NAs per row
 cs2000$total_nas <- apply(cs2000[,c("pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic")], 1, function(x) sum(is.na(x)))
 
-# Imputed number per row 
+# Imputed number per row
 cs2000$imputed_num <- ifelse(cs2000$total_nas > 0, cs2000$remaining_perc/cs2000$total_nas, 0)
 
 # Impute numbers
@@ -53,20 +53,20 @@ cs2010 <- read.csv("census_2010.csv")
 # Lots of "(S)" in the data --- these are suppressed proportions where count is 1 to 4
 # Imputing (S): Split 'remaining' percentage equally between the "(S)" though 0 is reasonable too
 
-# Convert to numeric 
+# Convert to numeric
 cs2010[,c("pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic")] <- lapply(cs2010[,c("pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic")], as.numeric)
 
-# Missing percentage 
+# Missing percentage
 cs2010$remaining_perc <- 100 - rowSums(cs2010[,c("pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic")], na.rm=T)
 
 # 4649 rows have negative remaining perc., likely due to rounding error
 # For these rows, there shouldn't be NAs, but if there are there they should be imputed to 0
 # No NAs: summary(is.na(cs2000[cs2000$remaining_perc <= 0, c("pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic")]))
 
-# Total NAs per row 
+# Total NAs per row
 cs2010$total_nas <- apply(cs2010[,c("pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic")], 1, function(x) sum(is.na(x)))
 
-# Imputed number per row 
+# Imputed number per row
 cs2010$imputed_num <- ifelse(cs2010$total_nas > 0, cs2010$remaining_perc/cs2010$total_nas, 0)
 
 # Impute numbers
