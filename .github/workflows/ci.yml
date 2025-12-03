@@ -30,10 +30,16 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install package (tests + TF runtime)
-        # Extras come from [project.optional-dependencies] in pyproject.toml
+        # Use explicit pip installation to ensure TensorFlow is available
         run: |
           uv sync --group test --group inference
           uv pip install -e .
+
+      - name: Verify TensorFlow installation
+        run: |
+          uv run python -c "import tensorflow; print('TensorFlow version:', tensorflow.__version__)"
+          uv run python -c "import pandas; print('Pandas version:', pandas.__version__)"
+          uv run python -c "import numpy; print('NumPy version:', numpy.__version__)"
 
       - name: Run test suite
         run: uv run pytest
@@ -58,6 +64,10 @@ jobs:
         run: |
           uv sync --group dev --group inference
           uv pip install -e .
+
+      - name: Verify dependencies for linting
+        run: |
+          uv run python -c "import tensorflow; print('TensorFlow available for import checking')"
 
       - name: Ruff lint
         run: uv run ruff check .
