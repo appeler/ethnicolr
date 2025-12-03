@@ -95,7 +95,7 @@ class TestPredictCommands:
         output_file = os.path.join(temp_output_dir, "census_output.csv")
 
         cmd = [
-            "python",
+            sys.executable,
             "-m",
             "ethnicolr.cli",
             "predict",
@@ -125,7 +125,7 @@ class TestPredictCommands:
         output_file = os.path.join(temp_output_dir, "census_2000.csv")
 
         cmd = [
-            "python",
+            sys.executable,
             "-m",
             "ethnicolr.cli",
             "predict",
@@ -149,7 +149,7 @@ class TestPredictCommands:
         output_file = os.path.join(temp_output_dir, "census_conf.csv")
 
         cmd = [
-            "python",
+            sys.executable,
             "-m",
             "ethnicolr.cli",
             "predict",
@@ -179,7 +179,7 @@ class TestPredictCommands:
         output_file = os.path.join(temp_output_dir, "florida_output.csv")
 
         cmd = [
-            "python",
+            sys.executable,
             "-m",
             "ethnicolr.cli",
             "predict",
@@ -212,7 +212,7 @@ class TestPredictCommands:
         output_file = os.path.join(temp_output_dir, "wiki_output.csv")
 
         cmd = [
-            "python",
+            sys.executable,
             "-m",
             "ethnicolr.cli",
             "predict",
@@ -307,7 +307,7 @@ class TestQuickPredict:
         output_file = os.path.join(temp_output_dir, "quick_output.csv")
 
         cmd = [
-            "python",
+            sys.executable,
             "-m",
             "ethnicolr.cli",
             "quick-predict",
@@ -337,7 +337,7 @@ class TestCLIErrorHandling:
         output_file = os.path.join(temp_output_dir, "output.csv")
 
         cmd = [
-            "python",
+            sys.executable,
             "-m",
             "ethnicolr.cli",
             "predict",
@@ -359,7 +359,7 @@ class TestCLIErrorHandling:
         output_file = os.path.join(temp_output_dir, "output.csv")
 
         cmd = [
-            "python",
+            sys.executable,
             "-m",
             "ethnicolr.cli",
             "predict",
@@ -381,7 +381,7 @@ class TestCLIErrorHandling:
         output_file = os.path.join(temp_output_dir, "output.csv")
 
         cmd = [
-            "python",
+            sys.executable,
             "-m",
             "ethnicolr.cli",
             "predict",
@@ -417,7 +417,7 @@ class TestCLIIntegration:
 
         pred_result = subprocess.run(
             [
-                "python",
+                sys.executable,
                 "-m",
                 "ethnicolr.cli",
                 "predict",
@@ -444,7 +444,7 @@ class TestCLIIntegration:
         output_file = os.path.join(temp_output_dir, "verbose_output.csv")
 
         cmd = [
-            "python",
+            sys.executable,
             "-m",
             "ethnicolr.cli",
             "--verbose",
