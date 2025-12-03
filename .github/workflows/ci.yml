@@ -30,8 +30,10 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install package (tests + TF runtime)
-        # Extras come from [project.optional-dependencies] in pyproject.toml
-        run: uv pip install -e ".[test,inference]"
+        # Extras come from [project.optional-dependencies] in pyproject.toml  
+        run: |
+          uv sync --group test --group inference
+          uv pip install -e .
 
       - name: Run test suite
         run: uv run pytest
@@ -53,7 +55,9 @@ jobs:
         run: uv python install 3.11
 
       - name: Install dev dependencies (incl. TF so imports succeed)
-        run: uv pip install -e ".[dev,inference]"
+        run: |
+          uv sync --group dev --group inference
+          uv pip install -e .
 
       - name: Ruff lint
         run: uv run ruff check .
