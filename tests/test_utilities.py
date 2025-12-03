@@ -381,7 +381,7 @@ class TestArgParser:
         captured = capsys.readouterr()
 
         # Should contain success message and argument listing
-        assert "✅ Parsed arguments:" in captured.out
+        assert "INFO: Parsed arguments:" in captured.out
         assert "input:" in captured.out
         assert "output:" in captured.out
         assert "last:" in captured.out

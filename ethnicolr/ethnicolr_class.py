@@ -187,7 +187,7 @@ class EthnicolrModelClass(AbstractLSTMModel):
             df = df.dropna(subset=[col])
 
         if df.empty:
-            raise ValueError("The name column has no non-NaN values.")
+            logger.warning("The name column has no non-NaN values.")
 
         # Log duplicates but keep them so prediction results align with inputs
         dup_count = df.duplicated(subset=[col]).sum()
@@ -197,9 +197,13 @@ class EthnicolrModelClass(AbstractLSTMModel):
             )
 
         final_length = len(df)
-        logger.info(
-            f"Data filtering summary: {original_length} → {final_length} rows (kept {final_length / original_length * 100:.1f}%)"
-        )
+        if original_length > 0:
+            percentage = final_length / original_length * 100
+            logger.info(
+                f"Data filtering summary: {original_length} -> {final_length} rows (kept {percentage:.1f}%)"
+            )
+        else:
+            logger.info("Data filtering summary: Empty input DataFrame")
 
         return df
 
@@ -341,6 +345,20 @@ class EthnicolrModelClass(AbstractLSTMModel):
         df = df.copy()
         original_index = df.index.copy()  # Preserve original index
         df = cls.test_and_norm_df(df, newnamecol)
+
+        # Handle empty DataFrames by returning empty result with correct structure
+        if df.empty:
+            # Load race categories to know what columns to create
+            if cls.get_race() is None:
+                cls.set_race(pd.read_csv(race_path).race.tolist())
+
+            result_df = df.copy()
+            result_df["race"] = None
+            # Add race columns (these will be empty but maintain structure)
+            for race in cls.get_race():
+                result_df[race] = float("nan")
+            return result_df
+
         df[newnamecol] = df[newnamecol].astype(str).str.strip().str.title()
         rowindex_added = "__rowindex" not in df.columns
         if rowindex_added:

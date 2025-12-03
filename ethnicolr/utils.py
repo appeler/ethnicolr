@@ -94,15 +94,15 @@ def arg_parser(
 
     # Additional input validation
     if not os.path.isfile(args.input):
-        sys.exit(f"❌ Input file not found: {args.input}")
+        sys.exit(f"ERROR: Input file not found: {args.input}")
 
     if not (0 < args.conf <= 1):
-        sys.exit("❌ --conf must be a float between 0 and 1.")
+        sys.exit("ERROR: --conf must be a float between 0 and 1.")
 
     if args.iter <= 0:
-        sys.exit("❌ --iter must be a positive integer.")
+        sys.exit("ERROR: --iter must be a positive integer.")
 
-    print("✅ Parsed arguments:")
+    print("INFO: Parsed arguments:")
     for k, v in vars(args).items():
         print(f"   {k}: {v}")
 
