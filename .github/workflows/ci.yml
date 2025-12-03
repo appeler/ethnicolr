@@ -33,20 +33,20 @@ jobs:
       - name: Verify installation
         run: |
           echo "Platform: ${{ matrix.os }}"
-          uv run python -c "import pandas; print('✓ Pandas version:', pandas.__version__)"
-          uv run python -c "import numpy; print('✓ NumPy version:', numpy.__version__)"
-          uv run python -c "import click; print('✓ Click version:', click.__version__)"
-          uv run python -c "from ethnicolr import cli; print('✓ CLI module loads successfully')"
+          uv run python -c "import pandas; print('[OK] Pandas version:', pandas.__version__)"
+          uv run python -c "import numpy; print('[OK] NumPy version:', numpy.__version__)"
+          uv run python -c "import click; print('[OK] Click version:', click.__version__)"
+          uv run python -c "from ethnicolr import cli; print('[OK] CLI module loads successfully')"
 
       - name: Verify TensorFlow (non-Windows)
         if: runner.os != 'Windows'
         run: |
-          uv run python -c "import tensorflow; print('✓ TensorFlow version:', tensorflow.__version__)"
-          uv run python -c "import tensorflow as tf; print('✓ TensorFlow functionality:', tf.constant([1, 2, 3]))"
+          uv run python -c "import tensorflow; print('[OK] TensorFlow version:', tensorflow.__version__)"
+          uv run python -c "import tensorflow as tf; print('[OK] TensorFlow functionality:', tf.constant([1, 2, 3]))"
 
       - name: Windows note
         if: runner.os == 'Windows'
-        run: echo "ℹ️ TensorFlow skipped on Windows due to missing wheels for tensorflow-io-gcs-filesystem"
+        run: echo "[INFO] TensorFlow skipped on Windows due to missing wheels for tensorflow-io-gcs-filesystem"
 
       - name: Run test suite
         run: |
@@ -76,7 +76,7 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Verify TensorFlow for import checking
-        run: uv run python -c "import tensorflow; print('✓ TensorFlow available for import checking')"
+        run: uv run python -c "import tensorflow; print('[OK] TensorFlow available for import checking')"
 
       - name: Run linting
         run: uv run ruff check .
