@@ -11,37 +11,39 @@ import pandas as pd
 import pytest
 
 
+@pytest.fixture
+def sample_input_file():
+    """Create a temporary CSV file for CLI testing."""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+        f.write("last,first,id\n")
+        f.write("smith,john,1\n")
+        f.write("zhang,wei,2\n")
+        f.write("garcia,maria,3\n")
+        f.write("johnson,james,4\n")
+        f.write("patel,raj,5\n")
+        temp_path = f.name
+
+    yield temp_path
+
+    # Cleanup
+    if os.path.exists(temp_path):
+        os.unlink(temp_path)
+
+
+@pytest.fixture
+def temp_output_dir():
+    """Create a temporary directory for output files."""
+    temp_dir = tempfile.mkdtemp()
+    yield temp_dir
+
+    # Cleanup - remove all files in temp directory
+    for file in Path(temp_dir).glob("*"):
+        file.unlink()
+    os.rmdir(temp_dir)
+
+
 class TestCLICommands:
     """Test all CLI commands defined in pyproject.toml."""
-
-    @pytest.fixture
-    def sample_input_file(self):
-        """Create a temporary CSV file for CLI testing."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
-            f.write("last,first,id\n")
-            f.write("smith,john,1\n")
-            f.write("zhang,wei,2\n")
-            f.write("garcia,maria,3\n")
-            f.write("johnson,james,4\n")
-            f.write("patel,raj,5\n")
-            temp_path = f.name
-
-        yield temp_path
-
-        # Cleanup
-        if os.path.exists(temp_path):
-            os.unlink(temp_path)
-
-    @pytest.fixture
-    def temp_output_dir(self):
-        """Create a temporary directory for output files."""
-        temp_dir = tempfile.mkdtemp()
-        yield temp_dir
-
-        # Cleanup - remove all files in temp directory
-        for file in Path(temp_dir).glob("*"):
-            file.unlink()
-        os.rmdir(temp_dir)
 
 
 class TestCensusLnCLI:

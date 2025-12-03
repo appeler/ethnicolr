@@ -339,6 +339,7 @@ class EthnicolrModelClass(AbstractLSTMModel):
         race_path = files("ethnicolr") / race_fn
 
         df = df.copy()
+        original_index = df.index.copy()  # Preserve original index
         df = cls.test_and_norm_df(df, newnamecol)
         df[newnamecol] = df[newnamecol].astype(str).str.strip().str.title()
         rowindex_added = "__rowindex" not in df.columns
@@ -389,9 +390,9 @@ class EthnicolrModelClass(AbstractLSTMModel):
             proba = cls.get_model()(X, training=False).numpy()
             proba_df = pd.DataFrame(proba, columns=cls.get_race())
             proba_df["race"] = proba_df.idxmax(axis=1)
-            final_df = pd.concat(
-                [df.reset_index(drop=True), proba_df.reset_index(drop=True)], axis=1
-            )
+            # Use original index for alignment
+            proba_df.index = df.index
+            final_df = pd.concat([df, proba_df], axis=1)
 
         else:
             lower_perc = (0.5 - conf_int / 2) * 100
@@ -450,7 +451,10 @@ class EthnicolrModelClass(AbstractLSTMModel):
         # Clean up
         if rowindex_added:
             final_df.drop(columns=["__rowindex"], inplace=True, errors="ignore")
-        return final_df.reset_index(drop=True)
+        
+        # Restore original index
+        final_df.index = original_index
+        return final_df
 
     # Abstract method implementations
     @classmethod
