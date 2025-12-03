@@ -452,8 +452,14 @@ class EthnicolrModelClass(AbstractLSTMModel):
         if rowindex_added:
             final_df.drop(columns=["__rowindex"], inplace=True, errors="ignore")
 
-        # Restore original index
-        final_df.index = original_index
+        # Restore original index only if lengths match
+        # If rows were filtered out, we can't restore the original index directly
+        if len(final_df) == len(original_index):
+            final_df.index = original_index
+        else:
+            # Use reindex to handle missing indices properly, filling with appropriate defaults
+            final_df = final_df.reindex(original_index)
+
         return final_df
 
     # Abstract method implementations
