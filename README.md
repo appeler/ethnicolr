@@ -168,7 +168,7 @@ specify the column name carrying last names using the [`-l`] option, keeping the
 
 ```bash
 # Download the sample file first:
-curl -O https://raw.githubusercontent.com/appeler/ethnicolr/master/examples/input-with-header.csv
+curl -O https://raw.githubusercontent.com/appeler/ethnicolr/refs/heads/master/examples/input-with-header.csv
 
 # Then run census lookup:
 census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv

@@ -95,12 +95,12 @@ To append census data from 2010 to a `file without column headers <ethnicolr/dat
 
    census_ln -y 2010 -o output-census2010.csv -l 0 input-without-header.csv
 
-To append census data from 2010 to a `sample file with column header in the first row <https://raw.githubusercontent.com/appeler/ethnicolr/master/examples/input-with-header.csv>`__, specify the column name carrying last names using the ``-l`` option:
+To append census data from 2010 to a `sample file with column header in the first row <https://raw.githubusercontent.com/appeler/ethnicolr/refs/heads/master/examples/input-with-header.csv>`__, specify the column name carrying last names using the ``-l`` option:
 
 ::
 
    # Download the sample file first:
-   curl -O https://raw.githubusercontent.com/appeler/ethnicolr/master/examples/input-with-header.csv
+   curl -O https://raw.githubusercontent.com/appeler/ethnicolr/refs/heads/master/examples/input-with-header.csv
 
    # Then run census lookup:
    census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv
