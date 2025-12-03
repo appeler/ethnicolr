@@ -277,12 +277,6 @@ docs = [
     { name = "sphinx-autodoc-typehints" },
     { name = "sphinx-copybutton" },
 ]
-inference = [
-    { name = "protobuf" },
-    { name = "tensorflow", marker = "sys_platform != 'win32'" },
-    { name = "tensorflow-cpu", marker = "sys_platform == 'win32'" },
-    { name = "typing-extensions" },
-]
 test = [
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -330,12 +324,6 @@ docs = [
     { name = "sphinx", specifier = ">=7.0" },
     { name = "sphinx-autodoc-typehints", specifier = ">=1.25" },
     { name = "sphinx-copybutton", specifier = ">=0.5" },
-]
-inference = [
-    { name = "protobuf", specifier = ">=4.21.0,<7.0.0" },
-    { name = "tensorflow", marker = "sys_platform != 'win32'", specifier = ">=2.15.0,<3.0.0" },
-    { name = "tensorflow-cpu", marker = "sys_platform == 'win32'", specifier = ">=2.15.0,<3.0.0" },
-    { name = "typing-extensions", specifier = ">=4.4,<5.0" },
 ]
 test = [
     { name = "pytest", specifier = ">=7.0" },
@@ -1226,29 +1214,28 @@ name = "tensorflow"
 version = "2.15.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "absl-py" },
-    { name = "astunparse" },
-    { name = "flatbuffers" },
-    { name = "gast" },
-    { name = "google-pasta" },
-    { name = "grpcio" },
-    { name = "h5py" },
-    { name = "keras" },
-    { name = "libclang" },
-    { name = "ml-dtypes" },
-    { name = "numpy" },
-    { name = "opt-einsum" },
-    { name = "packaging" },
-    { name = "protobuf" },
-    { name = "setuptools" },
-    { name = "six" },
-    { name = "tensorboard" },
-    { name = "tensorflow-estimator" },
-    { name = "tensorflow-io-gcs-filesystem", version = "0.31.0", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine == 'AMD64' and sys_platform == 'win32'" },
+    { name = "absl-py", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "astunparse", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "flatbuffers", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "gast", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "google-pasta", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "grpcio", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "h5py", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "keras", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "libclang", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "ml-dtypes", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "numpy", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "opt-einsum", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "packaging", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "protobuf", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "setuptools", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "six", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "tensorboard", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "tensorflow-estimator", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
     { name = "tensorflow-io-gcs-filesystem", version = "0.37.1", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
-    { name = "termcolor" },
-    { name = "typing-extensions" },
-    { name = "wrapt" },
+    { name = "termcolor", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "typing-extensions", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "wrapt", marker = "platform_machine != 'AMD64' or sys_platform != 'win32'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/25/72/2ede9c4b9b96650a8a7b909abf4733adf110c5907425ee252f8095385b11/tensorflow-2.15.1-cp311-cp311-macosx_10_15_x86_64.whl", hash = "sha256:6761efe511e6ee0f893f60738fefbcc51d6dc386eeaaafea59d21899ef369ffd", size = 236482723, upload-time = "2024-03-08T23:51:59.848Z" },

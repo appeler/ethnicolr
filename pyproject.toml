@@ -103,12 +103,8 @@ docs = [
 
 # --- uv dependency groups (for `uv sync --group ...`) ---
 [dependency-groups]
-inference = [
-  "tensorflow>=2.15.0,<3.0.0; sys_platform != 'win32'",  # Full TensorFlow for Mac/Linux
-  "tensorflow-cpu>=2.15.0,<3.0.0; sys_platform == 'win32'",  # CPU-only for Windows (no io-gcs-filesystem issues)
-  "protobuf>=4.21.0,<7.0.0",
-  "typing-extensions>=4.4,<5.0",
-]
+# Note: inference removed from here - already defined in [project.optional-dependencies]
+# This prevents UV dependency resolution conflicts
 
 test = [
   "pytest>=7.0",

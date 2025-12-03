@@ -28,14 +28,22 @@ jobs:
           enable-cache: true
 
       - name: Install project dependencies
-        run: uv sync --all-extras --dev
+        run: uv sync --all-extras --dev -v
+
+      - name: Debug installed packages (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "=== Checking installed packages ==="
+          uv run python -m pip list | grep -i tensorflow || echo "No TensorFlow packages found"
+          echo "=== Checking uv sync output ==="
+          uv sync --all-extras --dev --verbose
 
       - name: Verify installation
         run: |
           echo "Platform: ${{ matrix.os }}"
           uv run python -c "import pandas; print('[OK] Pandas version:', pandas.__version__)"
           uv run python -c "import numpy; print('[OK] NumPy version:', numpy.__version__)"
-          uv run python -c "import click; print('[OK] Click version:', click.__version__)"
+          uv run python -c "import importlib.metadata; print('[OK] Click version:', importlib.metadata.version('click'))"
           uv run python -c "import tensorflow; print('[OK] TensorFlow version:', tensorflow.__version__)"
           uv run python -c "import tensorflow as tf; print('[OK] TensorFlow functionality:', tf.constant([1, 2, 3]))"
           uv run python -c "from ethnicolr import cli; print('[OK] CLI module loads successfully')"
