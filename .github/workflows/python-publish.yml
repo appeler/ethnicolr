@@ -35,7 +35,9 @@ jobs:
         run: uv build
 
       - name: Sync citation metadata
-        uses: gojiplus/citation-sync@v1
+        uses: recite/citation-sync@v.2
+        with:
+          commit: true
 
       - name: Extract version from tag
         if: startsWith(github.ref, 'refs/tags/')
