@@ -30,16 +30,21 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install package (tests + TF runtime)
-        # Use explicit pip installation to ensure TensorFlow is available
+        # Install in development mode with all required dependency groups
         run: |
-          uv sync --group test --group inference
-          uv pip install -e .
+          uv sync --group test --group inference --group dev
+          uv pip install --no-deps -e .
+          # Fallback: Explicitly install TensorFlow if sync didn't work
+          uv run python -c "import tensorflow" || uv pip install "tensorflow>=2.15.0,<3.0.0"
 
       - name: Verify TensorFlow installation
         run: |
-          uv run python -c "import tensorflow; print('TensorFlow version:', tensorflow.__version__)"
-          uv run python -c "import pandas; print('Pandas version:', pandas.__version__)"
-          uv run python -c "import numpy; print('NumPy version:', numpy.__version__)"
+          echo "Verifying core dependencies..."
+          uv run python -c "import tensorflow; print('✓ TensorFlow version:', tensorflow.__version__)"
+          uv run python -c "import pandas; print('✓ Pandas version:', pandas.__version__)"
+          uv run python -c "import numpy; print('✓ NumPy version:', numpy.__version__)"
+          echo "Testing TensorFlow functionality..."
+          uv run python -c "import tensorflow as tf; print('✓ TensorFlow can create tensors:', tf.constant([1, 2, 3]))"
 
       - name: Run test suite
         run: uv run pytest
@@ -63,7 +68,9 @@ jobs:
       - name: Install dev dependencies (incl. TF so imports succeed)
         run: |
           uv sync --group dev --group inference
-          uv pip install -e .
+          uv pip install --no-deps -e .
+          # Fallback: Explicitly install TensorFlow if sync didn't work
+          uv run python -c "import tensorflow" || uv pip install "tensorflow>=2.15.0,<3.0.0"
 
       - name: Verify dependencies for linting
         run: |
