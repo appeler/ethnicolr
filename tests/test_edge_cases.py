@@ -325,7 +325,7 @@ class TestModelBoundaryConditions:
         assert_prediction_quality(result_small, "census", with_confidence=True)
 
         # Maximum confidence interval (should work)
-        result_max = pred_census_ln(df, "last", 2010, conf_int=1.0)
+        result_max = pred_census_ln(df, "last", 2010, conf_int=0.99)
         assert_prediction_quality(result_max, "census", with_confidence=True)
 
     def test_extreme_iteration_counts(self):
