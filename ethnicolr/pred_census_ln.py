@@ -137,9 +137,12 @@ class CensusLnModel(EthnicolrModelClass):
         )
 
         pred_count = rdf.dropna(subset=["race"]).shape[0]
-        logger.info(
-            f"Predicted {pred_count} of {len(df)} rows ({pred_count / len(df) * 100:.1f}%)"
-        )
+        if len(df) > 0:
+            logger.info(
+                f"Predicted {pred_count} of {len(df)} rows ({pred_count / len(df) * 100:.1f}%)"
+            )
+        else:
+            logger.info("No rows to predict (empty DataFrame)")
         logger.info(f"Added columns: {', '.join(set(rdf.columns) - set(df.columns))}")
 
         return rdf

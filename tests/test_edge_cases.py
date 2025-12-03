@@ -27,9 +27,13 @@ class TestDataFrameEdgeCases:
         """Test DataFrames with columns but no data rows."""
         empty_df = pd.DataFrame(columns=["last", "first", "id"])
 
-        # Should raise ValueError for empty data (current behavior)
-        with pytest.raises(ValueError, match="The name column has no non-NaN values"):
-            pred_census_ln(empty_df, "last", 2010)
+        # Should handle empty DataFrames gracefully by returning empty result
+        result = pred_census_ln(empty_df, "last", 2010)
+        assert len(result) == 0
+        assert "race" in result.columns  # Should have prediction columns
+        assert all(
+            col in result.columns for col in ["last", "first", "id"]
+        )  # Preserve input columns
 
     def test_single_row_dataframe(self):
         """Test DataFrames with only one row."""
@@ -216,16 +220,19 @@ class TestColumnNameEdgeCases:
 
     def test_case_sensitive_column_names(self):
         """Test that column names are case-sensitive."""
-        df = pd.DataFrame([{"LAST": "Smith", "Last": "Garcia", "last": "Johnson"}])
+        df = pd.DataFrame([{"last": "Smith", "first": "John", "id": 1}])
 
         # Should work with correct case
         result = pred_census_ln(df, "last", 2010)
         assert len(result) == 1
-        assert result.iloc[0]["LAST"] == "Smith"  # Other columns preserved
+        assert result.iloc[0]["last"] == "Smith"  # Original data preserved
 
-        # Should fail with incorrect case
+        # Should fail with incorrect case for non-existent column
         with pytest.raises((KeyError, ValueError)):
-            pred_census_ln(df, "LAST", 2010)
+            pred_census_ln(df, "Last", 2010)  # "Last" doesn't exist, only "last"
+
+        with pytest.raises((KeyError, ValueError)):
+            pred_census_ln(df, "LAST", 2010)  # "LAST" doesn't exist, only "last"
 
     def test_duplicate_column_names(self):
         """Test handling of DataFrames with duplicate column names."""

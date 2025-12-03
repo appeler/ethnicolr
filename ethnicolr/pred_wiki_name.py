@@ -254,8 +254,15 @@ class WikiNameModel(EthnicolrModelClass):
                         else:
                             skipped_df[col] = float("nan")
 
-            # Combine results
-            result_df = pd.concat([pred_df, skipped_df], ignore_index=True)
+            # Combine results - handle empty DataFrames explicitly to avoid deprecation warnings
+            if pred_df.empty and skipped_df.empty:
+                result_df = pd.DataFrame()
+            elif pred_df.empty:
+                result_df = skipped_df.reset_index(drop=True)
+            elif skipped_df.empty:
+                result_df = pred_df.reset_index(drop=True)
+            else:
+                result_df = pd.concat([pred_df, skipped_df], ignore_index=True)
 
             # Sort by original order if possible
             if "__rowindex" in result_df.columns:
