@@ -5,8 +5,6 @@ authors:
   given-names: "Suriyan" 
 - family-names: "Sood"
   given-names: "Gaurav"
-- family-names: "Naji"
-  given-names: "Bashar"
 title: "ethnicolr: Predict Race and Ethnicity From Name"
 version: 0.18.4
 date-released: 2025-09-01
