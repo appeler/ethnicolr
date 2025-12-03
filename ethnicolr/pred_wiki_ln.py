@@ -49,6 +49,12 @@ class WikiLnModel(EthnicolrModelClass):
         "GreaterEuropean,WestEuropean,Italian",
         "GreaterEuropean,WestEuropean,Nordic",
     ]
+
+    # Model file paths
+    MODELFN = "models/wiki/lstm/wiki_ln_lstm.h5"
+    VOCABFN = "models/wiki/lstm/wiki_ln_vocab.csv"
+    RACEFN = "models/wiki/lstm/wiki_race.csv"
+
     NGRAMS = 2
     FEATURE_LEN = 20
 

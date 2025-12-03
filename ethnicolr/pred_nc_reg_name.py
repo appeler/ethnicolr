@@ -224,6 +224,25 @@ class NCRegNameModel(EthnicolrModelClass):
             )
             result_df = working_df.copy()
             result_df["race"] = None
+
+            # Add all expected NC prediction columns with NaN values
+            nc_categories = [
+                "HL+A",
+                "HL+B",
+                "HL+I",
+                "HL+M",
+                "HL+O",
+                "HL+W",
+                "NL+A",
+                "NL+B",
+                "NL+I",
+                "NL+M",
+                "NL+O",
+                "NL+W",
+            ]
+            for category in nc_categories:
+                result_df[category] = float("nan")
+
             return result_df
 
         try:
