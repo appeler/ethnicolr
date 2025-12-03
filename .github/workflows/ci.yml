@@ -21,30 +21,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install uv
+      - name: Install uv and set Python version
         uses: astral-sh/setup-uv@v7
         with:
-          version: "latest"
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
 
-      - name: Set up Python ${{ matrix.python-version }}
-        run: uv python install ${{ matrix.python-version }}
+      - name: Install project dependencies
+        run: uv sync --all-extras --dev
 
-      - name: Install package (tests + TF runtime)
-        # Install in development mode with all required dependency groups
+      - name: Verify installation
         run: |
-          uv sync --group test --group inference --group dev
-          uv pip install --no-deps -e .
-          # Fallback: Explicitly install TensorFlow if sync didn't work
-          uv run python -c "import tensorflow" || uv pip install "tensorflow>=2.15.0,<3.0.0"
-
-      - name: Verify TensorFlow installation
-        run: |
-          echo "Verifying core dependencies..."
+          echo "Platform: ${{ matrix.os }}"
           uv run python -c "import tensorflow; print('✓ TensorFlow version:', tensorflow.__version__)"
           uv run python -c "import pandas; print('✓ Pandas version:', pandas.__version__)"
           uv run python -c "import numpy; print('✓ NumPy version:', numpy.__version__)"
-          echo "Testing TensorFlow functionality..."
-          uv run python -c "import tensorflow as tf; print('✓ TensorFlow can create tensors:', tf.constant([1, 2, 3]))"
+          uv run python -c "import click; print('✓ Click version:', click.__version__)"
+          uv run python -c "import tensorflow as tf; print('✓ TensorFlow functionality:', tf.constant([1, 2, 3]))"
+          uv run python -c "from ethnicolr import cli; print('✓ CLI module loads successfully')"
 
       - name: Run test suite
         run: uv run pytest
@@ -57,24 +51,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install uv
+      - name: Install uv and set Python version
         uses: astral-sh/setup-uv@v7
         with:
-          version: "latest"
+          python-version: "3.11"
+          enable-cache: true
 
-      - name: Set up Python
-        run: uv python install 3.11
+      - name: Install dev dependencies
+        run: uv sync --all-extras --dev
 
-      - name: Install dev dependencies (incl. TF so imports succeed)
-        run: |
-          uv sync --group dev --group inference
-          uv pip install --no-deps -e .
-          # Fallback: Explicitly install TensorFlow if sync didn't work
-          uv run python -c "import tensorflow" || uv pip install "tensorflow>=2.15.0,<3.0.0"
+      - name: Verify TensorFlow for import checking
+        run: uv run python -c "import tensorflow; print('✓ TensorFlow available for import checking')"
 
-      - name: Verify dependencies for linting
-        run: |
-          uv run python -c "import tensorflow; print('TensorFlow available for import checking')"
-
-      - name: Ruff lint
+      - name: Run linting
         run: uv run ruff check .
