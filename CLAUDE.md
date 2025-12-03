@@ -11,7 +11,7 @@ ethnicolr is a Python package that predicts race and ethnicity from names using 
 ### Testing
 - Run all tests: `pytest`
 - Run tests with coverage: `pytest --cov=ethnicolr`
-- Run specific test file: `pytest ethnicolr/tests/test_010_census_ln.py`
+- Run specific test file: `pytest tests/test_010_census_ln.py`
 
 ### Code Quality
 - Format code: `black .`
@@ -61,7 +61,7 @@ The package provides CLI commands defined in pyproject.toml:
 - `ethnicolr_download_models` - Download model files
 
 ### Testing Structure
-- Tests are in `ethnicolr/tests/` with descriptive numeric prefixes
+- Tests are in `tests/` with descriptive numeric prefixes
 - Each major module has corresponding test files
 - Tests use unittest framework with pandas DataFrame fixtures
 

@@ -19,7 +19,7 @@ dev:
 	pre-commit install
 
 test:
-	pytest ethnicolr/tests/ -v --cov=ethnicolr
+	pytest tests/ -v --cov=ethnicolr
 
 lint:
 	ruff check .

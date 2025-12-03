@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling>=1.21.1"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.9.15,<0.10.0"]
+build-backend = "uv_build"
 
 [project]
 name = "ethnicolr"
@@ -10,7 +10,7 @@ readme = "README.md"
 # TensorFlow officially supports Python 3.9–3.12 overall,
 # but on macOS the current guidance is Python 3.9–3.11, so we stay in the safe overlap. :contentReference[oaicite:0]{index=0}
 requires-python = ">=3.11,<3.12"
-license = { text = "MIT" }
+license = "MIT"
 
 authors = [
   { name = "Gaurav Sood", email = "contact@gsood.com" },
@@ -40,7 +40,7 @@ classifiers = [
 
 dependencies = [
   "pandas>=2.2.0",
-  "numpy>=1.26.0,<3.0.0",
+  "numpy>=1.26.0,<2.0.0",
 ]
 
 [project.urls]
@@ -129,6 +129,9 @@ docs = [
 # Only resolve deps for the current platform
 environments = []
 
+[tool.uv.build-backend]
+module-root = ""
+
 # Ruff configuration
 [tool.ruff]
 line-length = 88
@@ -171,7 +174,7 @@ known-first-party = ["ethnicolr"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = ["ethnicolr/tests"]
+testpaths = ["tests"]
 python_files = "test_*.py"
 addopts = [
   "-ra",
