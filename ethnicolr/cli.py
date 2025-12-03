@@ -23,6 +23,10 @@ from .pred_census_ln import CensusLnModel
 from .pred_fl_reg_ln import FloridaRegLnModel
 from .pred_wiki_ln import WikiLnModel
 
+# ASCII symbols for cross-platform compatibility
+CHECK = "[OK]"
+CROSS = "[FAIL]"
+
 
 # Custom click types for better validation
 class CSVFile(click.Path):
@@ -189,7 +193,9 @@ def predict_census(
         predicted_count = result.dropna(subset=["race"]).shape[0]
         success_rate = predicted_count / len(result) * 100
 
-        click.echo(click.style("✓ Prediction completed successfully!", fg="green"))
+        click.echo(
+            click.style(f"{CHECK} Prediction completed successfully!", fg="green")
+        )
         click.echo(f"  Processed: {len(result)} rows")
         click.echo(f"  Predicted: {predicted_count} rows ({success_rate:.1f}%)")
         click.echo(f"  Output: {output}")
@@ -314,7 +320,9 @@ def predict_florida(
         predicted_count = result.dropna(subset=["race"]).shape[0]
         success_rate = predicted_count / len(result) * 100
 
-        click.echo(click.style("✓ Prediction completed successfully!", fg="green"))
+        click.echo(
+            click.style(f"{CHECK} Prediction completed successfully!", fg="green")
+        )
         click.echo(f"  Processed: {len(result)} rows")
         click.echo(f"  Predicted: {predicted_count} rows ({success_rate:.1f}%)")
         click.echo(f"  Output: {output}")
@@ -439,7 +447,9 @@ def predict_wiki(
         predicted_count = result.dropna(subset=["race"]).shape[0]
         success_rate = predicted_count / len(result) * 100
 
-        click.echo(click.style("✓ Prediction completed successfully!", fg="green"))
+        click.echo(
+            click.style(f"{CHECK} Prediction completed successfully!", fg="green")
+        )
         click.echo(f"  Processed: {len(result)} rows")
         click.echo(f"  Predicted: {predicted_count} rows ({success_rate:.1f}%)")
         click.echo(f"  Output: {output}")
@@ -533,7 +543,9 @@ def download_models(model_type: str, year: str | None, force: bool):
         downloaded_files = download_model(model_type=model_type, year=year, force=force)
 
         if downloaded_files:
-            click.echo(click.style("✓ Download completed successfully!", fg="green"))
+            click.echo(
+                click.style(f"{CHECK} Download completed successfully!", fg="green")
+            )
             click.echo(f"Downloaded {len(downloaded_files)} files for {model_type}")
 
             if year:
@@ -572,9 +584,9 @@ def model_status():
 
             for year in available_years:
                 if year in installed_years:
-                    status = click.style("✓ Installed", fg="green")
+                    status = click.style(f"{CHECK} Installed", fg="green")
                 else:
-                    status = click.style("✗ Not installed", fg="yellow")
+                    status = click.style(f"{CROSS} Not installed", fg="yellow")
                 click.echo(f"  {year}: {status}")
 
             if not available_years:
