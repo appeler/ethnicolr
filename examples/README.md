@@ -22,7 +22,7 @@ This directory contains example files and tutorial notebooks for using the ethni
 ### Download the Sample File
 ```bash
 # Download sample input file
-curl -O https://raw.githubusercontent.com/appeler/ethnicolr/master/examples/input-with-header.csv
+curl -O https://raw.githubusercontent.com/appeler/ethnicolr/refs/heads/master/examples/input-with-header.csv
 ```
 
 ### Census Data Lookup
