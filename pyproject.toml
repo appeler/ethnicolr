@@ -72,7 +72,7 @@ ethnicolr_download_models = "ethnicolr.utils.download:main"
 # Runtime inference stack
 inference = [
   "tensorflow>=2.15.0,<3.0.0; sys_platform != 'win32'",  # Full TensorFlow for Mac/Linux
-  "tensorflow-cpu>=2.15.0,<3.0.0; sys_platform == 'win32'",  # CPU-only for Windows (no io-gcs-filesystem issues)
+  "tensorflow-intel>=2.15.0,<3.0.0; sys_platform == 'win32'",  # Intel's official Windows CPU build with proper tensorflow module
   "protobuf>=4.21.0,<7.0.0",
   "typing-extensions>=4.4,<5.0",
 ]
