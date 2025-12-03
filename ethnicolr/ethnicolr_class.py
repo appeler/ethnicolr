@@ -31,18 +31,66 @@ class _CompatLSTM:
 
 
 class EthnicolrModelClass:
-    """Base class for ethnicolr machine learning models.
+    """
+    Base class for ethnicolr machine learning models.
 
-    Provides common functionality for LSTM-based race/ethnicity prediction models.
-    Handles model loading, text preprocessing, n-gram generation, and prediction
-    with confidence intervals. Serves as the foundation for all prediction modules
-    in the ethnicolr package.
+    This class provides the foundation for all LSTM-based race/ethnicity prediction models
+    in the ethnicolr package. It handles common functionality including model loading,
+    text preprocessing, n-gram generation, prediction with confidence intervals, and
+    Monte Carlo sampling for uncertainty estimation.
+
+    Architecture:
+        All ethnicolr models use LSTM neural networks trained on character-level n-grams
+        extracted from names. The models predict probability distributions over
+        race/ethnicity categories using softmax output layers.
+
+    Model Types Supported:
+        - Census surname lookup models (census_ln.py)
+        - Census LSTM prediction models (pred_census_ln.py)  
+        - Wikipedia name models (pred_wiki_*.py)
+        - Florida voter registration models (pred_fl_reg_*.py)
+        - North Carolina voter registration models (pred_nc_reg_*.py)
+
+    Common Workflow:
+        1. Load vocabulary, race labels, and pre-trained LSTM model
+        2. Preprocess and normalize input names
+        3. Extract character n-grams from names
+        4. Convert n-grams to model input sequences
+        5. Generate predictions using LSTM model
+        6. Apply confidence interval estimation if requested
+        7. Return DataFrame with probabilities and predicted race
 
     Attributes:
-        vocab: Vocabulary list loaded from model files.
-        race: Race/ethnicity labels loaded from model files.
-        model: Loaded TensorFlow/Keras LSTM model.
-        model_year: Year of the loaded model.
+        vocab (list): Character n-gram vocabulary loaded from model files.
+        race (list): Race/ethnicity category labels loaded from model files.
+        model (tf.keras.Model): Pre-trained LSTM model for predictions.
+        model_year (int): Year version of the loaded model (affects training data).
+
+    Class Constants (defined in subclasses):
+        MODELFN (str): Path to .h5 model file within package
+        VOCABFN (str): Path to vocabulary CSV file within package  
+        RACEFN (str): Path to race labels CSV file within package
+        NGRAMS (int | tuple): N-gram size(s) for feature extraction
+        FEATURE_LEN (int): Maximum sequence length for model input
+
+    Example:
+        >>> # Subclass implementation pattern
+        >>> class MyModel(EthnicolrModelClass):
+        ...     MODELFN = "models/my_model.h5"
+        ...     VOCABFN = "models/my_vocab.csv"
+        ...     RACEFN = "models/my_races.csv"
+        ...     NGRAMS = 2
+        ...     FEATURE_LEN = 20
+        ...     
+        ...     @classmethod
+        ...     def my_prediction_func(cls, df, name_col):
+        ...         return cls.transform_and_pred(df, name_col, ...)
+
+    Note:
+        - This class is not intended for direct instantiation
+        - Subclasses must define model file paths and parameters
+        - All models use TensorFlow/Keras backend
+        - Model files are distributed separately from the package
     """
 
     vocab = None
@@ -310,6 +358,10 @@ class EthnicolrModelClass:
             # Choose race with highest mean
             means = [col for col in summary.columns if col.endswith("_mean")]
             summary["race"] = summary[means].idxmax(axis=1).str.replace("_mean", "")
+
+            # Add basic probability columns (same as mean values for compatibility)
+            for col in cls.race:
+                summary[col] = summary[f"{col}_mean"]
 
             # Convert CI columns to float
             for suffix in ["_lb", "_ub"]:
