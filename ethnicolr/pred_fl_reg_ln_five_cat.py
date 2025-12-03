@@ -71,7 +71,7 @@ class FloridaRegLnFiveCatModel(EthnicolrModelClass):
             - nh_black: Probability of Non-Hispanic Black [0.0-1.0]
             - nh_white: Probability of Non-Hispanic White [0.0-1.0]
             - other: Probability of Other/Multiracial [0.0-1.0]
-            
+
             When conf_int < 1.0, additional confidence interval columns:
             - {race}_mean: Monte Carlo mean probability
             - {race}_std: Monte Carlo standard deviation
@@ -85,7 +85,7 @@ class FloridaRegLnFiveCatModel(EthnicolrModelClass):
         Example:
             >>> import pandas as pd
             >>> from ethnicolr.pred_fl_reg_ln_five_cat import pred_fl_reg_ln_five_cat
-            >>> 
+            >>>
             >>> df = pd.DataFrame({
             ...     'last': ['Garcia', 'Smith', 'Patel', 'Johnson'],
             ...     'id': [1, 2, 3, 4]

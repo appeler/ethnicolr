@@ -76,8 +76,8 @@ class FloridaRegNameModel(EthnicolrModelClass):
         """
         Predict race/ethnicity from full names using Florida voter registration LSTM model.
 
-        This function uses an LSTM neural network model trained on Florida voter registration 
-        data to predict race/ethnicity probabilities from combined first and last names. 
+        This function uses an LSTM neural network model trained on Florida voter registration
+        data to predict race/ethnicity probabilities from combined first and last names.
         Enhanced with 2024 improvements for better international name handling and processing transparency.
 
         Performance Context:
@@ -101,18 +101,18 @@ class FloridaRegNameModel(EthnicolrModelClass):
             - race: Predicted race category (asian, hispanic, nh_black, nh_white)
             - asian: Probability of Asian ethnicity [0.0-1.0]
             - hispanic: Probability of Hispanic ethnicity [0.0-1.0]
-            - nh_black: Probability of Non-Hispanic Black [0.0-1.0] 
+            - nh_black: Probability of Non-Hispanic Black [0.0-1.0]
             - nh_white: Probability of Non-Hispanic White [0.0-1.0]
-            
+
             Processing transparency columns (2024 enhancement):
             - processing_status: 'processed', 'skipped_empty_original', 'skipped_empty_after_normalization'
             - __name: Full name used for processing (last + " " + first)
             - name_normalized: Original combined name before cleaning
             - name_normalized_clean: Name after title case normalization
-            
+
             When conf_int < 1.0, additional confidence interval columns:
             - {race}_mean: Monte Carlo mean probability
-            - {race}_std: Monte Carlo standard deviation  
+            - {race}_std: Monte Carlo standard deviation
             - {race}_lb: Lower confidence bound
             - {race}_ub: Upper confidence bound
 
@@ -123,7 +123,7 @@ class FloridaRegNameModel(EthnicolrModelClass):
         Example:
             >>> import pandas as pd
             >>> from ethnicolr.pred_fl_reg_name import pred_fl_reg_name
-            >>> 
+            >>>
             >>> df = pd.DataFrame({
             ...     'last': ['García', 'Smith', 'O\'Brien', 'Zhang'],
             ...     'first': ['José', 'John', 'Patrick', 'Wei'],
@@ -133,7 +133,7 @@ class FloridaRegNameModel(EthnicolrModelClass):
             >>> print(result[['last', 'first', 'race', 'processing_status']])
                  last     first      race processing_status
             0   García      José  hispanic         processed
-            1    Smith      John  nh_white         processed  
+            1    Smith      John  nh_white         processed
             2  O'Brien   Patrick  nh_white         processed
             3    Zhang       Wei     asian         processed
 

@@ -15,6 +15,7 @@ from importlib import resources
 import pandas as pd
 
 from .ethnicolr_class import EthnicolrModelClass
+from .model_base import ModelType, RaceCategory, register_model
 from .utils import arg_parser
 
 # Suppress TensorFlow noise
@@ -27,6 +28,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+@register_model(ModelType.CENSUS_LSTM)
 class CensusLnModel(EthnicolrModelClass):
     """Census-based last name prediction model.
 
@@ -34,6 +36,13 @@ class CensusLnModel(EthnicolrModelClass):
     from last names. Supports both 2000 and 2010 Census data.
     """
 
+    # Required abstract class attributes
+    SUPPORTED_CATEGORIES = [
+        RaceCategory.WHITE,
+        RaceCategory.BLACK,
+        RaceCategory.ASIAN,
+        RaceCategory.HISPANIC,
+    ]
     NGRAMS = 2
     FEATURE_LEN = 20
 
@@ -134,6 +143,54 @@ class CensusLnModel(EthnicolrModelClass):
         logger.info(f"Added columns: {', '.join(set(rdf.columns) - set(df.columns))}")
 
         return rdf
+
+    # Abstract method implementations
+    @classmethod
+    def predict(
+        cls, df: pd.DataFrame, name_col: str, year: int = 2010, **kwargs
+    ) -> pd.DataFrame:
+        """
+        Generate race/ethnicity predictions for Census model.
+
+        Args:
+            df: Input DataFrame containing names.
+            name_col: Column containing last names to predict.
+            year: Census year (2000 or 2010).
+            **kwargs: Additional parameters (num_iter, conf_int).
+
+        Returns:
+            DataFrame with race/ethnicity predictions.
+        """
+        cls.validate_input(df, name_col)
+        return cls.pred_census_ln(df, name_col, year=year, **kwargs)
+
+    @classmethod
+    def predict_with_confidence(
+        cls,
+        df: pd.DataFrame,
+        name_col: str,
+        conf_int: float = 0.95,
+        num_iter: int = 100,
+        year: int = 2010,
+        **kwargs,
+    ) -> pd.DataFrame:
+        """
+        Generate predictions with confidence intervals.
+
+        Args:
+            df: Input DataFrame containing names.
+            name_col: Column containing last names to predict.
+            conf_int: Confidence interval level (0.0-1.0).
+            num_iter: Number of Monte Carlo iterations.
+            year: Census year (2000 or 2010).
+
+        Returns:
+            DataFrame with predictions and confidence intervals.
+        """
+        cls.validate_input(df, name_col)
+        return cls.pred_census_ln(
+            df, name_col, year=year, num_iter=num_iter, conf_int=conf_int, **kwargs
+        )
 
 
 # Alias for CLI use

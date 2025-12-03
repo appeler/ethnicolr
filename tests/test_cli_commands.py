@@ -17,7 +17,7 @@ class TestCLICommands:
     @pytest.fixture
     def sample_input_file(self):
         """Create a temporary CSV file for CLI testing."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
             f.write("last,first,id\n")
             f.write("smith,john,1\n")
             f.write("zhang,wei,2\n")
@@ -52,12 +52,7 @@ class TestCensusLnCLI:
         output_file = os.path.join(temp_output_dir, "census_output.csv")
 
         # Test with 2010 census (default)
-        cmd = [
-            "census_ln",
-            sample_input_file,
-            "-l", "last",
-            "-o", output_file
-        ]
+        cmd = ["census_ln", sample_input_file, "-l", "last", "-o", output_file]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
 
@@ -81,9 +76,12 @@ class TestCensusLnCLI:
         cmd = [
             "census_ln",
             sample_input_file,
-            "-l", "last",
-            "-y", "2000",
-            "-o", output_file
+            "-l",
+            "last",
+            "-y",
+            "2000",
+            "-o",
+            output_file,
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -107,12 +105,7 @@ class TestPredCensusLnCLI:
         """Test basic pred_census_ln CLI functionality."""
         output_file = os.path.join(temp_output_dir, "pred_census.csv")
 
-        cmd = [
-            "pred_census_ln",
-            sample_input_file,
-            "-l", "last",
-            "-o", output_file
-        ]
+        cmd = ["pred_census_ln", sample_input_file, "-l", "last", "-o", output_file]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
@@ -136,10 +129,14 @@ class TestPredCensusLnCLI:
         cmd = [
             "pred_census_ln",
             sample_input_file,
-            "-l", "last",
-            "-c", "0.9",
-            "-i", "50",  # Fewer iterations for speed
-            "-o", output_file
+            "-l",
+            "last",
+            "-c",
+            "0.9",
+            "-i",
+            "50",  # Fewer iterations for speed
+            "-o",
+            output_file,
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
@@ -158,12 +155,7 @@ class TestWikiPredictionCLI:
         """Test pred_wiki_ln CLI functionality."""
         output_file = os.path.join(temp_output_dir, "wiki_ln.csv")
 
-        cmd = [
-            "pred_wiki_ln",
-            sample_input_file,
-            "-l", "last",
-            "-o", output_file
-        ]
+        cmd = ["pred_wiki_ln", sample_input_file, "-l", "last", "-o", output_file]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
@@ -175,7 +167,11 @@ class TestWikiPredictionCLI:
         assert len(output_df) == 5
         assert "race" in output_df.columns
         # Should have wiki-style race categories
-        wiki_cols = [col for col in output_df.columns if "GreaterEuropean" in col or "Asian" in col or "GreaterAfrican" in col]
+        wiki_cols = [
+            col
+            for col in output_df.columns
+            if "GreaterEuropean" in col or "Asian" in col or "GreaterAfrican" in col
+        ]
         assert len(wiki_cols) > 0
 
     def test_pred_wiki_name_basic(self, sample_input_file, temp_output_dir):
@@ -185,9 +181,12 @@ class TestWikiPredictionCLI:
         cmd = [
             "pred_wiki_name",
             sample_input_file,
-            "-l", "last",
-            "-f", "first",
-            "-o", output_file
+            "-l",
+            "last",
+            "-f",
+            "first",
+            "-o",
+            output_file,
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
@@ -208,12 +207,7 @@ class TestFloridaPredictionCLI:
         """Test pred_fl_reg_ln CLI functionality."""
         output_file = os.path.join(temp_output_dir, "fl_ln.csv")
 
-        cmd = [
-            "pred_fl_reg_ln",
-            sample_input_file,
-            "-l", "last",
-            "-o", output_file
-        ]
+        cmd = ["pred_fl_reg_ln", sample_input_file, "-l", "last", "-o", output_file]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
@@ -235,8 +229,10 @@ class TestFloridaPredictionCLI:
         cmd = [
             "pred_fl_reg_ln_five_cat",
             sample_input_file,
-            "-l", "last",
-            "-o", output_file
+            "-l",
+            "last",
+            "-o",
+            output_file,
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
@@ -254,9 +250,12 @@ class TestFloridaPredictionCLI:
         cmd = [
             "pred_fl_reg_name",
             sample_input_file,
-            "-l", "last",
-            "-f", "first",
-            "-o", output_file
+            "-l",
+            "last",
+            "-f",
+            "first",
+            "-o",
+            output_file,
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
@@ -275,9 +274,12 @@ class TestFloridaPredictionCLI:
         cmd = [
             "pred_fl_reg_name_five_cat",
             sample_input_file,
-            "-l", "last",
-            "-f", "first",
-            "-o", output_file
+            "-l",
+            "last",
+            "-f",
+            "first",
+            "-o",
+            output_file,
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
@@ -299,9 +301,12 @@ class TestNorthCarolinaPredictionCLI:
         cmd = [
             "pred_nc_reg_name",
             sample_input_file,
-            "-l", "last",
-            "-f", "first",
-            "-o", output_file
+            "-l",
+            "last",
+            "-f",
+            "first",
+            "-o",
+            output_file,
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
@@ -314,7 +319,11 @@ class TestNorthCarolinaPredictionCLI:
         assert "race" in output_df.columns
 
         # Should have NC-style race categories
-        nc_cols = [col for col in output_df.columns if col.startswith("HL+") or col.startswith("NL+")]
+        nc_cols = [
+            col
+            for col in output_df.columns
+            if col.startswith("HL+") or col.startswith("NL+")
+        ]
         assert len(nc_cols) == 12  # 12 NC categories
 
 
@@ -326,12 +335,7 @@ class TestCLIErrorHandling:
         nonexistent_file = "/nonexistent/path/file.csv"
         output_file = os.path.join(temp_output_dir, "output.csv")
 
-        cmd = [
-            "pred_census_ln",
-            nonexistent_file,
-            "-l", "last",
-            "-o", output_file
-        ]
+        cmd = ["pred_census_ln", nonexistent_file, "-l", "last", "-o", output_file]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
 
@@ -348,8 +352,10 @@ class TestCLIErrorHandling:
         cmd = [
             "pred_census_ln",
             sample_input_file,
-            "-l", "nonexistent_column",
-            "-o", output_file
+            "-l",
+            "nonexistent_column",
+            "-o",
+            output_file,
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
@@ -357,16 +363,21 @@ class TestCLIErrorHandling:
         # Should fail with non-zero exit code
         assert result.returncode != 0
 
-    def test_invalid_confidence_interval_error(self, sample_input_file, temp_output_dir):
+    def test_invalid_confidence_interval_error(
+        self, sample_input_file, temp_output_dir
+    ):
         """Test error for invalid confidence interval."""
         output_file = os.path.join(temp_output_dir, "output.csv")
 
         cmd = [
             "pred_census_ln",
             sample_input_file,
-            "-l", "last",
-            "-c", "1.5",  # Invalid: > 1.0
-            "-o", output_file
+            "-l",
+            "last",
+            "-c",
+            "1.5",  # Invalid: > 1.0
+            "-o",
+            output_file,
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -382,9 +393,7 @@ class TestCLIModelDownload:
     def test_ethnicolr_download_models_help(self):
         """Test that the download models command has help."""
         result = subprocess.run(
-            ["ethnicolr_download_models", "--help"],
-            capture_output=True,
-            text=True
+            ["ethnicolr_download_models", "--help"], capture_output=True, text=True
         )
 
         # Help should work (exit code 0) or command should exist (exit code != 127)
@@ -407,12 +416,7 @@ class TestCLIIntegration:
         prediction_output = os.path.join(temp_output_dir, "prediction_step.csv")
 
         # Step 1: Run census lookup
-        census_cmd = [
-            "census_ln",
-            sample_input_file,
-            "-l", "last",
-            "-o", census_output
-        ]
+        census_cmd = ["census_ln", sample_input_file, "-l", "last", "-o", census_output]
 
         result1 = subprocess.run(census_cmd, capture_output=True, text=True)
         assert result1.returncode == 0
@@ -422,8 +426,10 @@ class TestCLIIntegration:
         pred_cmd = [
             "pred_census_ln",
             sample_input_file,
-            "-l", "last",
-            "-o", prediction_output
+            "-l",
+            "last",
+            "-o",
+            prediction_output,
         ]
 
         result2 = subprocess.run(pred_cmd, capture_output=True, text=True, timeout=60)
@@ -459,7 +465,9 @@ class TestCLIIntegration:
 
         input_df = pd.read_csv(sample_input_file)
         for model_name, output_df in outputs.items():
-            assert len(output_df) == len(input_df), f"{model_name} changed number of rows"
+            assert len(output_df) == len(input_df), (
+                f"{model_name} changed number of rows"
+            )
             assert "race" in output_df.columns, f"{model_name} missing race column"
 
 
@@ -472,23 +480,26 @@ class TestCLIPerformance:
         # Create a larger input file
         large_input = os.path.join(temp_output_dir, "large_input.csv")
 
-        with open(large_input, 'w') as f:
+        with open(large_input, "w") as f:
             f.write("last,first,id\n")
-            names = ["smith", "garcia", "zhang", "williams", "johnson"] * 100  # 500 names
+            names = [
+                "smith",
+                "garcia",
+                "zhang",
+                "williams",
+                "johnson",
+            ] * 100  # 500 names
             for i, name in enumerate(names):
                 f.write(f"{name},person{i},{i}\n")
 
         output_file = os.path.join(temp_output_dir, "large_output.csv")
 
         # Test with census prediction (usually fastest)
-        cmd = [
-            "pred_census_ln",
-            large_input,
-            "-l", "last",
-            "-o", output_file
-        ]
+        cmd = ["pred_census_ln", large_input, "-l", "last", "-o", output_file]
 
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)  # 5 minute timeout
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=300
+        )  # 5 minute timeout
 
         if result.returncode == 0:
             assert os.path.exists(output_file)
@@ -504,12 +515,7 @@ class TestCLIPerformance:
 
         output_file = os.path.join(temp_output_dir, "timing_test.csv")
 
-        cmd = [
-            "pred_census_ln",
-            sample_input_file,
-            "-l", "last",
-            "-o", output_file
-        ]
+        cmd = ["pred_census_ln", sample_input_file, "-l", "last", "-o", output_file]
 
         start_time = time.time()
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
@@ -517,7 +523,9 @@ class TestCLIPerformance:
 
         # Should complete within reasonable time (60 seconds is very generous)
         execution_time = end_time - start_time
-        assert execution_time < 60, f"Command took too long: {execution_time:.2f} seconds"
+        assert execution_time < 60, (
+            f"Command took too long: {execution_time:.2f} seconds"
+        )
 
         if result.returncode == 0:
             assert os.path.exists(output_file)

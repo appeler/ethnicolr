@@ -15,6 +15,7 @@ from importlib import resources
 import pandas as pd
 
 from .ethnicolr_class import EthnicolrModelClass
+from .model_base import ModelType, register_model
 from .utils import arg_parser
 
 # Configure logging
@@ -24,6 +25,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+@register_model(ModelType.WIKI_LSTM)
 class WikiLnModel(EthnicolrModelClass):
     """Wikipedia-based last name prediction model.
 
@@ -31,10 +33,22 @@ class WikiLnModel(EthnicolrModelClass):
     from last names only. Provides detailed ethnic categories.
     """
 
-    MODELFN = "models/wiki/lstm/wiki_ln_lstm.h5"
-    VOCABFN = "models/wiki/lstm/wiki_ln_vocab.csv"
-    RACEFN = "models/wiki/lstm/wiki_race.csv"
-
+    # Required abstract class attributes
+    SUPPORTED_CATEGORIES = [
+        "Asian,GreaterEastAsian,EastAsian",
+        "Asian,GreaterEastAsian,Japanese",
+        "Asian,IndianSubContinent",
+        "GreaterAfrican,Africans",
+        "GreaterAfrican,Muslim",
+        "GreaterEuropean,British",
+        "GreaterEuropean,EastEuropean",
+        "GreaterEuropean,Jewish",
+        "GreaterEuropean,WestEuropean,French",
+        "GreaterEuropean,WestEuropean,Germanic",
+        "GreaterEuropean,WestEuropean,Hispanic",
+        "GreaterEuropean,WestEuropean,Italian",
+        "GreaterEuropean,WestEuropean,Nordic",
+    ]
     NGRAMS = 2
     FEATURE_LEN = 20
 
@@ -229,6 +243,49 @@ class WikiLnModel(EthnicolrModelClass):
         except Exception as e:
             logger.error(f"Prediction error: {e}")
             raise
+
+    # Abstract method implementations
+    @classmethod
+    def predict(cls, df: pd.DataFrame, name_col: str, **kwargs) -> pd.DataFrame:
+        """
+        Generate race/ethnicity predictions for Wikipedia model.
+
+        Args:
+            df: Input DataFrame containing names.
+            name_col: Column containing last names to predict.
+            **kwargs: Additional parameters (num_iter, conf_int).
+
+        Returns:
+            DataFrame with race/ethnicity predictions.
+        """
+        cls.validate_input(df, name_col)
+        return cls.pred_wiki_ln(df, name_col, **kwargs)
+
+    @classmethod
+    def predict_with_confidence(
+        cls,
+        df: pd.DataFrame,
+        name_col: str,
+        conf_int: float = 0.95,
+        num_iter: int = 100,
+        **kwargs,
+    ) -> pd.DataFrame:
+        """
+        Generate predictions with confidence intervals.
+
+        Args:
+            df: Input DataFrame containing names.
+            name_col: Column containing last names to predict.
+            conf_int: Confidence interval level (0.0-1.0).
+            num_iter: Number of Monte Carlo iterations.
+
+        Returns:
+            DataFrame with predictions and confidence intervals.
+        """
+        cls.validate_input(df, name_col)
+        return cls.pred_wiki_ln(
+            df, name_col, num_iter=num_iter, conf_int=conf_int, **kwargs
+        )
 
 
 # For backward compatibility

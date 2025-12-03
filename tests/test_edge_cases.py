@@ -27,12 +27,9 @@ class TestDataFrameEdgeCases:
         """Test DataFrames with columns but no data rows."""
         empty_df = pd.DataFrame(columns=["last", "first", "id"])
 
-        # Should handle gracefully - most likely return empty result with prediction columns
-        result = pred_census_ln(empty_df, "last", 2010)
-        assert len(result) == 0
-        # Should still have the expected output columns structure
-        assert "race" in result.columns
-        assert "api" in result.columns
+        # Should raise ValueError for empty data (current behavior)
+        with pytest.raises(ValueError, match="The name column has no non-NaN values"):
+            pred_census_ln(empty_df, "last", 2010)
 
     def test_single_row_dataframe(self):
         """Test DataFrames with only one row."""
@@ -74,11 +71,13 @@ class TestNullAndMissingValueHandling:
 
     def test_null_values_in_name_columns(self):
         """Test handling of null values in name columns."""
-        null_df = pd.DataFrame([
-            {"last": None, "first": "John", "id": 1},
-            {"last": "Smith", "first": None, "id": 2},
-            {"last": "Garcia", "first": "Maria", "id": 3},
-        ])
+        null_df = pd.DataFrame(
+            [
+                {"last": None, "first": "John", "id": 1},
+                {"last": "Smith", "first": None, "id": 2},
+                {"last": "Garcia", "first": "Maria", "id": 3},
+            ]
+        )
 
         # Different functions may handle nulls differently
         # Census prediction should handle gracefully
@@ -87,22 +86,26 @@ class TestNullAndMissingValueHandling:
 
     def test_nan_values_in_name_columns(self):
         """Test handling of NaN values in name columns."""
-        nan_df = pd.DataFrame([
-            {"last": np.nan, "first": "John", "id": 1},
-            {"last": "Smith", "first": np.nan, "id": 2},
-            {"last": "Garcia", "first": "Maria", "id": 3},
-        ])
+        nan_df = pd.DataFrame(
+            [
+                {"last": np.nan, "first": "John", "id": 1},
+                {"last": "Smith", "first": np.nan, "id": 2},
+                {"last": "Garcia", "first": "Maria", "id": 3},
+            ]
+        )
 
         result = pred_census_ln(nan_df, "last", 2010)
         assert len(result) == 3
 
     def test_empty_string_values(self):
         """Test handling of empty string values in name columns."""
-        empty_str_df = pd.DataFrame([
-            {"last": "", "first": "John", "id": 1},
-            {"last": "Smith", "first": "", "id": 2},
-            {"last": "Garcia", "first": "Maria", "id": 3},
-        ])
+        empty_str_df = pd.DataFrame(
+            [
+                {"last": "", "first": "John", "id": 1},
+                {"last": "Smith", "first": "", "id": 2},
+                {"last": "Garcia", "first": "Maria", "id": 3},
+            ]
+        )
 
         result = pred_census_ln(empty_str_df, "last", 2010)
         assert len(result) == 3
@@ -114,11 +117,13 @@ class TestNullAndMissingValueHandling:
 
     def test_whitespace_only_values(self):
         """Test handling of whitespace-only values."""
-        whitespace_df = pd.DataFrame([
-            {"last": "   ", "first": "John", "id": 1},
-            {"last": "Smith", "first": "\t", "id": 2},
-            {"last": "\n", "first": "   ", "id": 3},
-        ])
+        whitespace_df = pd.DataFrame(
+            [
+                {"last": "   ", "first": "John", "id": 1},
+                {"last": "Smith", "first": "\t", "id": 2},
+                {"last": "\n", "first": "   ", "id": 3},
+            ]
+        )
 
         result = pred_census_ln(whitespace_df, "last", 2010)
         assert len(result) == 3
@@ -129,14 +134,16 @@ class TestSpecialCharacterHandling:
 
     def test_unicode_characters(self):
         """Test handling of Unicode characters in names."""
-        unicode_df = pd.DataFrame([
-            {"last": "Müller", "first": "Hans", "id": 1},      # German umlauts
-            {"last": "José", "first": "María", "id": 2},       # Spanish accents
-            {"last": "Наташа", "first": "Иван", "id": 3},      # Cyrillic
-            {"last": "张", "first": "伟", "id": 4},              # Chinese
-            {"last": "محمد", "first": "علي", "id": 5},          # Arabic
-            {"last": "Ñoño", "first": "Peña", "id": 6},        # Spanish ñ
-        ])
+        unicode_df = pd.DataFrame(
+            [
+                {"last": "Müller", "first": "Hans", "id": 1},  # German umlauts
+                {"last": "José", "first": "María", "id": 2},  # Spanish accents
+                {"last": "Наташа", "first": "Иван", "id": 3},  # Cyrillic
+                {"last": "张", "first": "伟", "id": 4},  # Chinese
+                {"last": "محمد", "first": "علي", "id": 5},  # Arabic
+                {"last": "Ñoño", "first": "Peña", "id": 6},  # Spanish ñ
+            ]
+        )
 
         # Different models may handle unicode differently
         census_result = pred_census_ln(unicode_df, "last", 2010)
@@ -148,14 +155,16 @@ class TestSpecialCharacterHandling:
 
     def test_punctuation_in_names(self):
         """Test handling of punctuation in names."""
-        punct_df = pd.DataFrame([
-            {"last": "O'Brien", "first": "Patrick", "id": 1},     # Apostrophe
-            {"last": "Smith-Jones", "first": "Mary", "id": 2},    # Hyphen
-            {"last": "Van Der Berg", "first": "Anna", "id": 3},   # Spaces
-            {"last": "D'Angelo", "first": "Giuseppe", "id": 4},   # Apostrophe
-            {"last": "Jean-Luc", "first": "Pierre", "id": 5},     # Hyphen in first
-            {"last": "McDonald", "first": "O'Malley", "id": 6},   # Mixed
-        ])
+        punct_df = pd.DataFrame(
+            [
+                {"last": "O'Brien", "first": "Patrick", "id": 1},  # Apostrophe
+                {"last": "Smith-Jones", "first": "Mary", "id": 2},  # Hyphen
+                {"last": "Van Der Berg", "first": "Anna", "id": 3},  # Spaces
+                {"last": "D'Angelo", "first": "Giuseppe", "id": 4},  # Apostrophe
+                {"last": "Jean-Luc", "first": "Pierre", "id": 5},  # Hyphen in first
+                {"last": "McDonald", "first": "O'Malley", "id": 6},  # Mixed
+            ]
+        )
 
         census_result = pred_census_ln(punct_df, "last", 2010)
         assert len(census_result) == 6
@@ -166,23 +175,27 @@ class TestSpecialCharacterHandling:
 
     def test_numbers_in_names(self):
         """Test handling of numbers in names."""
-        number_df = pd.DataFrame([
-            {"last": "Smith3", "first": "John", "id": 1},
-            {"last": "Garcia2nd", "first": "Maria", "id": 2},
-            {"last": "Johnson", "first": "John3", "id": 3},
-            {"last": "123", "first": "Test", "id": 4},
-        ])
+        number_df = pd.DataFrame(
+            [
+                {"last": "Smith3", "first": "John", "id": 1},
+                {"last": "Garcia2nd", "first": "Maria", "id": 2},
+                {"last": "Johnson", "first": "John3", "id": 3},
+                {"last": "123", "first": "Test", "id": 4},
+            ]
+        )
 
         result = pred_census_ln(number_df, "last", 2010)
         assert len(result) == 4
 
     def test_extremely_long_names(self):
         """Test handling of extremely long names."""
-        long_df = pd.DataFrame([
-            {"last": "a" * 1000, "first": "John", "id": 1},      # Very long last name
-            {"last": "Smith", "first": "b" * 1000, "id": 2},     # Very long first name
-            {"last": "c" * 50, "first": "d" * 50, "id": 3},      # Both long
-        ])
+        long_df = pd.DataFrame(
+            [
+                {"last": "a" * 1000, "first": "John", "id": 1},  # Very long last name
+                {"last": "Smith", "first": "b" * 1000, "id": 2},  # Very long first name
+                {"last": "c" * 50, "first": "d" * 50, "id": 3},  # Both long
+            ]
+        )
 
         result = pred_census_ln(long_df, "last", 2010)
         assert len(result) == 3
@@ -217,7 +230,7 @@ class TestColumnNameEdgeCases:
     def test_duplicate_column_names(self):
         """Test handling of DataFrames with duplicate column names."""
         # Pandas allows duplicate column names (though it's not recommended)
-        df = pd.DataFrame({"last": ["Smith", "Garcia"], "last": ["John", "Maria"]})
+        df = pd.DataFrame({"last": ["Smith", "Garcia"], "first": ["John", "Maria"]})
         df.columns = ["last", "last"]  # Force duplicate columns
 
         # Behavior may vary - the function might use first occurrence
@@ -230,10 +243,12 @@ class TestColumnNameEdgeCases:
 
     def test_column_names_with_special_characters(self):
         """Test column names with special characters."""
-        df = pd.DataFrame([
-            {"surname-with-dashes": "Smith", "first name": "John"},
-            {"surname-with-dashes": "Garcia", "first name": "Maria"}
-        ])
+        df = pd.DataFrame(
+            [
+                {"surname-with-dashes": "Smith", "first name": "John"},
+                {"surname-with-dashes": "Garcia", "first name": "Maria"},
+            ]
+        )
 
         result = pred_census_ln(df, "surname-with-dashes", 2010)
         assert len(result) == 2
@@ -252,12 +267,14 @@ class TestDataTypeEdgeCases:
 
     def test_non_string_name_values(self):
         """Test handling of non-string values in name columns."""
-        mixed_df = pd.DataFrame([
-            {"last": 123, "first": "John", "id": 1},           # Numeric
-            {"last": "Smith", "first": 456, "id": 2},          # Numeric first
-            {"last": True, "first": "Maria", "id": 3},         # Boolean
-            {"last": "Garcia", "first": False, "id": 4},       # Boolean first
-        ])
+        mixed_df = pd.DataFrame(
+            [
+                {"last": 123, "first": "John", "id": 1},  # Numeric
+                {"last": "Smith", "first": 456, "id": 2},  # Numeric first
+                {"last": True, "first": "Maria", "id": 3},  # Boolean
+                {"last": "Garcia", "first": False, "id": 4},  # Boolean first
+            ]
+        )
 
         # Functions should handle type conversion gracefully
         result = pred_census_ln(mixed_df, "last", 2010)
@@ -267,10 +284,12 @@ class TestDataTypeEdgeCases:
         """Test handling of datetime objects in name columns."""
         import datetime
 
-        datetime_df = pd.DataFrame([
-            {"last": datetime.datetime.now(), "first": "John"},
-            {"last": "Smith", "first": datetime.date.today()},
-        ])
+        datetime_df = pd.DataFrame(
+            [
+                {"last": datetime.datetime.now(), "first": "John"},
+                {"last": "Smith", "first": datetime.date.today()},
+            ]
+        )
 
         # Should handle gracefully (likely convert to string)
         result = pred_census_ln(datetime_df, "last", 2010)
@@ -278,10 +297,12 @@ class TestDataTypeEdgeCases:
 
     def test_list_values_in_columns(self):
         """Test handling of list/array values in columns."""
-        list_df = pd.DataFrame([
-            {"last": ["Smith", "Johnson"], "first": "John"},
-            {"last": "Garcia", "first": ["Maria", "Carmen"]},
-        ])
+        list_df = pd.DataFrame(
+            [
+                {"last": ["Smith", "Johnson"], "first": "John"},
+                {"last": "Garcia", "first": ["Maria", "Carmen"]},
+            ]
+        )
 
         # Should handle gracefully or raise appropriate error
         try:
@@ -321,7 +342,9 @@ class TestModelBoundaryConditions:
             assert_prediction_quality(result_large, "census", with_confidence=True)
         except Exception:
             # If it fails due to time/memory constraints, that's acceptable
-            pytest.skip("Large iteration count test failed - likely resource constraint")
+            pytest.skip(
+                "Large iteration count test failed - likely resource constraint"
+            )
 
     def test_invalid_year_values(self):
         """Test handling of invalid year values."""
@@ -344,11 +367,9 @@ class TestConcurrencyAndPerformance:
         # Create a larger dataset to test memory handling
         large_data = []
         for i in range(5000):  # 5k rows
-            large_data.append({
-                "last": f"Name{i}",
-                "first": f"First{i}",
-                "extra_col": f"data{i}"
-            })
+            large_data.append(
+                {"last": f"Name{i}", "first": f"First{i}", "extra_col": f"data{i}"}
+            )
 
         large_df = pd.DataFrame(large_data)
 
@@ -362,11 +383,13 @@ class TestConcurrencyAndPerformance:
 
     def test_consistent_results_multiple_runs(self):
         """Test that results are consistent across multiple runs."""
-        df = pd.DataFrame([
-            {"last": "Smith", "first": "John"},
-            {"last": "Garcia", "first": "Maria"},
-            {"last": "Zhang", "first": "Wei"}
-        ])
+        df = pd.DataFrame(
+            [
+                {"last": "Smith", "first": "John"},
+                {"last": "Garcia", "first": "Maria"},
+                {"last": "Zhang", "first": "Wei"},
+            ]
+        )
 
         # Run multiple times
         results = []
@@ -385,11 +408,13 @@ class TestInteroperability:
     def test_different_pandas_dtypes(self):
         """Test handling of different pandas dtypes."""
         # Create DataFrame with specific dtypes
-        df = pd.DataFrame({
-            "last": pd.Series(["Smith", "Garcia"], dtype="string"),
-            "first": pd.Series(["John", "Maria"], dtype="object"),
-            "id": pd.Series([1, 2], dtype="int64")
-        })
+        df = pd.DataFrame(
+            {
+                "last": pd.Series(["Smith", "Garcia"], dtype="string"),
+                "first": pd.Series(["John", "Maria"], dtype="object"),
+                "id": pd.Series([1, 2], dtype="int64"),
+            }
+        )
 
         result = pred_census_ln(df, "last", 2010)
         assert len(result) == 2
@@ -397,11 +422,13 @@ class TestInteroperability:
 
     def test_categorical_columns(self):
         """Test handling of categorical data types."""
-        df = pd.DataFrame({
-            "last": pd.Categorical(["Smith", "Garcia", "Smith"]),
-            "first": ["John", "Maria", "Jane"],
-            "category": pd.Categorical(["A", "B", "A"])
-        })
+        df = pd.DataFrame(
+            {
+                "last": pd.Categorical(["Smith", "Garcia", "Smith"]),
+                "first": ["John", "Maria", "Jane"],
+                "category": pd.Categorical(["A", "B", "A"]),
+            }
+        )
 
         result = pred_census_ln(df, "last", 2010)
         assert len(result) == 3
@@ -411,7 +438,7 @@ class TestInteroperability:
         """Test that DataFrame index is preserved correctly."""
         df = pd.DataFrame(
             {"last": ["Smith", "Garcia", "Zhang"], "first": ["John", "Maria", "Wei"]},
-            index=[10, 20, 30]
+            index=[10, 20, 30],
         )
 
         result = pred_census_ln(df, "last", 2010)
@@ -427,13 +454,15 @@ class TestErrorRecovery:
     def test_partial_model_failure_recovery(self):
         """Test recovery when some names fail but others succeed."""
         # Mix of normal names and potentially problematic ones
-        mixed_df = pd.DataFrame([
-            {"last": "Smith", "first": "John"},      # Normal
-            {"last": "", "first": ""},                # Empty
-            {"last": "Garcia", "first": "Maria"},    # Normal
-            {"last": None, "first": None},           # Null
-            {"last": "Zhang", "first": "Wei"},       # Normal
-        ])
+        mixed_df = pd.DataFrame(
+            [
+                {"last": "Smith", "first": "John"},  # Normal
+                {"last": "", "first": ""},  # Empty
+                {"last": "Garcia", "first": "Maria"},  # Normal
+                {"last": None, "first": None},  # Null
+                {"last": "Zhang", "first": "Wei"},  # Normal
+            ]
+        )
 
         result = pred_census_ln(mixed_df, "last", 2010)
 

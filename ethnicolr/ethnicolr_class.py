@@ -8,6 +8,8 @@ from itertools import chain
 import numpy as np
 import pandas as pd
 
+from .model_base import AbstractLSTMModel, InvalidInputError
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,7 +32,7 @@ class _CompatLSTM:
         return _KerasLSTM(*args, **kwargs)
 
 
-class EthnicolrModelClass:
+class EthnicolrModelClass(AbstractLSTMModel):
     """
     Base class for ethnicolr machine learning models.
 
@@ -46,7 +48,7 @@ class EthnicolrModelClass:
 
     Model Types Supported:
         - Census surname lookup models (census_ln.py)
-        - Census LSTM prediction models (pred_census_ln.py)  
+        - Census LSTM prediction models (pred_census_ln.py)
         - Wikipedia name models (pred_wiki_*.py)
         - Florida voter registration models (pred_fl_reg_*.py)
         - North Carolina voter registration models (pred_nc_reg_*.py)
@@ -68,7 +70,7 @@ class EthnicolrModelClass:
 
     Class Constants (defined in subclasses):
         MODELFN (str): Path to .h5 model file within package
-        VOCABFN (str): Path to vocabulary CSV file within package  
+        VOCABFN (str): Path to vocabulary CSV file within package
         RACEFN (str): Path to race labels CSV file within package
         NGRAMS (int | tuple): N-gram size(s) for feature extraction
         FEATURE_LEN (int): Maximum sequence length for model input
@@ -81,7 +83,7 @@ class EthnicolrModelClass:
         ...     RACEFN = "models/my_races.csv"
         ...     NGRAMS = 2
         ...     FEATURE_LEN = 20
-        ...     
+        ...
         ...     @classmethod
         ...     def my_prediction_func(cls, df, name_col):
         ...         return cls.transform_and_pred(df, name_col, ...)
@@ -93,10 +95,74 @@ class EthnicolrModelClass:
         - Model files are distributed separately from the package
     """
 
-    vocab = None
-    race = None
-    model = None
-    model_year = None
+    # Model caches per class to prevent conflicts between different model types
+    _model_cache = {}  # Dict[str, Dict] - keyed by class name
+
+    @classmethod
+    def _get_cache_key(cls) -> str:
+        """Get cache key for this specific model class."""
+        return f"{cls.__module__}.{cls.__name__}"
+
+    @classmethod
+    def _ensure_cache_initialized(cls):
+        """Initialize cache for this model class if not exists."""
+        cache_key = cls._get_cache_key()
+        if cache_key not in cls._model_cache:
+            cls._model_cache[cache_key] = {
+                "vocab": None,
+                "race": None,
+                "model": None,
+                "model_year": None,
+                "vocab_dict": None,
+            }
+
+    @classmethod
+    def _get_cache(cls) -> dict:
+        """Get cache dictionary for this model class."""
+        cls._ensure_cache_initialized()
+        return cls._model_cache[cls._get_cache_key()]
+
+    @classmethod
+    def get_vocab(cls):
+        """Get vocabulary list for this model."""
+        return cls._get_cache()["vocab"]
+
+    @classmethod
+    def set_vocab(cls, value):
+        """Set vocabulary list for this model."""
+        cache = cls._get_cache()
+        cache["vocab"] = value
+        cache["vocab_dict"] = None  # Reset dict cache when vocab changes
+
+    @classmethod
+    def get_race(cls):
+        """Get race categories list for this model."""
+        return cls._get_cache()["race"]
+
+    @classmethod
+    def set_race(cls, value):
+        """Set race categories list for this model."""
+        cls._get_cache()["race"] = value
+
+    @classmethod
+    def get_model(cls):
+        """Get trained model for this model."""
+        return cls._get_cache()["model"]
+
+    @classmethod
+    def set_model(cls, value):
+        """Set trained model for this model."""
+        cls._get_cache()["model"] = value
+
+    @classmethod
+    def get_model_year(cls):
+        """Get model year for this model."""
+        return cls._get_cache()["model_year"]
+
+    @classmethod
+    def set_model_year(cls, value):
+        """Set model year for this model."""
+        cls._get_cache()["model_year"] = value
 
     @staticmethod
     def test_and_norm_df(df: pd.DataFrame, col: str) -> pd.DataFrame:
@@ -183,12 +249,14 @@ class EthnicolrModelClass:
         """
         return chain(*(EthnicolrModelClass.n_grams(seq, i) for i in range(*ngramRange)))
 
-    @staticmethod
-    def find_ngrams(vocab, text: str, n) -> list:
+    @classmethod
+    def find_ngrams(cls, vocab, text: str, n) -> list:
         """Convert text n-grams to vocabulary indices.
 
         Generates n-grams from input text and maps them to indices in a
         pre-defined vocabulary. Unknown n-grams are mapped to index 0.
+
+        PERFORMANCE: Uses O(1) dictionary lookup instead of O(n) list.index().
 
         Args:
             vocab: List of vocabulary items for index lookup.
@@ -204,15 +272,17 @@ class EthnicolrModelClass:
             >>> EthnicolrModelClass.find_ngrams(vocab, 'smith', 2)
             [3, 0, 0, 0]  # 'sm' found at index 3, others unknown
         """
+        # Build vocabulary dictionary for O(1) lookups if not cached
+        cache = cls._get_cache()
+        if cache["vocab_dict"] is None or len(cache["vocab_dict"]) != len(vocab):
+            cache["vocab_dict"] = {gram: idx for idx, gram in enumerate(vocab)}
+
         if isinstance(n, tuple):
             ngram_iter = EthnicolrModelClass.range_ngrams(text, n)
         else:
             ngram_iter = zip(*[text[i:] for i in range(n)], strict=False)
 
-        return [
-            vocab.index("".join(gram)) if "".join(gram) in vocab else 0
-            for gram in ngram_iter
-        ]
+        return [cache["vocab_dict"].get("".join(gram), 0) for gram in ngram_iter]
 
     @classmethod
     def transform_and_pred(
@@ -276,9 +346,9 @@ class EthnicolrModelClass:
             df["__rowindex"] = np.arange(len(df))
 
         # Load model, vocab, and race label set once
-        if cls.model is None:
-            cls.vocab = pd.read_csv(vocab_path).vocab.tolist()
-            cls.race = pd.read_csv(race_path).race.tolist()
+        if cls.get_model() is None:
+            cls.set_vocab(pd.read_csv(vocab_path).vocab.tolist())
+            cls.set_race(pd.read_csv(race_path).race.tolist())
             # ``time_major`` argument was removed in Keras 3. Models bundled with
             # ethnicolr were trained with ``time_major=False`` which causes
             # deserialization errors on newer Keras versions. We register a
@@ -301,21 +371,23 @@ class EthnicolrModelClass:
                 )
                 from tensorflow.keras.models import load_model
 
-                cls.model = load_model(
-                    model_path,
-                    custom_objects={"LSTM": _CompatLSTM},
-                    compile=False,
+                cls.set_model(
+                    load_model(
+                        model_path,
+                        custom_objects={"LSTM": _CompatLSTM},
+                        compile=False,
+                    )
                 )
 
         # Vectorize input
-        X = [cls.find_ngrams(cls.vocab, name, ngrams) for name in df[newnamecol]]
+        X = [cls.find_ngrams(cls.get_vocab(), name, ngrams) for name in df[newnamecol]]
         from tensorflow.keras.preprocessing import sequence
 
         X = sequence.pad_sequences(X, maxlen=maxlen)
 
         if conf_int == 1:
-            proba = cls.model(X, training=False).numpy()
-            proba_df = pd.DataFrame(proba, columns=cls.race)
+            proba = cls.get_model()(X, training=False).numpy()
+            proba_df = pd.DataFrame(proba, columns=cls.get_race())
             proba_df["race"] = proba_df.idxmax(axis=1)
             final_df = pd.concat(
                 [df.reset_index(drop=True), proba_df.reset_index(drop=True)], axis=1
@@ -329,9 +401,11 @@ class EthnicolrModelClass:
                 f"Generating {num_iter} samples for CI [{lower_perc:.1f}%, {upper_perc:.1f}%]"
             )
 
-            all_preds = [cls.model(X, training=True).numpy() for _ in range(num_iter)]
+            all_preds = [
+                cls.get_model()(X, training=True).numpy() for _ in range(num_iter)
+            ]
             stacked = np.vstack(all_preds)
-            pdf = pd.DataFrame(stacked, columns=cls.race)
+            pdf = pd.DataFrame(stacked, columns=cls.get_race())
             pdf["__rowindex"] = np.tile(df["__rowindex"].values, num_iter)
 
             agg = {
@@ -341,7 +415,7 @@ class EthnicolrModelClass:
                     lambda x: np.percentile(x, q=lower_perc),
                     lambda x: np.percentile(x, q=upper_perc),
                 ]
-                for col in cls.race
+                for col in cls.get_race()
             }
 
             summary = pdf.groupby("__rowindex").agg(agg).reset_index()
@@ -360,7 +434,7 @@ class EthnicolrModelClass:
             summary["race"] = summary[means].idxmax(axis=1).str.replace("_mean", "")
 
             # Add basic probability columns (same as mean values for compatibility)
-            for col in cls.race:
+            for col in cls.get_race():
                 summary[col] = summary[f"{col}_mean"]
 
             # Convert CI columns to float
@@ -377,3 +451,60 @@ class EthnicolrModelClass:
         if rowindex_added:
             final_df.drop(columns=["__rowindex"], inplace=True, errors="ignore")
         return final_df.reset_index(drop=True)
+
+    # Abstract method implementations
+    @classmethod
+    def predict(cls, df: pd.DataFrame, name_col: str, **kwargs) -> pd.DataFrame:
+        """
+        Implementation of abstract predict method.
+        Delegates to transform_and_pred with model-specific parameters.
+        """
+        # This base implementation requires subclasses to override with their specific parameters
+        raise NotImplementedError("Subclasses must implement predict() method")
+
+    @classmethod
+    def predict_with_confidence(
+        cls,
+        df: pd.DataFrame,
+        name_col: str,
+        conf_int: float = 0.95,
+        num_iter: int = 100,
+        **kwargs,
+    ) -> pd.DataFrame:
+        """
+        Implementation of abstract predict_with_confidence method.
+        """
+        # This base implementation requires subclasses to override with their specific parameters
+        raise NotImplementedError(
+            "Subclasses must implement predict_with_confidence() method"
+        )
+
+    @classmethod
+    def get_supported_categories(cls) -> list[str]:
+        """Get list of race/ethnicity categories this model predicts."""
+        if hasattr(cls, "SUPPORTED_CATEGORIES"):
+            return [cat.value for cat in cls.SUPPORTED_CATEGORIES]
+        else:
+            # Fallback to runtime race categories if loaded
+            race_list = cls.get_race()
+            return race_list if race_list else []
+
+    @classmethod
+    def validate_input(cls, df: pd.DataFrame, name_col: str) -> None:
+        """
+        Validate input DataFrame and column.
+
+        Raises:
+            InvalidInputError: If validation fails.
+        """
+        if not isinstance(df, pd.DataFrame):
+            raise InvalidInputError("Input must be a pandas DataFrame")
+
+        if df.empty:
+            raise InvalidInputError("Input DataFrame is empty")
+
+        if name_col not in df.columns:
+            raise InvalidInputError(f"Column '{name_col}' not found in DataFrame")
+
+        if df[name_col].isna().all():
+            raise InvalidInputError(f"All values in column '{name_col}' are NaN")

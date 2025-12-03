@@ -55,12 +55,14 @@ class TestNorthCarolinaPrediction:
             else:
                 expected_nc = "NL+O"  # Non-Hispanic Other
 
-            nc_test_data.append({
-                "last": row["last"],
-                "first": row["first"],
-                "expected_nc": expected_nc,
-                "expected_major": expected_major
-            })
+            nc_test_data.append(
+                {
+                    "last": row["last"],
+                    "first": row["first"],
+                    "expected_nc": expected_nc,
+                    "expected_major": expected_major,
+                }
+            )
 
         nc_df = pd.DataFrame(nc_test_data)
         result = pred_nc_reg_name(nc_df, "last", "first")
@@ -75,14 +77,18 @@ class TestNorthCarolinaPrediction:
             hispanic_results = result[hispanic_mask]
             hispanic_predictions = hispanic_results["race"].str.startswith("HL+")
             hispanic_accuracy = hispanic_predictions.mean()
-            assert hispanic_accuracy >= 0.3, f"Hispanic prediction accuracy too low: {hispanic_accuracy}"
+            assert hispanic_accuracy >= 0.3, (
+                f"Hispanic prediction accuracy too low: {hispanic_accuracy}"
+            )
 
         # Non-Hispanic whites should often predict NL+W
         white_mask = nc_df["expected_major"] == "white"
         if white_mask.any():
             white_results = result[white_mask]
             white_accuracy = (white_results["race"] == "NL+W").mean()
-            assert white_accuracy >= 0.3, f"White prediction accuracy too low: {white_accuracy}"
+            assert white_accuracy >= 0.3, (
+                f"White prediction accuracy too low: {white_accuracy}"
+            )
 
     def test_nc_race_categories_comprehensive(self, sample_nc_names):
         """Test that NC model produces all expected race categories."""
@@ -90,8 +96,18 @@ class TestNorthCarolinaPrediction:
 
         # Should have all 12 NC race categories as columns
         expected_categories = [
-            "HL+A", "HL+B", "HL+I", "HL+M", "HL+O", "HL+W",  # Hispanic
-            "NL+A", "NL+B", "NL+I", "NL+M", "NL+O", "NL+W",  # Non-Hispanic
+            "HL+A",
+            "HL+B",
+            "HL+I",
+            "HL+M",
+            "HL+O",
+            "HL+W",  # Hispanic
+            "NL+A",
+            "NL+B",
+            "NL+I",
+            "NL+M",
+            "NL+O",
+            "NL+W",  # Non-Hispanic
         ]
 
         for category in expected_categories:
@@ -109,7 +125,7 @@ class TestNorthCarolinaPrediction:
         assert_prediction_quality(result, "nc", with_confidence=True)
 
         # Should have 12 mean columns (one for each race category)
-        mean_cols = [col for col in result.columns if col.endswith('_mean')]
+        mean_cols = [col for col in result.columns if col.endswith("_mean")]
         assert len(mean_cols) == 12
 
         # All mean columns should sum to approximately 1.0
@@ -119,12 +135,14 @@ class TestNorthCarolinaPrediction:
     def test_nc_hispanic_vs_nonhispanic_distinction(self):
         """Test that NC model properly distinguishes Hispanic vs Non-Hispanic."""
         # Test with clearly Hispanic and Non-Hispanic names
-        test_names = pd.DataFrame([
-            {"last": "Garcia", "first": "Jose", "expected_type": "HL"},
-            {"last": "Rodriguez", "first": "Maria", "expected_type": "HL"},
-            {"last": "Smith", "first": "John", "expected_type": "NL"},
-            {"last": "Johnson", "first": "Emily", "expected_type": "NL"},
-        ])
+        test_names = pd.DataFrame(
+            [
+                {"last": "Garcia", "first": "Jose", "expected_type": "HL"},
+                {"last": "Rodriguez", "first": "Maria", "expected_type": "HL"},
+                {"last": "Smith", "first": "John", "expected_type": "NL"},
+                {"last": "Johnson", "first": "Emily", "expected_type": "NL"},
+            ]
+        )
 
         result = pred_nc_reg_name(test_names, "last", "first")
         assert_prediction_quality(result, "nc")
@@ -134,8 +152,9 @@ class TestNorthCarolinaPrediction:
             predicted_race = result.iloc[i]["race"]
             expected_prefix = row["expected_type"]
 
-            assert predicted_race.startswith(expected_prefix), \
+            assert predicted_race.startswith(expected_prefix), (
                 f"Expected {expected_prefix}+ category but got {predicted_race} for {row['first']} {row['last']}"
+            )
 
 
 class TestNorthCarolinaErrorHandling:
@@ -159,8 +178,18 @@ class TestNorthCarolinaErrorHandling:
 
         # Should still have expected columns
         expected_cols = [
-            "HL+A", "HL+B", "HL+I", "HL+M", "HL+O", "HL+W",
-            "NL+A", "NL+B", "NL+I", "NL+M", "NL+O", "NL+W",
+            "HL+A",
+            "HL+B",
+            "HL+I",
+            "HL+M",
+            "HL+O",
+            "HL+W",
+            "NL+A",
+            "NL+B",
+            "NL+I",
+            "NL+M",
+            "NL+O",
+            "NL+W",
         ]
         for col in expected_cols:
             assert col in result.columns
@@ -183,13 +212,15 @@ class TestNorthCarolinaErrorHandling:
 
     def test_nc_null_and_empty_names(self):
         """Test handling of null and empty name values."""
-        problematic_df = pd.DataFrame([
-            {"last": None, "first": "John"},
-            {"last": "Smith", "first": None},
-            {"last": "", "first": "Jane"},
-            {"last": "Doe", "first": ""},
-            {"last": "   ", "first": "Bob"},  # Whitespace only
-        ])
+        problematic_df = pd.DataFrame(
+            [
+                {"last": None, "first": "John"},
+                {"last": "Smith", "first": None},
+                {"last": "", "first": "Jane"},
+                {"last": "Doe", "first": ""},
+                {"last": "   ", "first": "Bob"},  # Whitespace only
+            ]
+        )
 
         # Should not crash
         result = pred_nc_reg_name(problematic_df, "last", "first")
@@ -231,18 +262,35 @@ class TestNorthCarolinaPerformance:
         assert len(regular) == len(with_conf)
 
         # Regular probability columns should be identical
-        race_cols = [col for col in regular.columns if col in [
-            "HL+A", "HL+B", "HL+I", "HL+M", "HL+O", "HL+W",
-            "NL+A", "NL+B", "NL+I", "NL+M", "NL+O", "NL+W",
-        ]]
+        race_cols = [
+            col
+            for col in regular.columns
+            if col
+            in [
+                "HL+A",
+                "HL+B",
+                "HL+I",
+                "HL+M",
+                "HL+O",
+                "HL+W",
+                "NL+A",
+                "NL+B",
+                "NL+I",
+                "NL+M",
+                "NL+O",
+                "NL+W",
+            ]
+        ]
 
         for col in race_cols:
-            pd.testing.assert_series_equal(regular[col], with_conf[col],
-                                         check_names=False)
+            pd.testing.assert_series_equal(
+                regular[col], with_conf[col], check_names=False
+            )
 
         # Predicted race should be the same
-        pd.testing.assert_series_equal(regular["race"], with_conf["race"],
-                                     check_names=False)
+        pd.testing.assert_series_equal(
+            regular["race"], with_conf["race"], check_names=False
+        )
 
 
 class TestNorthCarolinaUniqueFeatures:
@@ -251,27 +299,31 @@ class TestNorthCarolinaUniqueFeatures:
     def test_nc_twelve_category_coverage(self):
         """Test that NC model can predict all 12 categories."""
         # Create names likely to trigger different categories
-        diverse_names = pd.DataFrame([
-            # Hispanic categories
-            {"last": "Garcia", "first": "Jose"},      # HL+W likely
-            {"last": "Martinez", "first": "Carlos"},  # HL+W likely
-            {"last": "Chen", "first": "Maria"},       # HL+A possible
-            {"last": "Johnson", "first": "Carlos"},   # HL+B possible
-            # Non-Hispanic categories
-            {"last": "Smith", "first": "John"},       # NL+W likely
-            {"last": "Williams", "first": "James"},   # NL+B likely
-            {"last": "Kim", "first": "Sarah"},        # NL+A likely
-            {"last": "Patel", "first": "David"},      # NL+A likely
-            {"last": "Running Bear", "first": "Tom"}, # NL+I possible
-            {"last": "Nakamura", "first": "Lisa"},    # NL+A likely
-        ])
+        diverse_names = pd.DataFrame(
+            [
+                # Hispanic categories
+                {"last": "Garcia", "first": "Jose"},  # HL+W likely
+                {"last": "Martinez", "first": "Carlos"},  # HL+W likely
+                {"last": "Chen", "first": "Maria"},  # HL+A possible
+                {"last": "Johnson", "first": "Carlos"},  # HL+B possible
+                # Non-Hispanic categories
+                {"last": "Smith", "first": "John"},  # NL+W likely
+                {"last": "Williams", "first": "James"},  # NL+B likely
+                {"last": "Kim", "first": "Sarah"},  # NL+A likely
+                {"last": "Patel", "first": "David"},  # NL+A likely
+                {"last": "Running Bear", "first": "Tom"},  # NL+I possible
+                {"last": "Nakamura", "first": "Lisa"},  # NL+A likely
+            ]
+        )
 
         result = pred_nc_reg_name(diverse_names, "last", "first")
         assert_prediction_quality(result, "nc")
 
         # Should predict at least several different categories
         unique_predictions = result["race"].nunique()
-        assert unique_predictions >= 3, f"Only predicted {unique_predictions} unique categories"
+        assert unique_predictions >= 3, (
+            f"Only predicted {unique_predictions} unique categories"
+        )
 
         # Should have both Hispanic and Non-Hispanic predictions
         has_hispanic = result["race"].str.startswith("HL+").any()
@@ -285,15 +337,26 @@ class TestNorthCarolinaUniqueFeatures:
 
         # For each prediction, the highest probability should correspond to predicted race
         race_cols = [
-            "HL+A", "HL+B", "HL+I", "HL+M", "HL+O", "HL+W",
-            "NL+A", "NL+B", "NL+I", "NL+M", "NL+O", "NL+W",
+            "HL+A",
+            "HL+B",
+            "HL+I",
+            "HL+M",
+            "HL+O",
+            "HL+W",
+            "NL+A",
+            "NL+B",
+            "NL+I",
+            "NL+M",
+            "NL+O",
+            "NL+W",
         ]
 
-        for i, row in result.iterrows():
+        for _i, row in result.iterrows():
             predicted_race = row["race"]
             predicted_prob = row[predicted_race]
 
             # Predicted race should have highest (or tied for highest) probability
             max_prob = row[race_cols].max()
-            assert predicted_prob == max_prob, \
+            assert predicted_prob == max_prob, (
                 f"Predicted race {predicted_race} doesn't have max probability"
+            )

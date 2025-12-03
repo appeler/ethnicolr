@@ -101,7 +101,9 @@ class TestFloridaFullNamePrediction:
 
     def test_five_category_fullname_with_confidence(self, sample_florida_names):
         """Test 5-category full name prediction with confidence intervals."""
-        result = pred_fl_reg_name_five_cat(sample_florida_names, "last", "first", conf_int=0.9)
+        result = pred_fl_reg_name_five_cat(
+            sample_florida_names, "last", "first", conf_int=0.9
+        )
 
         # Validate prediction quality including confidence intervals
         assert_prediction_quality(result, "florida_5cat", with_confidence=True)
@@ -123,8 +125,16 @@ class TestFloridaModelComparison:
         assert_prediction_quality(name_result, "florida_4cat")
 
         # Should have same race categories
-        race_cols_ln = [col for col in ln_result.columns if col in ["asian", "hispanic", "nh_black", "nh_white"]]
-        race_cols_name = [col for col in name_result.columns if col in ["asian", "hispanic", "nh_black", "nh_white"]]
+        race_cols_ln = [
+            col
+            for col in ln_result.columns
+            if col in ["asian", "hispanic", "nh_black", "nh_white"]
+        ]
+        race_cols_name = [
+            col
+            for col in name_result.columns
+            if col in ["asian", "hispanic", "nh_black", "nh_white"]
+        ]
         assert set(race_cols_ln) == set(race_cols_name)
 
     def test_lastname_vs_fullname_five_category(self, sample_florida_names):
@@ -176,7 +186,7 @@ class TestFloridaExtensiveValidation:
             "white": "nh_white",
             "black": "nh_black",
             "hispanic": "hispanic",
-            "asian": "asian"
+            "asian": "asian",
         }
 
         test_df = extensive_names.copy()
@@ -191,7 +201,9 @@ class TestFloridaExtensiveValidation:
             if subset_mask.any():
                 subset_results = result[subset_mask]
                 accuracy = (subset_results["race"] == fl_race).mean()
-                assert accuracy >= 0.4, f"{expected_race} -> {fl_race} accuracy too low: {accuracy}"
+                assert accuracy >= 0.4, (
+                    f"{expected_race} -> {fl_race} accuracy too low: {accuracy}"
+                )
 
     def test_extensive_five_category_other_usage(self, extensive_names):
         """Test that 5-category model appropriately uses 'other' category."""
@@ -211,33 +223,43 @@ class TestFloridaExtensiveValidation:
 class TestFloridaConfidenceIntervals:
     """Test confidence interval functionality across Florida models."""
 
-    @pytest.mark.parametrize("model_func,model_type", [
-        (pred_fl_reg_ln, "florida_4cat"),
-        (pred_fl_reg_ln_five_cat, "florida_5cat"),
-    ])
+    @pytest.mark.parametrize(
+        "model_func,model_type",
+        [
+            (pred_fl_reg_ln, "florida_4cat"),
+            (pred_fl_reg_ln_five_cat, "florida_5cat"),
+        ],
+    )
     @pytest.mark.parametrize("conf_level", [0.8, 0.9, 0.95])
-    def test_lastname_confidence_levels(self, sample_florida_names, model_func, model_type, conf_level):
+    def test_lastname_confidence_levels(
+        self, sample_florida_names, model_func, model_type, conf_level
+    ):
         """Test different confidence levels for last name models."""
         result = model_func(sample_florida_names, "last", conf_int=conf_level)
         assert_prediction_quality(result, model_type, with_confidence=True)
 
         # Should have appropriate number of mean columns
-        mean_cols = [col for col in result.columns if col.endswith('_mean')]
+        mean_cols = [col for col in result.columns if col.endswith("_mean")]
         expected_count = 4 if model_type == "florida_4cat" else 5
         assert len(mean_cols) == expected_count
 
-    @pytest.mark.parametrize("model_func,model_type", [
-        (pred_fl_reg_name, "florida_4cat"),
-        (pred_fl_reg_name_five_cat, "florida_5cat"),
-    ])
+    @pytest.mark.parametrize(
+        "model_func,model_type",
+        [
+            (pred_fl_reg_name, "florida_4cat"),
+            (pred_fl_reg_name_five_cat, "florida_5cat"),
+        ],
+    )
     @pytest.mark.parametrize("conf_level", [0.8, 0.9, 0.95])
-    def test_fullname_confidence_levels(self, sample_florida_names, model_func, model_type, conf_level):
+    def test_fullname_confidence_levels(
+        self, sample_florida_names, model_func, model_type, conf_level
+    ):
         """Test different confidence levels for full name models."""
         result = model_func(sample_florida_names, "last", "first", conf_int=conf_level)
         assert_prediction_quality(result, model_type, with_confidence=True)
 
         # Should have appropriate number of mean columns
-        mean_cols = [col for col in result.columns if col.endswith('_mean')]
+        mean_cols = [col for col in result.columns if col.endswith("_mean")]
         expected_count = 4 if model_type == "florida_4cat" else 5
         assert len(mean_cols) == expected_count
 

@@ -14,10 +14,10 @@ ethnicolr is a Python package that predicts race and ethnicity from names using 
 - Run specific test file: `pytest tests/test_010_census_ln.py`
 
 ### Code Quality
-- Format code: `black .`
-- Sort imports: `isort .`
-- Lint code: `flake8`
-- All quality checks: `black . && isort . && flake8`
+- Format code: `ruff format .`
+- Fix import sorting and basic issues: `ruff check . --fix`
+- Lint code (check only): `ruff check .`
+- All quality checks: `ruff format . && ruff check . --fix && ruff check .`
 
 ### Installation
 - Install package in development mode: `pip install -e .`
@@ -96,6 +96,27 @@ The package provides CLI commands defined in pyproject.toml:
 - Normalization tracking helps debug problematic names
 
 This addresses issues with Canadian/international datasets containing accented names, titles, and special characters.
+
+## Known Issues
+
+### Protobuf Warnings with TensorFlow
+You may see protobuf version warnings when using TensorFlow:
+```
+UserWarning: Protobuf gencode version 5.28.3 is exactly one major version older than the runtime version 6.31.1
+```
+
+This is a TensorFlow compatibility issue and does not affect functionality. To suppress these warnings:
+```bash
+export TF_CPP_MIN_LOG_LEVEL=3
+```
+
+Or in Python:
+```python
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning, module='google.protobuf')
+```
 
 ## Model File Locations
 

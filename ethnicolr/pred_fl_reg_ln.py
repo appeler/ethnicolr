@@ -9,10 +9,12 @@ to predict race/ethnicity from last names.
 import logging
 import os
 import sys
+from importlib import resources
 
 import pandas as pd
 
 from .ethnicolr_class import EthnicolrModelClass
+from .model_base import ModelType, RaceCategory, register_model
 from .utils import arg_parser
 
 # Configure logging
@@ -22,17 +24,49 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+@register_model(ModelType.FLORIDA_LSTM)
 class FloridaRegLnModel(EthnicolrModelClass):
-    """
-    Florida last-name model for race/ethnicity prediction.
+    """Florida voter registration LSTM model for last name prediction.
+
+    LSTM model trained on Florida voter registration data to predict
+    race/ethnicity from last names. Uses 5-category classification.
     """
 
-    MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm.h5"
-    VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab.csv"
-    RACEFN = "models/fl_voter_reg/lstm/fl_ln_race.csv"
-
+    # Required abstract class attributes
+    SUPPORTED_CATEGORIES = [
+        RaceCategory.ASIAN,
+        RaceCategory.HISPANIC,
+        RaceCategory.NH_BLACK,
+        RaceCategory.NH_WHITE,
+    ]
     NGRAMS = 2
     FEATURE_LEN = 20
+
+    @classmethod
+    def get_model_paths(cls):
+        package = resources.files(__name__.split(".")[0])
+        return (
+            str(package / "models/fl_voter_reg/lstm/fl_all_ln_lstm.h5"),
+            str(package / "models/fl_voter_reg/lstm/fl_all_ln_vocab.csv"),
+            str(package / "models/fl_voter_reg/lstm/fl_ln_race.csv"),
+        )
+
+    @classmethod
+    def check_models_exist(cls):
+        model_path, vocab_path, race_path = cls.get_model_paths()
+        missing = [
+            p for p in [model_path, vocab_path, race_path] if not os.path.exists(p)
+        ]
+        if missing:
+            msg = (
+                f"Required model files not found for Florida model:\n"
+                f"{', '.join(missing)}\n\n"
+                "Install with: pip install ethnicolr[models]\n"
+                "Or download from: https://github.com/appeler/ethnicolr/releases"
+            )
+            logger.error(msg)
+            raise FileNotFoundError(msg)
+        return True
 
     @classmethod
     def pred_fl_reg_ln(
@@ -53,7 +87,7 @@ class FloridaRegLnModel(EthnicolrModelClass):
             The Florida voter registration dataset provides strong regional context for
             predictions. Accuracy varies by name frequency and racial demographics:
             - Common names: ~75-85% accuracy
-            - Regional Hispanic names: ~80-90% accuracy  
+            - Regional Hispanic names: ~80-90% accuracy
             - Less common surnames: ~60-75% accuracy
 
         Args:
@@ -68,10 +102,10 @@ class FloridaRegLnModel(EthnicolrModelClass):
             DataFrame with original data plus race prediction columns:
             - race: Predicted race category (asian, hispanic, nh_black, nh_white)
             - asian: Probability of Asian ethnicity [0.0-1.0]
-            - hispanic: Probability of Hispanic ethnicity [0.0-1.0] 
+            - hispanic: Probability of Hispanic ethnicity [0.0-1.0]
             - nh_black: Probability of Non-Hispanic Black [0.0-1.0]
             - nh_white: Probability of Non-Hispanic White [0.0-1.0]
-            
+
             When conf_int < 1.0, additional confidence interval columns:
             - {race}_mean: Monte Carlo mean probability
             - {race}_std: Monte Carlo standard deviation
@@ -85,7 +119,7 @@ class FloridaRegLnModel(EthnicolrModelClass):
         Example:
             >>> import pandas as pd
             >>> from ethnicolr.pred_fl_reg_ln import pred_fl_reg_ln
-            >>> 
+            >>>
             >>> df = pd.DataFrame({
             ...     'last': ['Garcia', 'Smith', 'Rodriguez', 'Chen'],
             ...     'id': [1, 2, 3, 4]
@@ -95,7 +129,7 @@ class FloridaRegLnModel(EthnicolrModelClass):
                   last     race  hispanic   nh_white
             0   Garcia  hispanic     0.823     0.142
             1    Smith  nh_white     0.091     0.821
-            2 Rodriguez  hispanic     0.891     0.078  
+            2 Rodriguez  hispanic     0.891     0.078
             3     Chen     asian     0.034     0.156
 
             >>> # With confidence intervals
@@ -118,12 +152,14 @@ class FloridaRegLnModel(EthnicolrModelClass):
             f"Predicting race/ethnicity for {len(df)} rows using Florida LSTM model"
         )
 
+        model_path, vocab_path, race_path = cls.get_model_paths()
+
         rdf = cls.transform_and_pred(
             df=df.copy(),
             newnamecol=lname_col,
-            vocab_fn=cls.VOCABFN,
-            race_fn=cls.RACEFN,
-            model_fn=cls.MODELFN,
+            vocab_fn=vocab_path,
+            race_fn=race_path,
+            model_fn=model_path,
             ngrams=cls.NGRAMS,
             maxlen=cls.FEATURE_LEN,
             num_iter=num_iter,
@@ -134,6 +170,51 @@ class FloridaRegLnModel(EthnicolrModelClass):
             f"Prediction complete. Added columns: {', '.join(set(rdf.columns) - set(df.columns))}"
         )
         return rdf
+
+    # Abstract method implementations
+    @classmethod
+    def predict(cls, df: pd.DataFrame, name_col: str, **kwargs) -> pd.DataFrame:
+        """
+        Generate race/ethnicity predictions for Florida model.
+
+        Args:
+            df: Input DataFrame containing names.
+            name_col: Column containing last names to predict.
+            **kwargs: Additional parameters (num_iter, conf_int).
+
+        Returns:
+            DataFrame with race/ethnicity predictions.
+        """
+        cls.validate_input(df, name_col)
+        cls.check_models_exist()
+        return cls.pred_fl_reg_ln(df, name_col, **kwargs)
+
+    @classmethod
+    def predict_with_confidence(
+        cls,
+        df: pd.DataFrame,
+        name_col: str,
+        conf_int: float = 0.95,
+        num_iter: int = 100,
+        **kwargs,
+    ) -> pd.DataFrame:
+        """
+        Generate predictions with confidence intervals.
+
+        Args:
+            df: Input DataFrame containing names.
+            name_col: Column containing last names to predict.
+            conf_int: Confidence interval level (0.0-1.0).
+            num_iter: Number of Monte Carlo iterations.
+
+        Returns:
+            DataFrame with predictions and confidence intervals.
+        """
+        cls.validate_input(df, name_col)
+        cls.check_models_exist()
+        return cls.pred_fl_reg_ln(
+            df, name_col, num_iter=num_iter, conf_int=conf_int, **kwargs
+        )
 
 
 # CLI alias
@@ -148,7 +229,7 @@ def main(argv: list[str] | None = None) -> int:
     from last names. It handles argument parsing, file I/O, error handling, and logging.
 
     Args:
-        argv: Command-line arguments. If None, uses sys.argv[1:]. 
+        argv: Command-line arguments. If None, uses sys.argv[1:].
               Expected format: [input_file, -l, last_col, -o, output_file, ...]
 
     Returns:

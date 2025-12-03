@@ -58,34 +58,96 @@ Notes:
 
 ```bash
 pip install ethnicolr jupyter
-ethnicolr_download_models
+python -m ethnicolr.cli models download census
 jupyter notebook ethnicolr/examples
 ```
 
 Open one of the example notebooks and run the cells to see the package in
 action.
 
-## General API
+## Modern CLI
 
-To see the available command line options for any function, please type
-in [`<function-name>`]` `[`--help`]
+Ethnicolr now provides a modern, user-friendly command-line interface using Click. The CLI offers intuitive commands with helpful progress indicators, better error messages, and comprehensive help.
 
-```python
-# census_ln --help
-usage: census_ln [-h] [-y {2000,2010}] [-o OUTPUT] -l LAST input
+### Quick Start
 
-Appends Census columns by last name
+```bash
+# Check which models are available
+python -m ethnicolr.cli models status
 
-positional arguments:
-  input                 Input file
+# Download required models
+python -m ethnicolr.cli models download census
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -y {2000,2010}, --year {2000,2010}
-                        Year of Census data (default=2000)
-  -o OUTPUT, --output OUTPUT
-                        Output file with Census data columns
-  -l LAST, --last LAST  Name of the column containing the last name
+# Run predictions
+python -m ethnicolr.cli predict census data.csv -l surname -o results.csv
+```
+
+### Main Commands
+
+#### Prediction Commands
+
+```bash
+# Census-based prediction (most common)
+python -m ethnicolr.cli predict census data.csv -l surname
+
+# With specific census year and confidence intervals  
+python -m ethnicolr.cli predict census data.csv -l surname -y 2010 -c 0.95 -i 200
+
+# Florida voter registration model
+python -m ethnicolr.cli predict florida data.csv -l surname
+
+# Wikipedia model (detailed ethnic categories)
+python -m ethnicolr.cli predict wiki data.csv -l surname
+```
+
+#### Model Management
+
+```bash
+# Check installation status of all models
+python -m ethnicolr.cli models status
+
+# List available prediction models
+python -m ethnicolr.cli models list --detailed
+
+# Download specific models
+python -m ethnicolr.cli models download census --year 2010
+python -m ethnicolr.cli models download florida
+
+# Get information about a model
+python -m ethnicolr.cli models info census
+```
+
+#### Quick Prediction
+
+```bash
+# Fast prediction with minimal setup
+python -m ethnicolr.cli quick-predict data.csv -l surname --model census
+
+# Auto-selects best model based on available data
+python -m ethnicolr.cli quick-predict data.csv -l surname -f firstname
+```
+
+### CLI Options
+
+All prediction commands support these common options:
+
+- `-l, --last-column`: Column containing last names (required)
+- `-f, --first-column`: Column containing first names (when supported)  
+- `-o, --output`: Output file path (auto-generated if not specified)
+- `-c, --confidence`: Confidence interval level (0.0-1.0)
+- `-i, --iterations`: Monte Carlo iterations for confidence intervals
+- `--overwrite`: Overwrite existing output files
+- `-v, --verbose`: Enable detailed progress information
+
+### Legacy CLI
+
+The original command-line tools are still available for backward compatibility:
+
+```bash
+census_ln --help
+pred_census_ln --help
+pred_wiki_name --help
+# ... etc
 ```
 
 ### Cleaning Names

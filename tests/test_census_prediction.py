@@ -46,10 +46,9 @@ class TestCensusLookup:
 
     def test_census_lookup_with_missing_names(self):
         """Test census lookup with names not in census data."""
-        df = pd.DataFrame([
-            {"last": "veryrareuncommonname", "id": 1},
-            {"last": "smith", "id": 2}
-        ])
+        df = pd.DataFrame(
+            [{"last": "veryrareuncommonname", "id": 1}, {"last": "smith", "id": 2}]
+        )
 
         result = census_ln(df, "last", 2010)
         assert len(result) == 2
@@ -97,19 +96,23 @@ class TestCensusPrediction:
         assert_prediction_quality(result, "census")
 
         # Check that we get reasonable predictions for major groups
-        race_counts = result["race"].value_counts()
+        # race_counts = result["race"].value_counts()
 
         # Should predict white for most European surnames
         european_subset = extensive_names[extensive_names["expected_major"] == "white"]
         european_results = result[result.index.isin(european_subset.index)]
         white_accuracy = (european_results["race"] == "white").mean()
-        assert white_accuracy >= 0.7, f"White prediction accuracy too low: {white_accuracy}"
+        assert white_accuracy >= 0.7, (
+            f"White prediction accuracy too low: {white_accuracy}"
+        )
 
         # Should predict asian for most Asian surnames
         asian_subset = extensive_names[extensive_names["expected_major"] == "asian"]
         asian_results = result[result.index.isin(asian_subset.index)]
         asian_accuracy = (asian_results["race"] == "api").mean()
-        assert asian_accuracy >= 0.7, f"Asian prediction accuracy too low: {asian_accuracy}"
+        assert asian_accuracy >= 0.7, (
+            f"Asian prediction accuracy too low: {asian_accuracy}"
+        )
 
     def test_prediction_preserves_input_columns(self, sample_census_names):
         """Test that prediction preserves all input columns."""
@@ -129,10 +132,12 @@ class TestCensusPrediction:
 
     def test_different_column_names(self):
         """Test prediction with non-standard column names."""
-        df = pd.DataFrame([
-            {"surname": "smith", "expected": "white"},
-            {"surname": "zhang", "expected": "api"},
-        ])
+        df = pd.DataFrame(
+            [
+                {"surname": "smith", "expected": "white"},
+                {"surname": "zhang", "expected": "api"},
+            ]
+        )
 
         result = pred_census_ln(df, "surname", 2010)
         assert_prediction_quality(result, "census")
@@ -153,7 +158,7 @@ class TestCensusPrediction:
         assert_prediction_quality(result, "census", with_confidence=True)
 
         # Should have confidence interval columns
-        mean_cols = [col for col in result.columns if col.endswith('_mean')]
+        mean_cols = [col for col in result.columns if col.endswith("_mean")]
         assert len(mean_cols) == 4  # One for each race
 
     def test_census_year_consistency(self, sample_census_names):
@@ -162,8 +167,16 @@ class TestCensusPrediction:
         result_2010 = pred_census_ln(sample_census_names, "last", 2010)
 
         # Both should have same columns structure (except for census-specific columns)
-        race_cols_2000 = [col for col in result_2000.columns if col in ["api", "black", "hispanic", "white"]]
-        race_cols_2010 = [col for col in result_2010.columns if col in ["api", "black", "hispanic", "white"]]
+        race_cols_2000 = [
+            col
+            for col in result_2000.columns
+            if col in ["api", "black", "hispanic", "white"]
+        ]
+        race_cols_2010 = [
+            col
+            for col in result_2010.columns
+            if col in ["api", "black", "hispanic", "white"]
+        ]
 
         assert set(race_cols_2000) == set(race_cols_2010)
         assert len(result_2000) == len(result_2010)

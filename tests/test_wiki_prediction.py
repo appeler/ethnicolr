@@ -41,12 +41,14 @@ class TestWikiLastNamePrediction:
         """Test last name prediction on extensive dataset."""
         # Create simplified mapping for wiki predictions
         wiki_df = extensive_names.copy()
-        wiki_df["expected_wiki"] = wiki_df["expected_major"].map({
-            "white": "GreaterEuropean,British",
-            "asian": "Asian,GreaterEastAsian,EastAsian",
-            "hispanic": "GreaterEuropean,WestEuropean,Hispanic",
-            "black": "GreaterAfrican,Africans"
-        })
+        wiki_df["expected_wiki"] = wiki_df["expected_major"].map(
+            {
+                "white": "GreaterEuropean,British",
+                "asian": "Asian,GreaterEastAsian,EastAsian",
+                "hispanic": "GreaterEuropean,WestEuropean,Hispanic",
+                "black": "GreaterAfrican,Africans",
+            }
+        )
 
         result = pred_wiki_ln(wiki_df, "last")
         assert_prediction_quality(result, "wiki")
@@ -55,9 +57,13 @@ class TestWikiLastNamePrediction:
         european_mask = wiki_df["expected_major"] == "white"
         if european_mask.any():
             european_results = result[european_mask]
-            european_predictions = european_results["race"].str.contains("GreaterEuropean")
+            european_predictions = european_results["race"].str.contains(
+                "GreaterEuropean"
+            )
             european_accuracy = european_predictions.mean()
-            assert european_accuracy >= 0.5, f"European accuracy too low: {european_accuracy}"
+            assert european_accuracy >= 0.5, (
+                f"European accuracy too low: {european_accuracy}"
+            )
 
 
 class TestWikiFullNamePrediction:
@@ -88,12 +94,14 @@ class TestWikiFullNamePrediction:
 
     def test_fullname_handles_duplicates(self):
         """Test that full name prediction preserves duplicates correctly."""
-        dupe_df = pd.DataFrame([
-            {"last": "O'Neil", "first": "John"},
-            {"last": "ONeil", "first": "John"},  # Similar but different
-            {"last": "Smith", "first": "John"},
-            {"last": "Smith", "first": "John"},  # Exact duplicate
-        ])
+        dupe_df = pd.DataFrame(
+            [
+                {"last": "O'Neil", "first": "John"},
+                {"last": "ONeil", "first": "John"},  # Similar but different
+                {"last": "Smith", "first": "John"},
+                {"last": "Smith", "first": "John"},  # Exact duplicate
+            ]
+        )
 
         result = pred_wiki_name(dupe_df, "last", "first")
 
@@ -126,14 +134,16 @@ class TestWikiFullNamePrediction:
 
     def test_fullname_handles_accents_and_initials(self):
         """Test specific handling of accented characters and initials."""
-        tricky_df = pd.DataFrame([
-            {"last": "Szathmáry", "first": "Emöke"},      # Hungarian with accents
-            {"last": "McMillan", "first": "A."},          # Initial with period
-            {"last": "FitzGerald", "first": "John"},      # Irish prefix
-            {"last": "Edwards", "first": "N"},            # Single letter initial
-            {"last": "Sauder", "first": "E"},             # Single letter
-            {"last": "Aguilar", "first": "J."},           # Initial with period
-        ])
+        tricky_df = pd.DataFrame(
+            [
+                {"last": "Szathmáry", "first": "Emöke"},  # Hungarian with accents
+                {"last": "McMillan", "first": "A."},  # Initial with period
+                {"last": "FitzGerald", "first": "John"},  # Irish prefix
+                {"last": "Edwards", "first": "N"},  # Single letter initial
+                {"last": "Sauder", "first": "E"},  # Single letter
+                {"last": "Aguilar", "first": "J."},  # Initial with period
+            ]
+        )
 
         result = pred_wiki_name(tricky_df, "last", "first")
 
@@ -177,8 +187,8 @@ class TestWikiModelComparison:
         assert_prediction_quality(name_conf, "wiki", with_confidence=True)
 
         # Should have same set of mean columns
-        ln_mean_cols = [col for col in ln_conf.columns if col.endswith('_mean')]
-        name_mean_cols = [col for col in name_conf.columns if col.endswith('_mean')]
+        ln_mean_cols = [col for col in ln_conf.columns if col.endswith("_mean")]
+        name_mean_cols = [col for col in name_conf.columns if col.endswith("_mean")]
         assert set(ln_mean_cols) == set(name_mean_cols)
 
 
@@ -187,11 +197,13 @@ class TestWikiErrorHandling:
 
     def test_empty_names(self):
         """Test handling of empty or invalid names."""
-        empty_df = pd.DataFrame([
-            {"last": "", "first": "John"},
-            {"last": "Smith", "first": ""},
-            {"last": "   ", "first": "Mary"},  # Whitespace
-        ])
+        empty_df = pd.DataFrame(
+            [
+                {"last": "", "first": "John"},
+                {"last": "Smith", "first": ""},
+                {"last": "   ", "first": "Mary"},  # Whitespace
+            ]
+        )
 
         # Should not crash
         ln_result = pred_wiki_ln(empty_df, "last")
@@ -213,11 +225,13 @@ class TestWikiErrorHandling:
 
     def test_very_long_names(self):
         """Test handling of unusually long names."""
-        long_names_df = pd.DataFrame([
-            {"last": "a" * 100, "first": "John"},  # Very long last name
-            {"last": "Smith", "first": "b" * 100},  # Very long first name
-            {"last": "Normal", "first": "Jane"},     # Normal name for comparison
-        ])
+        long_names_df = pd.DataFrame(
+            [
+                {"last": "a" * 100, "first": "John"},  # Very long last name
+                {"last": "Smith", "first": "b" * 100},  # Very long first name
+                {"last": "Normal", "first": "Jane"},  # Normal name for comparison
+            ]
+        )
 
         # Should handle without crashing
         result = pred_wiki_name(long_names_df, "last", "first")
@@ -226,13 +240,15 @@ class TestWikiErrorHandling:
 
     def test_unicode_handling(self):
         """Test proper handling of various Unicode characters."""
-        unicode_df = pd.DataFrame([
-            {"last": "Müller", "first": "Björn"},      # Germanic umlauts
-            {"last": "José", "first": "María"},        # Spanish accents
-            {"last": "Ξενοφῶν", "first": "Greek"},     # Greek characters
-            {"last": "Владимир", "first": "Russian"},   # Cyrillic
-            {"last": "张", "first": "伟"},              # Chinese characters
-        ])
+        unicode_df = pd.DataFrame(
+            [
+                {"last": "Müller", "first": "Björn"},  # Germanic umlauts
+                {"last": "José", "first": "María"},  # Spanish accents
+                {"last": "Ξενοφῶν", "first": "Greek"},  # Greek characters
+                {"last": "Владимир", "first": "Russian"},  # Cyrillic
+                {"last": "张", "first": "伟"},  # Chinese characters
+            ]
+        )
 
         # Should process without crashing
         result = pred_wiki_name(unicode_df, "last", "first")
