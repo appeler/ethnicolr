@@ -71,7 +71,7 @@ ethnicolr_download_models = "ethnicolr.utils.download:main"
 # but keeps compatibility with existing usage like `ethnicolr[base]`.
 # Runtime inference stack
 inference = [
-  "tensorflow>=2.15.0,<3.0.0",
+  "tensorflow>=2.15.0,<3.0.0; sys_platform != 'win32'",  # Skip TensorFlow on Windows due to missing wheels for tensorflow-io-gcs-filesystem
   "protobuf>=4.21.0,<7.0.0",
   "typing-extensions>=4.4,<5.0",
 ]
@@ -103,7 +103,7 @@ docs = [
 # --- uv dependency groups (for `uv sync --group ...`) ---
 [dependency-groups]
 inference = [
-  "tensorflow>=2.15.0,<3.0.0",
+  "tensorflow>=2.15.0,<3.0.0; sys_platform != 'win32'",  # Skip TensorFlow on Windows due to missing wheels for tensorflow-io-gcs-filesystem
   "protobuf>=4.21.0,<7.0.0",
   "typing-extensions>=4.4,<5.0",
 ]
