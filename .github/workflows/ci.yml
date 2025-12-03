@@ -36,29 +36,12 @@ jobs:
           uv run python -c "import pandas; print('[OK] Pandas version:', pandas.__version__)"
           uv run python -c "import numpy; print('[OK] NumPy version:', numpy.__version__)"
           uv run python -c "import click; print('[OK] Click version:', click.__version__)"
-          uv run python -c "from ethnicolr import cli; print('[OK] CLI module loads successfully')"
-
-      - name: Verify TensorFlow (non-Windows)
-        if: runner.os != 'Windows'
-        run: |
           uv run python -c "import tensorflow; print('[OK] TensorFlow version:', tensorflow.__version__)"
           uv run python -c "import tensorflow as tf; print('[OK] TensorFlow functionality:', tf.constant([1, 2, 3]))"
+          uv run python -c "from ethnicolr import cli; print('[OK] CLI module loads successfully')"
 
-      - name: Windows note
-        if: runner.os == 'Windows'
-        run: echo "[INFO] TensorFlow skipped on Windows due to missing wheels for tensorflow-io-gcs-filesystem"
-
-      - name: Run test suite (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          echo "Running Windows-compatible tests (excluding TensorFlow-dependent tests)"
-          uv run pytest tests/test_edge_cases.py -v
-
-      - name: Run test suite (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          echo "Running full test suite"
-          uv run pytest
+      - name: Run test suite
+        run: uv run pytest
 
   lint:
     name: Lint (Linux, Python 3.11)
