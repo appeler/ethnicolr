@@ -135,8 +135,8 @@ docs = [
 
 # UV configuration
 [tool.uv]
-# Only resolve deps for the current platform
-environments = []
+# Universal lockfile generation - resolve deps for all platforms
+# environments = []  # Commented out to allow cross-platform dependency resolution
 # Ensure Windows AMD64 gets compatible wheels (fixes tensorflow-io-gcs-filesystem)
 required-environments = ["sys_platform == 'win32' and platform_machine == 'AMD64'"]
 
