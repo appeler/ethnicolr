@@ -72,7 +72,7 @@ def app():
 
     #### Usage
 
-    Enter a list of (last) names or upload a CSV with (first and) last name columns. Here's a [sample CSV](https://raw.githubusercontent.com/appeler/ethnicolr/master/ethnicolr/data/examples/input-with-header.csv)
+    Enter a list of (last) names or upload a CSV with (first and) last name columns. Here's a [sample CSV](https://raw.githubusercontent.com/appeler/ethnicolr/master/examples/input-with-header.csv)
 
     """
     )

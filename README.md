@@ -162,18 +162,20 @@ are not empty after cleaning.
 
 ## Examples
 
-To append census data from 2010 to a [file with column header in the
-first row](ethnicolr/data/examples/input-with-header.csv),
+To append census data from 2010 to a [sample file with column header in the
+first row](examples/input-with-header.csv),
 specify the column name carrying last names using the [`-l`] option, keeping the rest the same:
 
 ```bash
+# Download the sample file first:
+curl -O https://raw.githubusercontent.com/appeler/ethnicolr/master/examples/input-with-header.csv
+
+# Then run census lookup:
 census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv
 ```
 
-To predict race/ethnicity using [Wikipedia full name
-model](ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb), specify the column name of last name and first name by using
-[`-l`] and [`-f`]
-flags respectively.
+To predict race/ethnicity using Wikipedia full name model, specify the column name of last name and first name by using
+[`-l`] and [`-f`] flags respectively.
 
 ```bash
 pred_wiki_name -o output-wiki-pred-race.csv -l last_name -f first_name input-with-header.csv
