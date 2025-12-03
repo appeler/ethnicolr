@@ -48,15 +48,17 @@ jobs:
         if: runner.os == 'Windows'
         run: echo "[INFO] TensorFlow skipped on Windows due to missing wheels for tensorflow-io-gcs-filesystem"
 
-      - name: Run test suite
+      - name: Run test suite (Windows)
+        if: runner.os == 'Windows'
         run: |
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            echo "Running Windows-compatible tests (excluding TensorFlow-dependent tests)"
-            uv run pytest tests/test_edge_cases.py -v
-          else
-            echo "Running full test suite"
-            uv run pytest
-          fi
+          echo "Running Windows-compatible tests (excluding TensorFlow-dependent tests)"
+          uv run pytest tests/test_edge_cases.py -v
+
+      - name: Run test suite (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          echo "Running full test suite"
+          uv run pytest
 
   lint:
     name: Lint (Linux, Python 3.11)
