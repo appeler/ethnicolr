@@ -137,6 +137,8 @@ docs = [
 [tool.uv]
 # Only resolve deps for the current platform
 environments = []
+# Ensure Windows AMD64 gets compatible wheels (fixes tensorflow-io-gcs-filesystem)
+required-environments = ["sys_platform == 'win32' and platform_machine == 'AMD64'"]
 
 [tool.uv.build-backend]
 module-root = ""
