@@ -163,7 +163,7 @@ are not empty after cleaning.
 ## Examples
 
 To append census data from 2010 to a [file with column header in the
-first row](ethnicolr/data/input-with-header.csv),
+first row](ethnicolr/data/examples/input-with-header.csv),
 specify the column name carrying last names using the [`-l`] option, keeping the rest the same:
 
 ```bash
