@@ -4,6 +4,7 @@ Tests for the modern CLI interface using Click framework.
 
 import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -52,7 +53,9 @@ class TestMainCLI:
     def test_main_help(self):
         """Test main CLI help."""
         result = subprocess.run(
-            ["python", "-m", "ethnicolr.cli", "--help"], capture_output=True, text=True
+            [sys.executable, "-m", "ethnicolr.cli", "--help"],
+            capture_output=True,
+            text=True,
         )
         assert result.returncode == 0
         assert "Ethnicolr" in result.stdout
@@ -62,7 +65,7 @@ class TestMainCLI:
     def test_predict_help(self):
         """Test predict subcommand help."""
         result = subprocess.run(
-            ["python", "-m", "ethnicolr.cli", "predict", "--help"],
+            [sys.executable, "-m", "ethnicolr.cli", "predict", "--help"],
             capture_output=True,
             text=True,
         )
@@ -74,7 +77,7 @@ class TestMainCLI:
     def test_models_help(self):
         """Test models subcommand help."""
         result = subprocess.run(
-            ["python", "-m", "ethnicolr.cli", "models", "--help"],
+            [sys.executable, "-m", "ethnicolr.cli", "models", "--help"],
             capture_output=True,
             text=True,
         )
@@ -238,7 +241,7 @@ class TestModelsCommands:
     def test_models_list(self):
         """Test models list command."""
         result = subprocess.run(
-            ["python", "-m", "ethnicolr.cli", "models", "list"],
+            [sys.executable, "-m", "ethnicolr.cli", "models", "list"],
             capture_output=True,
             text=True,
         )
@@ -248,7 +251,7 @@ class TestModelsCommands:
     def test_models_list_detailed(self):
         """Test models list with details."""
         result = subprocess.run(
-            ["python", "-m", "ethnicolr.cli", "models", "list", "--detailed"],
+            [sys.executable, "-m", "ethnicolr.cli", "models", "list", "--detailed"],
             capture_output=True,
             text=True,
         )
@@ -258,7 +261,7 @@ class TestModelsCommands:
     def test_models_status(self):
         """Test models status command."""
         result = subprocess.run(
-            ["python", "-m", "ethnicolr.cli", "models", "status"],
+            [sys.executable, "-m", "ethnicolr.cli", "models", "status"],
             capture_output=True,
             text=True,
         )
@@ -268,7 +271,7 @@ class TestModelsCommands:
     def test_models_info_census(self):
         """Test models info for census."""
         result = subprocess.run(
-            ["python", "-m", "ethnicolr.cli", "models", "info", "census"],
+            [sys.executable, "-m", "ethnicolr.cli", "models", "info", "census"],
             capture_output=True,
             text=True,
         )
@@ -278,7 +281,7 @@ class TestModelsCommands:
     def test_models_download_help(self):
         """Test models download help."""
         result = subprocess.run(
-            ["python", "-m", "ethnicolr.cli", "models", "download", "--help"],
+            [sys.executable, "-m", "ethnicolr.cli", "models", "download", "--help"],
             capture_output=True,
             text=True,
         )
@@ -292,7 +295,7 @@ class TestQuickPredict:
     def test_quick_predict_help(self):
         """Test quick predict help."""
         result = subprocess.run(
-            ["python", "-m", "ethnicolr.cli", "quick-predict", "--help"],
+            [sys.executable, "-m", "ethnicolr.cli", "quick-predict", "--help"],
             capture_output=True,
             text=True,
         )
@@ -403,7 +406,7 @@ class TestCLIIntegration:
         """Test workflow: check status, then predict."""
         # Step 1: Check model status
         status_result = subprocess.run(
-            ["python", "-m", "ethnicolr.cli", "models", "status"],
+            [sys.executable, "-m", "ethnicolr.cli", "models", "status"],
             capture_output=True,
             text=True,
         )
