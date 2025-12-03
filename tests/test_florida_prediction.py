@@ -201,9 +201,9 @@ class TestFloridaExtensiveValidation:
             if subset_mask.any():
                 subset_results = result[subset_mask]
                 accuracy = (subset_results["race"] == fl_race).mean()
-                assert (
-                    accuracy >= 0.25
-                ), f"{expected_race} -> {fl_race} accuracy too low: {accuracy}"
+                assert accuracy >= 0.25, (
+                    f"{expected_race} -> {fl_race} accuracy too low: {accuracy}"
+                )
 
     def test_extensive_five_category_other_usage(self, extensive_names):
         """Test that 5-category model appropriately uses 'other' category."""

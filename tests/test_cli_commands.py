@@ -467,9 +467,9 @@ class TestCLIIntegration:
 
         input_df = pd.read_csv(sample_input_file)
         for model_name, output_df in outputs.items():
-            assert len(output_df) == len(
-                input_df
-            ), f"{model_name} changed number of rows"
+            assert len(output_df) == len(input_df), (
+                f"{model_name} changed number of rows"
+            )
             assert "race" in output_df.columns, f"{model_name} missing race column"
 
 
@@ -525,9 +525,9 @@ class TestCLIPerformance:
 
         # Should complete within reasonable time (60 seconds is very generous)
         execution_time = end_time - start_time
-        assert (
-            execution_time < 60
-        ), f"Command took too long: {execution_time:.2f} seconds"
+        assert execution_time < 60, (
+            f"Command took too long: {execution_time:.2f} seconds"
+        )
 
         if result.returncode == 0:
             assert os.path.exists(output_file)

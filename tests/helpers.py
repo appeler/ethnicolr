@@ -264,25 +264,25 @@ def assert_prediction_quality(
     """
     results = validate_basic_prediction_output(df, model_type, with_confidence)
 
-    assert results[
-        "has_expected_columns"
-    ], f"Missing expected columns for {model_type} model"
+    assert results["has_expected_columns"], (
+        f"Missing expected columns for {model_type} model"
+    )
     assert results["probabilities_sum_to_one"], "Probabilities do not sum to 1.0"
     assert results["no_nan_values"], "Found NaN values in prediction columns"
-    assert results[
-        "valid_probability_ranges"
-    ], "Found probability values outside [0,1] range"
+    assert results["valid_probability_ranges"], (
+        "Found probability values outside [0,1] range"
+    )
     assert results["has_race_column"], "Missing 'race' column with predicted race"
 
     if with_confidence:
         assert results["has_confidence_columns"], "Missing confidence interval columns"
-        assert results[
-            "confidence_probabilities_sum_to_one"
-        ], "Confidence probabilities do not sum to 1.0"
+        assert results["confidence_probabilities_sum_to_one"], (
+            "Confidence probabilities do not sum to 1.0"
+        )
         assert results["confidence_no_nan"], "Found NaN values in confidence columns"
-        assert results[
-            "confidence_valid_ranges"
-        ], "Found confidence values outside [0,1] range"
+        assert results["confidence_valid_ranges"], (
+            "Found confidence values outside [0,1] range"
+        )
 
 
 def create_test_summary(

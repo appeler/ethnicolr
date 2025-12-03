@@ -15,9 +15,6 @@ uv run python -c "import numpy; print('✓ NumPy version:', numpy.__version__)"
 echo "🔍 Local CI: Running linting checks..."
 uv run ruff check .
 
-echo "🧹 Local CI: Auto-formatting files with ruff..."
-uv run ruff format .
-
 echo "🔍 Local CI: Verifying ruff formatting is clean..."
 uv run ruff format --check .
 

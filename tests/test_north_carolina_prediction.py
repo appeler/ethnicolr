@@ -95,9 +95,9 @@ class TestNorthCarolinaPrediction:
 
             # At minimum, should predict some NL+ category for white names
             nl_predictions = white_results["race"].str.startswith("NL+").mean()
-            assert (
-                nl_predictions >= 0.5
-            ), f"Expected most white names to predict NL+ categories, got {nl_predictions:.2%}"
+            assert nl_predictions >= 0.5, (
+                f"Expected most white names to predict NL+ categories, got {nl_predictions:.2%}"
+            )
 
     def test_nc_race_categories_comprehensive(self, sample_nc_names):
         """Test that NC model produces all expected race categories."""
@@ -161,15 +161,15 @@ class TestNorthCarolinaPrediction:
         nl_predictions = result["race"].str.startswith("NL+").sum()
 
         # Model should predict at least some NL+ categories (most common)
-        assert (
-            nl_predictions >= 2
-        ), f"Expected at least 2 NL+ predictions, got {nl_predictions}"
+        assert nl_predictions >= 2, (
+            f"Expected at least 2 NL+ predictions, got {nl_predictions}"
+        )
 
         # Total predictions should equal input rows
         total_predictions = hl_predictions + nl_predictions
-        assert total_predictions == len(
-            test_names
-        ), f"Prediction count mismatch: {total_predictions} != {len(test_names)}"
+        assert total_predictions == len(test_names), (
+            f"Prediction count mismatch: {total_predictions} != {len(test_names)}"
+        )
 
 
 class TestNorthCarolinaErrorHandling:
@@ -336,9 +336,9 @@ class TestNorthCarolinaUniqueFeatures:
 
         # Should predict at least several different categories
         unique_predictions = result["race"].nunique()
-        assert (
-            unique_predictions >= 3
-        ), f"Only predicted {unique_predictions} unique categories"
+        assert unique_predictions >= 3, (
+            f"Only predicted {unique_predictions} unique categories"
+        )
 
         # Should have Non-Hispanic predictions (Hispanic predictions are optional due to model limitations)
         has_nonhispanic = result["race"].str.startswith("NL+").any()
@@ -377,6 +377,6 @@ class TestNorthCarolinaUniqueFeatures:
 
             # Predicted race should have highest (or tied for highest) probability
             max_prob = row[race_cols].max()
-            assert (
-                predicted_prob == max_prob
-            ), f"Predicted race {predicted_race} doesn't have max probability"
+            assert predicted_prob == max_prob, (
+                f"Predicted race {predicted_race} doesn't have max probability"
+            )

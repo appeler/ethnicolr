@@ -102,17 +102,17 @@ class TestCensusPrediction:
         european_subset = extensive_names[extensive_names["expected_major"] == "white"]
         european_results = result[result.index.isin(european_subset.index)]
         white_accuracy = (european_results["race"] == "white").mean()
-        assert (
-            white_accuracy >= 0.7
-        ), f"White prediction accuracy too low: {white_accuracy}"
+        assert white_accuracy >= 0.7, (
+            f"White prediction accuracy too low: {white_accuracy}"
+        )
 
         # Should predict asian for most Asian surnames
         asian_subset = extensive_names[extensive_names["expected_major"] == "asian"]
         asian_results = result[result.index.isin(asian_subset.index)]
         asian_accuracy = (asian_results["race"] == "api").mean()
-        assert (
-            asian_accuracy >= 0.7
-        ), f"Asian prediction accuracy too low: {asian_accuracy}"
+        assert asian_accuracy >= 0.7, (
+            f"Asian prediction accuracy too low: {asian_accuracy}"
+        )
 
     def test_prediction_preserves_input_columns(self, sample_census_names):
         """Test that prediction preserves all input columns."""
