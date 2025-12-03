@@ -35,7 +35,7 @@ jobs:
         run: uv build
 
       - name: Sync citation metadata
-        uses: recite/citation-sync@v.2
+        uses: recite/citation-sync@v0.3.0
         with:
           commit: true
 
