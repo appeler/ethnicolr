@@ -39,27 +39,36 @@ jobs:
         with:
           commit: true
 
-      - name: Extract version from tag
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Extract version from pyproject.toml
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
           echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
-          echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
+
+      - name: Create git tag for manual triggers
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git tag -a "v$RELEASE_VERSION" -m "Release v$RELEASE_VERSION"
+          git push origin "v$RELEASE_VERSION"
 
       - name: Extract release notes
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
           # Extract release notes for current version from CHANGELOG.md
-          awk '/^## \['"$RELEASE_VERSION"'\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md > release_notes.txt
-          # If no specific version found, use a generic message
+          if [ -f CHANGELOG.md ]; then
+            awk '/^## \['"$RELEASE_VERSION"'\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md > release_notes.txt
+          fi
+          # If no specific version found or no CHANGELOG, use a generic message
           if [ ! -s release_notes.txt ]; then
-            echo "Release $RELEASE_VERSION of ethnicolr" > release_notes.txt
+            echo "Release v$RELEASE_VERSION of ethnicolr" > release_notes.txt
             echo "" >> release_notes.txt
-            echo "See [CHANGELOG.md](https://github.com/appeler/ethnicolr/blob/master/CHANGELOG.md) for detailed changes." >> release_notes.txt
+            echo "Automated release from workflow trigger." >> release_notes.txt
+            echo "" >> release_notes.txt
+            echo "See commit history for detailed changes." >> release_notes.txt
           fi
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           name: ethnicolr v${{ env.RELEASE_VERSION }}
