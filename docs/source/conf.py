@@ -21,11 +21,7 @@ import sys
 from datetime import datetime
 
 # Read project metadata from pyproject.toml
-try:
-    import tomllib
-except ImportError:
-    # Fallback for Python < 3.11
-    import tomli as tomllib
+import tomllib
 
 # Add paths for autodoc
 sys.path.insert(0, os.path.abspath("../"))

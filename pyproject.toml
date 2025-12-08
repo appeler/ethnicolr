@@ -209,3 +209,29 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.deptry]
+# Exclude development/research code that uses transitive dependencies
+extend_exclude = [
+  "scripts/",
+  "examples/",
+]
+
+# Ignore notebooks
+ignore_notebooks = true
+
+# These are legitimate dependencies used as CLI tools, not imports
+known_first_party = ["ethnicolr"]
+
+# Tell deptry these are dev dependency groups (won't be flagged as unused)
+pep621_dev_dependency_groups = ["test", "dev", "docs"]
+
+# Map package names to module names
+package_module_name_map = { tensorflow-intel = "tensorflow" }
+
+# Only ignore truly exceptional cases that can't be categorized above
+per_rule_ignores = { DEP002 = [
+  "tensorflow-intel",   # Platform-specific runtime dependency (Windows only)
+  "protobuf",          # TensorFlow runtime dependency
+  "typing-extensions"   # Runtime compatibility shim
+] }
