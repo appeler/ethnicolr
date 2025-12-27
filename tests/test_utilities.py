@@ -2,6 +2,7 @@
 Tests for utility functions in ethnicolr.utils module.
 """
 
+import logging
 import os
 import tempfile
 from unittest.mock import patch
@@ -368,23 +369,34 @@ class TestArgParser:
         """Test that output messages are properly formatted."""
         argv = [temp_input_file, "-l", "lastname", "-o", "test.csv"]
 
-        # Don't patch print this time, capture it
-        arg_parser(
-            argv=argv,
-            title="Test Tool",
-            default_out="default.csv",
-            default_year=2010,
-            year_choices=[2000, 2010],
-            first=False,
-        )
+        # Configure logging to output to stdout for capture
+        logger = logging.getLogger("ethnicolr.utils")
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
 
-        captured = capsys.readouterr()
+        try:
+            arg_parser(
+                argv=argv,
+                title="Test Tool",
+                default_out="default.csv",
+                default_year=2010,
+                year_choices=[2000, 2010],
+                first=False,
+            )
 
-        # Should contain success message and argument listing
-        assert "INFO: Parsed arguments:" in captured.out
-        assert "input:" in captured.out
-        assert "output:" in captured.out
-        assert "last:" in captured.out
+            captured = capsys.readouterr()
+
+            # Should contain success message and argument listing
+            assert "INFO: Parsed arguments:" in captured.err
+            assert "input:" in captured.err
+            assert "output:" in captured.err
+            assert "last:" in captured.err
+        finally:
+            # Clean up logging configuration
+            logger.removeHandler(handler)
+            logger.setLevel(logging.WARNING)
 
 
 class TestArgParserEdgeCases:
