@@ -1,9 +1,9 @@
 ## ethnicolr: Predict Race and Ethnicity From Name
 
 ![PyPI Authenicated](https://notarypy.soodoku.workers.dev/badge/ethnicolr/0.18.4/ethnicolr-0.18.4-py3-none-any.whl)
-![Test Badge](https://github.com/appeler/ethnicolr/workflows/test/badge.svg)
+[![CI](https://github.com/appeler/ethnicolr/actions/workflows/ci.yml/badge.svg)](https://github.com/appeler/ethnicolr/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.python.org/pypi/ethnicolr)
-[![Anaconda version](https://anaconda.org/soodoku/ethnicolr/badges/version.svg)](https://anaconda.org/soodoku/ethnicolr/)
+[![Documentation](https://img.shields.io/badge/docs-github.io-blue)](https://appeler.github.io/ethnicolr/)
 [![PePy Downloads](https://static.pepy.tech/badge/ethnicolr)](https://www.pepy.tech/projects/ethnicolr)
 
 We exploit the US census data, the Florida voting registration data, and
@@ -58,34 +58,96 @@ Notes:
 
 ```bash
 pip install ethnicolr jupyter
-ethnicolr_download_models
+python -m ethnicolr.cli models download census
 jupyter notebook ethnicolr/examples
 ```
 
 Open one of the example notebooks and run the cells to see the package in
 action.
 
-## General API
+## Modern CLI
 
-To see the available command line options for any function, please type
-in [`<function-name>`]` `[`--help`]
+Ethnicolr now provides a modern, user-friendly command-line interface using Click. The CLI offers intuitive commands with helpful progress indicators, better error messages, and comprehensive help.
 
-```python
-# census_ln --help
-usage: census_ln [-h] [-y {2000,2010}] [-o OUTPUT] -l LAST input
+### Quick Start
 
-Appends Census columns by last name
+```bash
+# Check which models are available
+python -m ethnicolr.cli models status
 
-positional arguments:
-  input                 Input file
+# Download required models
+python -m ethnicolr.cli models download census
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -y {2000,2010}, --year {2000,2010}
-                        Year of Census data (default=2000)
-  -o OUTPUT, --output OUTPUT
-                        Output file with Census data columns
-  -l LAST, --last LAST  Name of the column containing the last name
+# Run predictions
+python -m ethnicolr.cli predict census data.csv -l surname -o results.csv
+```
+
+### Main Commands
+
+#### Prediction Commands
+
+```bash
+# Census-based prediction (most common)
+python -m ethnicolr.cli predict census data.csv -l surname
+
+# With specific census year and confidence intervals
+python -m ethnicolr.cli predict census data.csv -l surname -y 2010 -c 0.95 -i 200
+
+# Florida voter registration model
+python -m ethnicolr.cli predict florida data.csv -l surname
+
+# Wikipedia model (detailed ethnic categories)
+python -m ethnicolr.cli predict wiki data.csv -l surname
+```
+
+#### Model Management
+
+```bash
+# Check installation status of all models
+python -m ethnicolr.cli models status
+
+# List available prediction models
+python -m ethnicolr.cli models list --detailed
+
+# Download specific models
+python -m ethnicolr.cli models download census --year 2010
+python -m ethnicolr.cli models download florida
+
+# Get information about a model
+python -m ethnicolr.cli models info census
+```
+
+#### Quick Prediction
+
+```bash
+# Fast prediction with minimal setup
+python -m ethnicolr.cli quick-predict data.csv -l surname --model census
+
+# Auto-selects best model based on available data
+python -m ethnicolr.cli quick-predict data.csv -l surname -f firstname
+```
+
+### CLI Options
+
+All prediction commands support these common options:
+
+- `-l, --last-column`: Column containing last names (required)
+- `-f, --first-column`: Column containing first names (when supported)
+- `-o, --output`: Output file path (auto-generated if not specified)
+- `-c, --confidence`: Confidence interval level (0.0-1.0)
+- `-i, --iterations`: Monte Carlo iterations for confidence intervals
+- `--overwrite`: Overwrite existing output files
+- `-v, --verbose`: Enable detailed progress information
+
+### Legacy CLI
+
+The original command-line tools are still available for backward compatibility:
+
+```bash
+census_ln --help
+pred_census_ln --help
+pred_wiki_name --help
+# ... etc
 ```
 
 ### Cleaning Names
@@ -100,18 +162,20 @@ are not empty after cleaning.
 
 ## Examples
 
-To append census data from 2010 to a [file with column header in the
-first row](ethnicolr/data/input-with-header.csv),
+To append census data from 2010 to a [sample file with column header in the
+first row](examples/input-with-header.csv),
 specify the column name carrying last names using the [`-l`] option, keeping the rest the same:
 
 ```bash
+# Download the sample file first:
+curl -O https://raw.githubusercontent.com/appeler/ethnicolr/refs/heads/master/examples/input-with-header.csv
+
+# Then run census lookup:
 census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv
 ```
 
-To predict race/ethnicity using [Wikipedia full name
-model](ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb), specify the column name of last name and first name by using
-[`-l`] and [`-f`]
-flags respectively.
+To predict race/ethnicity using Wikipedia full name model, specify the column name of last name and first name by using
+[`-l`] and [`-f`] flags respectively.
 
 ```bash
 pred_wiki_name -o output-wiki-pred-race.csv -l last_name -f first_name input-with-header.csv
@@ -142,7 +206,7 @@ or a CSV.
 
 - Output: Appends the following columns to the pandas DataFrame or CSV:
   pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic. See
-  [here](https://github.com/appeler/ethnicolr/blob/master/ethnicolr/data/census/census_2000.pdf) for what the column names mean.
+  [here](https://github.com/appeler/ethnicolr/blob/main/ethnicolr/data/census/census_2000.pdf) for what the column names mean.
 
   ``` literal-block
   >>> import pandas as pd
@@ -749,7 +813,7 @@ tally campaign contributions by race.
   pred_census_ln](ethnicolr/examples/ethnicolr_app_contrib20xx.ipynb)
 - [Contrib 2000/2010 using
   pred_fl_reg_name](ethnicolr/examples/ethnicolr_app_contrib20xx-fl_reg.ipynb)
-  
+
 Data on race of all the people in the [DIME
 data](https://data.stanford.edu/dime) is posted
 [here](http://dx.doi.org/10.7910/DVN/M5K7VR). The
@@ -775,10 +839,10 @@ registration data from early 2017.
     had racial data on about 47% of their members, so they used it to learn
     the race of the remaining 53%. On the data they had labels for, they
     found .9 AUC and 83% accuracy for the last name model.
-    
+
 3.  Evaluation on NC Data:
     [https://github.com/appeler/nc_race_ethnicity](https://github.com/appeler/nc_race_ethnicity)
-    
+
 ### Authors
 
 Suriyan Laohaprapanon and Gaurav Sood
@@ -803,5 +867,5 @@ License](https://opensource.org/licenses/MIT).
 - [appeler/ethnicolr2](https://github.com/appeler/ethnicolr2) — Ethnicolr implementation with new models in pytorch
 - [appeler/ethnicolor](https://github.com/appeler/ethnicolor) — Race and Ethnicity based on name using data from census, voter reg. files, etc.
 - [appeler/instate](https://github.com/appeler/instate) — instate: predict the state of residence from last name using the indian electoral rolls
-- [appeler/search_names](https://github.com/appeler/search_names) — Search a long list of names (patterns) in a large text corpus systematically and quickly
+- [appeler/naampy](https://github.com/appeler/naampy) — Infer Sociodemographic Characteristics from Names Using Indian Electoral Rolls
 - [appeler/nc_race_ethnicity](https://github.com/appeler/nc_race_ethnicity) — Evaluation of some of the ethnicolr models on the NC Voter Registration Data + New Models Based on NC Voter Registration Data.

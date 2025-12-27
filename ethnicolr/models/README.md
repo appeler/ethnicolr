@@ -16,6 +16,6 @@
 
 * Train the model with LSTM.
 
-### Census Data 
+### Census Data
 
 The Census Bureau provides data on the racial distribution of last names. The dataset that it issues aggregates data for each last name and provides percentage of people with the last name who are Black, White, Asian, Hispanic, etc. Given some names are more common than others (Smith is the last name of 2,376,206 Americans), and given our interest in modeling the population distribution, we take a weighted random sample from this data with weight = how common the last name is in the population or count/total_count. Next, we assign race to name roughly in proportion to how the name is distributed across the racial groups. We assign floor(pctwhite) as whites, floor(pctblacks) as blacks etc. And we lose the one or two or few observations as we are using floor. We use this as the final dataset and apply the model to it.

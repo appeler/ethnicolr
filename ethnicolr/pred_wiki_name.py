@@ -1,22 +1,21 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Wikipedia Name-based Race/Ethnicity Prediction Module.
 
 Predicts race/ethnicity using full names based on LSTM models trained on Wikipedia data.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import re
 import sys
 import unicodedata
-from typing import List, Optional
+from importlib import resources
 
 import numpy as np
-
 import pandas as pd
-from pkg_resources import resource_filename
 
 from .ethnicolr_class import EthnicolrModelClass
 from .utils import arg_parser
@@ -35,6 +34,16 @@ def _normalize_name(name: str) -> str:
     This helper strips diacritics, drops any non-letter characters and
     collapses multiple spaces. The cleaned string is title cased to match
     the model's training format.
+
+    Args:
+        name: Input name string to normalize.
+
+    Returns:
+        Cleaned name with only ASCII letters, title cased.
+
+    Example:
+        >>> _normalize_name('José García-Smith')
+        'Jose Garcia Smith'
     """
     # Remove accents
     name = unicodedata.normalize("NFKD", str(name))
@@ -47,8 +56,11 @@ def _normalize_name(name: str) -> str:
 
 
 class WikiNameModel(EthnicolrModelClass):
-    """
-    Wikipedia Full Name prediction model.
+    """Wikipedia-based full name prediction model.
+
+    LSTM model trained on Wikipedia data for predicting race/ethnicity
+    from full names (first + last). Provides detailed ethnic categories
+    beyond the basic Census classifications.
     """
 
     MODELFN = "models/wiki/lstm/wiki_name_lstm.h5"
@@ -60,14 +72,30 @@ class WikiNameModel(EthnicolrModelClass):
 
     @classmethod
     def get_model_paths(cls):
+        """Get file paths for Wikipedia name model components.
+
+        Returns:
+            Tuple of (model_path, vocab_path, race_path) as strings.
+        """
+        base_path = resources.files(__name__.split(".")[0])
+        vocab_path = str(base_path / cls.VOCABFN) if cls.VOCABFN else None
+        race_path = str(base_path / cls.RACEFN) if cls.RACEFN else None
         return (
-            resource_filename(__name__, cls.MODELFN),
-            resource_filename(__name__, cls.VOCABFN),
-            resource_filename(__name__, cls.RACEFN),
+            str(base_path / cls.MODELFN),
+            vocab_path,
+            race_path,
         )
 
     @classmethod
     def check_models_exist(cls):
+        """Verify that all required model files exist.
+
+        Raises:
+            FileNotFoundError: If any model files are missing.
+
+        Returns:
+            True if all files exist.
+        """
         model_path, vocab_path, race_path = cls.get_model_paths()
         missing_files = [
             path
@@ -95,6 +123,45 @@ class WikiNameModel(EthnicolrModelClass):
         num_iter: int = 100,
         conf_int: float = 1.0,
     ) -> pd.DataFrame:
+        """Predict race/ethnicity from full names using Wikipedia model.
+
+        Uses LSTM trained on Wikipedia biographical data to predict detailed
+        ethnic categories. Handles name normalization and provides comprehensive
+        processing status tracking.
+
+        Args:
+            df: Input DataFrame containing first and last names.
+            lname_col: Column name containing last names.
+            fname_col: Column name containing first names.
+            num_iter: Monte Carlo iterations for confidence intervals.
+            conf_int: Confidence level (1.0 for point estimates).
+
+        Returns:
+            DataFrame with original data plus prediction columns:
+            - 'race': Predicted ethnicity category
+            - Probability columns for each ethnicity
+            - 'processing_status': Name processing outcome
+            - 'name_normalized': Original combined name
+            - 'name_normalized_clean': Cleaned name used for prediction
+            - Confidence bounds if conf_int < 1.0
+
+        Raises:
+            ValueError: If required columns are missing.
+            FileNotFoundError: If model files are not found.
+
+        Example:
+            >>> import pandas as pd
+            >>> df = pd.DataFrame({
+            ...     'first': ['John', 'Maria', 'Chen'],
+            ...     'last': ['Smith', 'Garcia', 'Wang']
+            ... })
+            >>> result = WikiNameModel.pred_wiki_name(df, 'last', 'first')
+            >>> print(result[['first', 'last', 'race']].head())
+              first    last        race
+            0  John   Smith  GreaterEuropean
+            1 Maria  Garcia      Hispanic
+            2  Chen    Wang  EastAsian
+        """
         if lname_col not in df.columns:
             raise ValueError(f"The last name column '{lname_col}' doesn't exist.")
         if fname_col not in df.columns:
@@ -144,7 +211,8 @@ class WikiNameModel(EthnicolrModelClass):
         skipped_count = to_skip.sum()
 
         if skipped_count > 0:
-            skip_reasons = working_df[to_skip]["processing_status"].value_counts()
+            status_series: pd.Series = working_df[to_skip]["processing_status"]  # type: ignore
+            skip_reasons = status_series.value_counts()
             logger.warning(f"Will skip {skipped_count} names:")
             for reason, count in skip_reasons.items():
                 logger.warning(f"  - {count} names: {reason}")
@@ -152,6 +220,10 @@ class WikiNameModel(EthnicolrModelClass):
         # Separate processable and skipped names
         processable_df = working_df[~to_skip].copy()
         skipped_df = working_df[to_skip].copy()
+
+        # Ensure we have DataFrames, not Series
+        assert isinstance(processable_df, pd.DataFrame)
+        assert isinstance(skipped_df, pd.DataFrame)
 
         if len(processable_df) == 0:
             logger.warning(
@@ -167,6 +239,11 @@ class WikiNameModel(EthnicolrModelClass):
             )
 
             # Run prediction only on processable names
+            if vocab_path is None or race_path is None:
+                raise ValueError(
+                    "Vocabulary and race files must be provided for LSTM models"
+                )
+
             pred_df = cls.transform_and_pred(
                 df=processable_df,
                 newnamecol=temp_col,
@@ -190,12 +267,21 @@ class WikiNameModel(EthnicolrModelClass):
                         else:
                             skipped_df[col] = float("nan")
 
-            # Combine results
-            result_df = pd.concat([pred_df, skipped_df], ignore_index=True)
+            # Combine results - handle empty DataFrames explicitly to avoid deprecation warnings
+            if pred_df.empty and skipped_df.empty:
+                result_df = pd.DataFrame()
+            elif pred_df.empty:
+                result_df = skipped_df.reset_index(drop=True)
+            elif skipped_df.empty:
+                result_df = pred_df.reset_index(drop=True)
+            else:
+                result_df = pd.concat([pred_df, skipped_df], ignore_index=True)
 
             # Sort by original order if possible
             if "__rowindex" in result_df.columns:
-                result_df = result_df.sort_values("__rowindex").reset_index(drop=True)
+                result_df = result_df.sort_values(by="__rowindex").reset_index(
+                    drop=True
+                )
 
             # Clean up temporary columns
             columns_to_drop = [temp_col, "__rowindex"]
@@ -230,7 +316,18 @@ class WikiNameModel(EthnicolrModelClass):
 pred_wiki_name = WikiNameModel.pred_wiki_name
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
+    """Command-line interface for Wikipedia name predictions.
+
+    Provides CLI access to Wikipedia-based race/ethnicity prediction
+    using full names. Processes CSV files and outputs predictions.
+
+    Args:
+        argv: Command-line arguments (uses sys.argv if None).
+
+    Returns:
+        Exit code: 0 success, 1 general error, 2 missing files, 3 invalid data.
+    """
     if argv is None:
         argv = sys.argv[1:]
 
@@ -260,7 +357,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             logger.warning(f"Overwriting existing file: {args.output}")
 
         rdf.to_csv(args.output, index=False, encoding="utf-8")
-        logger.info(f"📦 Output written: {args.output} ({len(rdf)} rows)")
+        logger.info(f"Output written: {args.output} ({len(rdf)} rows)")
 
         return 0
 

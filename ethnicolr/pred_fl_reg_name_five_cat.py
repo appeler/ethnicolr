@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Florida Full Name (5-category) Race/Ethnicity Prediction Module.
 
@@ -7,18 +6,18 @@ Uses an LSTM model trained on FL voter registration data
 to predict race/ethnicity from full names.
 """
 
-import sys
-import os
 import logging
+import os
+import sys
+
 import pandas as pd
-from typing import Optional, List
+
 from .ethnicolr_class import EthnicolrModelClass
 from .utils import arg_parser
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -32,13 +31,15 @@ class FloridaRegNameFiveCatModel(EthnicolrModelClass):
     FEATURE_LEN = 20
 
     @classmethod
-    def pred_fl_reg_name(cls,
-                         df: pd.DataFrame,
-                         lname_col: str,
-                         fname_col: str,
-                         num_iter: int = 100,
-                         conf_int: float = 1.0,
-                         year: int = 2022) -> pd.DataFrame:
+    def pred_fl_reg_name(
+        cls,
+        df: pd.DataFrame,
+        lname_col: str,
+        fname_col: str,
+        num_iter: int = 100,
+        conf_int: float = 1.0,
+        year: int = 2022,
+    ) -> pd.DataFrame:
         """
         Predict race/ethnicity using full name via Florida 5-category model.
         """
@@ -55,8 +56,9 @@ class FloridaRegNameFiveCatModel(EthnicolrModelClass):
             temp_col += "_"
 
         df[temp_col] = (
-            df[lname_col].fillna("").astype(str).str.strip() + " " +
-            df[fname_col].fillna("").astype(str).str.strip()
+            df[lname_col].fillna("").astype(str).str.strip()
+            + " "
+            + df[fname_col].fillna("").astype(str).str.strip()
         ).str.title()
 
         suffix = "_2022" if year == 2022 else ""
@@ -65,13 +67,13 @@ class FloridaRegNameFiveCatModel(EthnicolrModelClass):
         rdf = cls.transform_and_pred(
             df=df,
             newnamecol=temp_col,
-            vocab_fn=cls.VOCABFN.format(suffix),
-            race_fn=cls.RACEFN.format(suffix),
+            vocab_fn=cls.VOCABFN.format(suffix) if cls.VOCABFN else "",
+            race_fn=cls.RACEFN.format(suffix) if cls.RACEFN else "",
             model_fn=cls.MODELFN.format(suffix),
             ngrams=cls.NGRAMS,
             maxlen=cls.FEATURE_LEN,
             num_iter=num_iter,
-            conf_int=conf_int
+            conf_int=conf_int,
         )
 
         if temp_col in rdf.columns:
@@ -84,7 +86,7 @@ class FloridaRegNameFiveCatModel(EthnicolrModelClass):
 pred_fl_reg_name_five_cat = FloridaRegNameFiveCatModel.pred_fl_reg_name
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
@@ -95,7 +97,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             default_out="fl-pred-name-five-cat-output.csv",
             default_year=2022,
             year_choices=[2017, 2022],
-            first=True
+            first=True,
         )
 
         logger.info(f"Reading input file: {args.input}")
@@ -108,7 +110,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             fname_col=args.first,
             num_iter=args.iter,
             conf_int=args.conf,
-            year=args.year
+            year=args.year,
         )
 
         if os.path.exists(args.output):

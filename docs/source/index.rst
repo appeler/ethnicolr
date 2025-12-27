@@ -11,7 +11,16 @@ ethnicolr: Predict Race and Ethnicity From Name
    :caption: Contents:
 
    ethnicolr
-   
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples:
+
+   basic_usage
+   advanced_predictions
+   batch_processing
+
+
 Indices and tables
 ==================
 

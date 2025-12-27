@@ -1,16 +1,31 @@
+"""
+ethnicolr: Predict Race/Ethnicity Based on Names
 
-from ethnicolr.census_ln import census_ln
-from ethnicolr.pred_census_ln import pred_census_ln
-from ethnicolr.pred_wiki_ln import pred_wiki_ln
-from ethnicolr.pred_wiki_name import pred_wiki_name
-from ethnicolr.pred_fl_reg_ln import pred_fl_reg_ln
-from ethnicolr.pred_fl_reg_name import pred_fl_reg_name
-from ethnicolr.pred_nc_reg_name import pred_nc_reg_name
-from ethnicolr.pred_fl_reg_ln_five_cat import pred_fl_reg_ln_five_cat
-from ethnicolr.pred_fl_reg_name_five_cat import pred_fl_reg_name_five_cat
+A Python package for predicting race and ethnicity based on names using
+machine learning models trained on Census, Wikipedia, and voter registration data.
+"""
 
+from __future__ import annotations
 
-__all__ = ['census_ln', 'pred_census_ln', 'pred_wiki_ln', 'pred_wiki_name',
-           'pred_fl_reg_ln', 'pred_fl_reg_name',
-           'pred_nc_reg_name', 'pred_fl_reg_ln_five_cat',
-           'pred_fl_reg_name_five_cat']
+# Direct imports - no lazy loading needed
+from .census_ln import census_ln
+from .pred_census_ln import pred_census_ln
+from .pred_fl_reg_ln import pred_fl_reg_ln
+from .pred_fl_reg_ln_five_cat import pred_fl_reg_ln_five_cat
+from .pred_fl_reg_name import pred_fl_reg_name
+from .pred_fl_reg_name_five_cat import pred_fl_reg_name_five_cat
+from .pred_nc_reg_name import pred_nc_reg_name
+from .pred_wiki_ln import pred_wiki_ln
+from .pred_wiki_name import pred_wiki_name
+
+__all__ = [
+    "census_ln",
+    "pred_census_ln",
+    "pred_wiki_ln",
+    "pred_wiki_name",
+    "pred_fl_reg_ln",
+    "pred_fl_reg_name",
+    "pred_nc_reg_name",
+    "pred_fl_reg_ln_five_cat",
+    "pred_fl_reg_name_five_cat",
+]

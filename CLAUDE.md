@@ -11,19 +11,27 @@ ethnicolr is a Python package that predicts race and ethnicity from names using 
 ### Testing
 - Run all tests: `pytest`
 - Run tests with coverage: `pytest --cov=ethnicolr`
-- Run specific test file: `pytest ethnicolr/tests/test_010_census_ln.py`
+- Run specific test file: `pytest tests/test_010_census_ln.py`
 
 ### Code Quality
-- Format code: `black .`
-- Sort imports: `isort .`
-- Lint code: `flake8`
-- All quality checks: `black . && isort . && flake8`
+- Format code: `ruff format .`
+- Fix import sorting and basic issues: `ruff check . --fix`
+- Lint code (check only): `ruff check .`
+- All quality checks: `ruff format . && ruff check . --fix && ruff check .`
 
 ### Installation
 - Install package in development mode: `pip install -e .`
 - Install with optional dependencies: `pip install -e .[dev,test]`
-- For macOS with Apple Silicon: `pip install -e .[macos]`
-- For Linux: `pip install -e .[linux]`
+- For macOS: `pip install -e .[macos]` or `uv sync --group macos`
+- For Linux: `pip install -e .[linux]` or `uv sync --group linux`
+- For Windows: `pip install -e .[windows]` or `uv sync --group windows`
+
+### Documentation
+- Build documentation locally: `pip install -e .[docs]` then `cd docs && make html`
+- View built docs: Open `docs/build/html/index.html` in browser
+- Documentation is automatically deployed to GitHub Pages on pushes to main
+- Live documentation: https://appeler.github.io/ethnicolr/
+- Documentation configuration reads metadata from `pyproject.toml` automatically
 
 ## Package Architecture
 
@@ -53,7 +61,7 @@ The package provides CLI commands defined in pyproject.toml:
 - `ethnicolr_download_models` - Download model files
 
 ### Testing Structure
-- Tests are in `ethnicolr/tests/` with descriptive numeric prefixes
+- Tests are in `tests/` with descriptive numeric prefixes
 - Each major module has corresponding test files
 - Tests use unittest framework with pandas DataFrame fixtures
 
@@ -62,7 +70,7 @@ The package provides CLI commands defined in pyproject.toml:
 - **TensorFlow/Keras**: For LSTM model inference (version 2.13.x)
 - **pandas**: Data manipulation and CSV I/O
 - **numpy**: Numerical operations
-- Models require platform-specific TensorFlow installations (tensorflow-macos for Apple Silicon)
+- Models work with standard TensorFlow installations across all platforms (Windows, macOS, Linux)
 
 ## Important Notes
 
@@ -88,6 +96,27 @@ The package provides CLI commands defined in pyproject.toml:
 - Normalization tracking helps debug problematic names
 
 This addresses issues with Canadian/international datasets containing accented names, titles, and special characters.
+
+## Known Issues
+
+### Protobuf Warnings with TensorFlow
+You may see protobuf version warnings when using TensorFlow:
+```
+UserWarning: Protobuf gencode version 5.28.3 is exactly one major version older than the runtime version 6.31.1
+```
+
+This is a TensorFlow compatibility issue and does not affect functionality. To suppress these warnings:
+```bash
+export TF_CPP_MIN_LOG_LEVEL=3
+```
+
+Or in Python:
+```python
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning, module='google.protobuf')
+```
 
 ## Model File Locations
 

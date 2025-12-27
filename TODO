@@ -1,4 +1,0 @@
-## To Do
-
-* Current Wikipedia full name model passes names through Human Names and gets first and last names and just uses those. Would be useful to estimate a full name model. 
-* Try out tri-chars, uni-chars, etc. to see if we can do better
