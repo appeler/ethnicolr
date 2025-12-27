@@ -53,6 +53,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "myst_parser",
+    "nbsphinx",
 ]
 
 # Autodoc settings
@@ -100,6 +101,18 @@ myst_enable_extensions = [
     "substitution",
     "tasklist",
 ]
+
+# nbsphinx configuration
+nbsphinx_execute = "always"
+nbsphinx_allow_errors = True
+nbsphinx_kernel_name = "python3"
+nbsphinx_timeout = 600
+nbsphinx_execute_arguments = [
+    "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.rc={'figure.dpi': 96}",
+]
+
+# nbsphinx handles .ipynb files automatically
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

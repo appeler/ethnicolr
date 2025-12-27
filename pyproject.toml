@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "ethnicolr"
-version = "0.21.0"
+version = "0.21.1"
 description = "Modern ML library for race/ethnicity prediction from names with intuitive CLI"
 readme = "README.md"
 # TensorFlow 2.18+ supports Python 3.11-3.12 (no Python 3.13 wheels available yet)
@@ -98,6 +98,11 @@ docs = [
   "sphinx-autodoc-typehints>=1.25",
   "sphinx-copybutton>=0.5",
   "myst-parser>=2.0",
+  "nbsphinx>=0.9.0",
+  "pandoc>=2.0",
+  "ipykernel>=6.0",
+  "ipython>=8.0.0",
+  "matplotlib>=3.5.0",
 ]
 
 # --- uv dependency groups (for `uv sync --group ...`) ---
@@ -128,6 +133,11 @@ docs = [
   "sphinx-autodoc-typehints>=1.25",
   "sphinx-copybutton>=0.5",
   "myst-parser>=2.0",
+  "nbsphinx>=0.9.0",
+  "pandoc>=2.0",
+  "ipykernel>=6.0",
+  "ipython>=8.0.0",
+  "matplotlib>=3.5.0",
 ]
 
 # UV configuration
@@ -175,7 +185,8 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "tests/*" = ["S101"]
-"*.ipynb" = ["E402", "E722", "UP031", "B905", "F821", "F811", "W293", "F841"]
+"*.ipynb" = ["E402", "E722", "UP031", "B905", "F821", "F811", "W293", "F841", "E501", "F401", "E302", "E305", "W391"]
+"docs/examples/*.ipynb" = ["E402", "E722", "UP031", "B905", "F821", "F811", "W293", "F841", "E501", "F401", "E302", "E305", "W391"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["ethnicolr"]
