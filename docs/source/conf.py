@@ -103,7 +103,7 @@ myst_enable_extensions = [
 ]
 
 # nbsphinx configuration
-nbsphinx_execute = "always"
+nbsphinx_execute = "never"
 nbsphinx_allow_errors = True
 nbsphinx_kernel_name = "python3"
 nbsphinx_timeout = 600
@@ -112,19 +112,12 @@ nbsphinx_execute_arguments = [
     "--InlineBackend.rc={'figure.dpi': 96}",
 ]
 
-# nbsphinx handles .ipynb files automatically
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
-# You can specify multiple suffix as a list of string:
-#
-# source_suffix = ['.rst', '.md']
-source_suffix = {
-    ".rst": "restructuredtext",
-    ".md": "markdown",
-}
+source_suffix = ['.rst', '.md']
 
 # The master toctree document.
 master_doc = "index"

@@ -16,9 +16,10 @@ ethnicolr: Predict Race and Ethnicity From Name
    :maxdepth: 2
    :caption: Examples:
 
-   basic_usage
-   advanced_predictions
-   batch_processing
+   ../examples/basic_usage
+   ../examples/advanced_predictions
+   ../examples/batch_processing
+
 
 Indices and tables
 ==================
