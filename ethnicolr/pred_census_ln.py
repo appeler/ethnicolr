@@ -197,7 +197,7 @@ class CensusLnModel(EthnicolrModelClass):
 
 
 # Alias for CLI use
-pred_census_ln = CensusLnModel.pred_census_ln
+pred_census_ln = CensusLnModel.pred_census_ln  # type: ignore
 
 
 def download_models(year=None):

@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import os
 import sys
+
+logger = logging.getLogger(__name__)
 
 
 def arg_parser(
@@ -102,8 +105,8 @@ def arg_parser(
     if args.iter <= 0:
         sys.exit("ERROR: --iter must be a positive integer.")
 
-    print("INFO: Parsed arguments:")
+    logger.info("Parsed arguments:")
     for k, v in vars(args).items():
-        print(f"   {k}: {v}")
+        logger.info(f"   {k}: {v}")
 
     return args

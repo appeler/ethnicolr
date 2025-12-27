@@ -51,15 +51,19 @@ class OutputPath(click.Path):
     def convert(self, value, param, ctx):
         path = super().convert(value, param, ctx)
         # Create parent directory if it doesn't exist
-        path.parent.mkdir(parents=True, exist_ok=True)
+        if isinstance(path, Path):
+            path.parent.mkdir(parents=True, exist_ok=True)
         return path
 
 
 @click.group()
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
+@click.option(
+    "--debug", "-d", is_flag=True, help="Enable debug output (implies --verbose)"
+)
 @click.version_option()
 @click.pass_context
-def cli(ctx: click.Context, verbose: bool):
+def cli(ctx: click.Context, verbose: bool, debug: bool):
     """
     Ethnicolr: Predict race/ethnicity from names using machine learning.
 
@@ -69,12 +73,14 @@ def cli(ctx: click.Context, verbose: bool):
     # Ensure ctx.obj exists
     ctx.ensure_object(dict)
     ctx.obj["verbose"] = verbose
+    ctx.obj["debug"] = debug
 
-    if verbose:
+    if debug or verbose:
         import logging
 
+        log_level = logging.DEBUG if debug else logging.INFO
         logging.basicConfig(
-            level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+            level=log_level, format="%(asctime)s - %(levelname)s - %(message)s"
         )
 
 
@@ -179,7 +185,7 @@ def predict_census(
 
             # Run prediction
             click.echo(f"Running Census {year} prediction on {len(df)} rows...")
-            result = CensusLnModel.predict_with_confidence(
+            result = CensusLnModel.predict_with_confidence(  # type: ignore
                 df, last_col, year=int(year), conf_int=confidence, num_iter=iterations
             )
             bar.update(1)
@@ -306,7 +312,7 @@ def predict_florida(
 
             # Run prediction
             click.echo(f"Running Florida prediction on {len(df)} rows...")
-            result = FloridaRegLnModel.predict_with_confidence(
+            result = FloridaRegLnModel.predict_with_confidence(  # type: ignore
                 df, last_col, conf_int=confidence, num_iter=iterations
             )
             bar.update(1)
@@ -433,7 +439,7 @@ def predict_wiki(
 
             # Run prediction
             click.echo(f"Running Wikipedia prediction on {len(df)} rows...")
-            result = WikiLnModel.predict_with_confidence(
+            result = WikiLnModel.predict_with_confidence(  # type: ignore
                 df, last_col, conf_int=confidence, num_iter=iterations
             )
             bar.update(1)

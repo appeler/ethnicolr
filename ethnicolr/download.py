@@ -11,6 +11,7 @@ import logging
 import shutil
 import tempfile
 from pathlib import Path
+from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen, urlretrieve
 
@@ -156,15 +157,17 @@ def download_file_with_progress(
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             tmp_path = Path(tmp_file.name)
 
+            pbar_ref: dict[str, Any] = {"pbar": None}
+
             def progress_hook(block_num, block_size, total_size):
-                if hasattr(progress_hook, "pbar"):
+                if pbar_ref["pbar"] is not None:
                     downloaded = min(block_num * block_size, total_size)
-                    progress_hook.pbar.update(downloaded - progress_hook.pbar.n)
+                    pbar_ref["pbar"].update(downloaded - pbar_ref["pbar"].n)
 
             # Only show progress bar if we know the size
             if total_size > 0:
                 with click.progressbar(length=total_size, label=desc) as pbar:
-                    progress_hook.pbar = pbar
+                    pbar_ref["pbar"] = pbar
                     urlretrieve(url, tmp_path, progress_hook)
             else:
                 click.echo(f"{desc}...")

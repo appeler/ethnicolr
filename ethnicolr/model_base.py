@@ -83,7 +83,7 @@ class AbstractEthnicolrModel(ABC):
 
     # Subclasses must define these class attributes
     MODEL_TYPE: ClassVar[ModelType]
-    SUPPORTED_CATEGORIES: ClassVar[list[RaceCategory]]
+    SUPPORTED_CATEGORIES: ClassVar[list[RaceCategory | str]]
     MODELFN: ClassVar[str]  # Path to model file
     VOCABFN: ClassVar[str | None] = None  # Path to vocabulary (LSTM only)
     RACEFN: ClassVar[str | None] = None  # Path to race labels (LSTM only)

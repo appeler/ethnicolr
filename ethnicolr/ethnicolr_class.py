@@ -2,11 +2,14 @@
 
 import logging
 import warnings
-from importlib.resources import files
+from importlib.resources import as_file, files
 from itertools import chain
 
 import numpy as np
 import pandas as pd
+from tensorflow.keras.layers import LSTM as _KerasLSTM  # type: ignore
+from tensorflow.keras.models import load_model  # type: ignore
+from tensorflow.keras.preprocessing import sequence  # type: ignore
 
 from .model_base import AbstractLSTMModel, InvalidInputError
 
@@ -25,9 +28,6 @@ class _CompatLSTM:
 
     def __new__(cls, *args, time_major=False, **kwargs):
         # ``time_major`` is unused but preserved for compatibility.
-        # Import inside __new__ for lazy loading
-        from tensorflow.keras.layers import LSTM as _KerasLSTM
-
         # Return actual LSTM instance, ignoring time_major parameter
         return _KerasLSTM(*args, **kwargs)
 
@@ -350,7 +350,8 @@ class EthnicolrModelClass(AbstractLSTMModel):
         if df.empty:
             # Load race categories to know what columns to create
             if cls.get_race() is None:
-                cls.set_race(pd.read_csv(race_path).race.tolist())
+                with as_file(race_path) as race_file:
+                    cls.set_race(pd.read_csv(race_file).race.tolist())
 
             result_df = df.copy()
             result_df["race"] = None
@@ -366,8 +367,10 @@ class EthnicolrModelClass(AbstractLSTMModel):
 
         # Load model, vocab, and race label set once
         if cls.get_model() is None:
-            cls.set_vocab(pd.read_csv(vocab_path).vocab.tolist())
-            cls.set_race(pd.read_csv(race_path).race.tolist())
+            with as_file(vocab_path) as vocab_file:
+                cls.set_vocab(pd.read_csv(vocab_file).vocab.tolist())
+            with as_file(race_path) as race_file:
+                cls.set_race(pd.read_csv(race_file).race.tolist())
             # ``time_major`` argument was removed in Keras 3. Models bundled with
             # ethnicolr were trained with ``time_major=False`` which causes
             # deserialization errors on newer Keras versions. We register a
@@ -388,21 +391,21 @@ class EthnicolrModelClass(AbstractLSTMModel):
                     message="Argument `decay` is no longer supported",
                     category=UserWarning,
                 )
-                from tensorflow.keras.models import load_model
-
-                cls.set_model(
-                    load_model(
-                        model_path,
+                logger.debug(f"Loading model from: {model_path}")
+                with as_file(model_path) as model_file:
+                    model = load_model(
+                        model_file,
                         custom_objects={"LSTM": _CompatLSTM},
                         compile=False,
                     )
-                )
+                logger.debug(f"Model loaded successfully: {type(model).__name__}")
+                cls.set_model(model)
 
         # Vectorize input
+        logger.debug(f"Vectorizing {len(df)} names using {ngrams}-grams")
         X = [cls.find_ngrams(cls.get_vocab(), name, ngrams) for name in df[newnamecol]]
-        from tensorflow.keras.preprocessing import sequence
-
         X = sequence.pad_sequences(X, maxlen=maxlen)
+        logger.debug(f"Padded sequences to shape: {X.shape}")
 
         if conf_int == 1:
             proba = cls.get_model()(X, training=False).numpy()
@@ -419,13 +422,17 @@ class EthnicolrModelClass(AbstractLSTMModel):
             logger.info(
                 f"Generating {num_iter} samples for CI [{lower_perc:.1f}%, {upper_perc:.1f}%]"
             )
+            logger.debug(f"Model input shape: {X.shape}, Data types: {X.dtype}")
 
             all_preds = [
                 cls.get_model()(X, training=True).numpy() for _ in range(num_iter)
             ]
+            logger.debug(
+                f"Generated {len(all_preds)} prediction arrays, shape: {all_preds[0].shape}"
+            )
             stacked = np.vstack(all_preds)
             pdf = pd.DataFrame(stacked, columns=cls.get_race())
-            pdf["__rowindex"] = np.tile(df["__rowindex"].values, num_iter)
+            pdf["__rowindex"] = np.tile(df["__rowindex"].to_numpy(), num_iter)
 
             agg = {
                 col: [
@@ -450,7 +457,8 @@ class EthnicolrModelClass(AbstractLSTMModel):
 
             # Choose race with highest mean
             means = [col for col in summary.columns if col.endswith("_mean")]
-            summary["race"] = summary[means].idxmax(axis=1).str.replace("_mean", "")
+            race_cols: pd.Series = summary[means].idxmax(axis=1)  # type: ignore
+            summary["race"] = race_cols.str.replace("_mean", "")
 
             # Add basic probability columns (same as mean values for compatibility)
             for col in cls.get_race():
@@ -511,7 +519,13 @@ class EthnicolrModelClass(AbstractLSTMModel):
     def get_supported_categories(cls) -> list[str]:
         """Get list of race/ethnicity categories this model predicts."""
         if hasattr(cls, "SUPPORTED_CATEGORIES"):
-            return [cat.value for cat in cls.SUPPORTED_CATEGORIES]
+            result: list[str] = []
+            for cat in cls.SUPPORTED_CATEGORIES:
+                if hasattr(cat, "value"):
+                    result.append(cat.value)  # type: ignore
+                else:
+                    result.append(cat)  # type: ignore
+            return result
         else:
             # Fallback to runtime race categories if loaded
             race_list = cls.get_race()
@@ -534,5 +548,5 @@ class EthnicolrModelClass(AbstractLSTMModel):
         if name_col not in df.columns:
             raise InvalidInputError(f"Column '{name_col}' not found in DataFrame")
 
-        if df[name_col].isna().all():
+        if bool(df[name_col].isna().all()):
             raise InvalidInputError(f"All values in column '{name_col}' are NaN")

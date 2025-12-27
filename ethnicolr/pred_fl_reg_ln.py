@@ -218,7 +218,7 @@ class FloridaRegLnModel(EthnicolrModelClass):
 
 
 # CLI alias
-pred_fl_reg_ln = FloridaRegLnModel.pred_fl_reg_ln
+pred_fl_reg_ln = FloridaRegLnModel.pred_fl_reg_ln  # type: ignore
 
 
 def main(argv: list[str] | None = None) -> int:

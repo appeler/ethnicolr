@@ -38,10 +38,13 @@ class NCRegNameModel(EthnicolrModelClass):
 
     @classmethod
     def get_model_paths(cls):
+        base_path = resources.files(__name__.split(".")[0])
+        vocab_path = str(base_path / cls.VOCABFN) if cls.VOCABFN else None
+        race_path = str(base_path / cls.RACEFN) if cls.RACEFN else None
         return (
-            str(resources.files(__name__.split(".")[0]) / cls.MODELFN),
-            str(resources.files(__name__.split(".")[0]) / cls.VOCABFN),
-            str(resources.files(__name__.split(".")[0]) / cls.RACEFN),
+            str(base_path / cls.MODELFN),
+            vocab_path,
+            race_path,
         )
 
     @classmethod
@@ -209,7 +212,8 @@ class NCRegNameModel(EthnicolrModelClass):
         skipped_count = to_skip.sum()
 
         if skipped_count > 0:
-            skip_reasons = working_df[to_skip]["processing_status"].value_counts()
+            status_series: pd.Series = working_df[to_skip]["processing_status"]  # type: ignore
+            skip_reasons = status_series.value_counts()
             logger.warning(f"Will skip {skipped_count} names:")
             for reason, count in skip_reasons.items():
                 logger.warning(f"  - {count} names: {reason}")
@@ -217,6 +221,10 @@ class NCRegNameModel(EthnicolrModelClass):
         # Separate processable and skipped names
         processable_df = working_df[~to_skip].copy()
         skipped_df = working_df[to_skip].copy()
+
+        # Ensure we have DataFrames, not Series
+        assert isinstance(processable_df, pd.DataFrame)
+        assert isinstance(skipped_df, pd.DataFrame)
 
         if len(processable_df) == 0:
             logger.warning(
@@ -251,6 +259,11 @@ class NCRegNameModel(EthnicolrModelClass):
             )
 
             # Run prediction only on processable names
+            if vocab_path is None or race_path is None:
+                raise ValueError(
+                    "Vocabulary and race files must be provided for LSTM models"
+                )
+
             pred_df = cls.transform_and_pred(
                 df=processable_df,
                 newnamecol=temp_col,
@@ -286,7 +299,9 @@ class NCRegNameModel(EthnicolrModelClass):
 
             # Sort by original order if possible
             if "__rowindex" in result_df.columns:
-                result_df = result_df.sort_values("__rowindex").reset_index(drop=True)
+                result_df = result_df.sort_values(by="__rowindex").reset_index(
+                    drop=True
+                )
 
             # Clean up temporary columns
             columns_to_drop = [temp_col, "__rowindex"]

@@ -89,8 +89,10 @@ class CensusLnData:
             logger.info(f"Loading Census {year} data from {census_file}...")
 
             try:
+                columns_to_use: list[str] = ["name"] + CENSUS_COLS
                 census_df = pd.read_csv(
-                    census_file, usecols=["name"] + CENSUS_COLS
+                    census_file,
+                    usecols=columns_to_use,  # type: ignore
                 ).dropna(subset=["name"])
 
                 census_df.columns = [temp_col] + CENSUS_COLS

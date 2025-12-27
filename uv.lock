@@ -205,6 +205,15 @@ wheels = [
 ]
 
 [[package]]
+name = "docstring-parser-fork"
+version = "0.0.14"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/66/bf/27f9cab2f0cd1d17a4420572088bbc19f36d726fbcf165edf226a8926dbc/docstring_parser_fork-0.0.14.tar.gz", hash = "sha256:a2743a63d8d36c09650594f7b4ab5b2758fee8629dcf794d1b221b23179baa5c", size = 34551, upload-time = "2025-09-07T17:27:38.272Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bf/50/98b146aea0f1cd7531d25f12bea69fa9ce8d1662124f93fb30dc4511b65e/docstring_parser_fork-0.0.14-py3-none-any.whl", hash = "sha256:4c544f234ef2cc2749a3df32b70c437d77888b1099143a1ad5454452c574b9af", size = 43063, upload-time = "2025-09-07T17:27:37.012Z" },
+]
+
+[[package]]
 name = "docutils"
 version = "0.21.2"
 source = { registry = "https://pypi.org/simple" }
@@ -215,7 +224,7 @@ wheels = [
 
 [[package]]
 name = "ethnicolr"
-version = "0.20.0"
+version = "0.21.0"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -255,6 +264,8 @@ test = [
 dev = [
     { name = "mypy" },
     { name = "pre-commit" },
+    { name = "pydoclint" },
+    { name = "pyright" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-xdist" },
@@ -303,6 +314,8 @@ provides-extras = ["inference", "test", "dev", "docs"]
 dev = [
     { name = "mypy", specifier = ">=1.0" },
     { name = "pre-commit", specifier = ">=3.0" },
+    { name = "pydoclint", specifier = ">=0.8.3" },
+    { name = "pyright", specifier = ">=1.1.407" },
     { name = "pytest", specifier = ">=7.0" },
     { name = "pytest-cov", specifier = ">=4.0" },
     { name = "pytest-xdist", specifier = ">=3.0" },
@@ -885,12 +898,38 @@ wheels = [
 ]
 
 [[package]]
+name = "pydoclint"
+version = "0.8.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "docstring-parser-fork" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/70/58/bb3c7edd2bd06b07d9bbb494e52e2d2d6d53405b166aac531b1a27cef972/pydoclint-0.8.3.tar.gz", hash = "sha256:0c69c0ed92c6f6b5aec2a14371bbd9e0a77980da8e2fa0f708092aa06b3b20b3", size = 186619, upload-time = "2025-11-26T06:53:43.361Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/87/6f/cc2b231dc78d8c3aaa674a676db190b8f8071c50134af8f8cf39b9b8e8df/pydoclint-0.8.3-py3-none-any.whl", hash = "sha256:5fc9b82d0d515afce0908cb70e8ff695a68b19042785c248c4f227ad66b4a164", size = 79075, upload-time = "2025-11-26T06:53:42.129Z" },
+]
+
+[[package]]
 name = "pygments"
 version = "2.19.2"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/b0/77/a5b8c569bf593b0140bde72ea885a803b82086995367bf2037de0159d924/pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887", size = 4968631, upload-time = "2025-06-21T13:39:12.283Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b", size = 1225217, upload-time = "2025-06-21T13:39:07.939Z" },
+]
+
+[[package]]
+name = "pyright"
+version = "1.1.407"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "nodeenv" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a6/1b/0aa08ee42948b61745ac5b5b5ccaec4669e8884b53d31c8ec20b2fcd6b6f/pyright-1.1.407.tar.gz", hash = "sha256:099674dba5c10489832d4a4b2d302636152a9a42d317986c38474c76fe562262", size = 4122872, upload-time = "2025-10-24T23:17:15.145Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/dc/93/b69052907d032b00c40cb656d21438ec00b3a471733de137a3f65a49a0a0/pyright-1.1.407-py3-none-any.whl", hash = "sha256:6dd419f54fcc13f03b52285796d65e639786373f433e243f8b94cf93a7444d21", size = 5997008, upload-time = "2025-10-24T23:17:13.159Z" },
 ]
 
 [[package]]
@@ -1236,29 +1275,28 @@ name = "tensorflow"
 version = "2.18.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "absl-py" },
-    { name = "astunparse" },
-    { name = "flatbuffers" },
-    { name = "gast" },
-    { name = "google-pasta" },
-    { name = "grpcio" },
-    { name = "h5py" },
-    { name = "keras" },
-    { name = "libclang" },
-    { name = "ml-dtypes" },
-    { name = "numpy" },
-    { name = "opt-einsum" },
-    { name = "packaging" },
-    { name = "protobuf" },
-    { name = "requests" },
-    { name = "setuptools" },
-    { name = "six" },
-    { name = "tensorboard" },
-    { name = "tensorflow-io-gcs-filesystem", version = "0.31.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12' and platform_machine == 'AMD64' and sys_platform == 'win32'" },
+    { name = "absl-py", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "astunparse", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "flatbuffers", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "gast", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "google-pasta", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "grpcio", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "h5py", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "keras", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "libclang", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "ml-dtypes", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "numpy", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "opt-einsum", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "packaging", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "protobuf", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "requests", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "setuptools", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "six", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "tensorboard", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
     { name = "tensorflow-io-gcs-filesystem", version = "0.37.1", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and platform_machine != 'AMD64') or (python_full_version < '3.12' and sys_platform != 'win32')" },
-    { name = "termcolor" },
-    { name = "typing-extensions" },
-    { name = "wrapt" },
+    { name = "termcolor", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "typing-extensions", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
+    { name = "wrapt", marker = "python_full_version >= '3.12' or platform_machine != 'AMD64' or sys_platform != 'win32'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a1/88/57e2acd11a2587cc5c0a6612a389a57f3bda3cd60d132934cb7a9bb00a81/tensorflow-2.18.1-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:661029cd769b311db910b79a3a6ef50a5a61ecc947172228c777a49989722508", size = 239549037, upload-time = "2025-03-12T00:12:38.202Z" },

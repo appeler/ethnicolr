@@ -67,8 +67,8 @@ class FloridaRegNameFiveCatModel(EthnicolrModelClass):
         rdf = cls.transform_and_pred(
             df=df,
             newnamecol=temp_col,
-            vocab_fn=cls.VOCABFN.format(suffix),
-            race_fn=cls.RACEFN.format(suffix),
+            vocab_fn=cls.VOCABFN.format(suffix) if cls.VOCABFN else "",
+            race_fn=cls.RACEFN.format(suffix) if cls.RACEFN else "",
             model_fn=cls.MODELFN.format(suffix),
             ngrams=cls.NGRAMS,
             maxlen=cls.FEATURE_LEN,

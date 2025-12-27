@@ -65,10 +65,13 @@ class WikiLnModel(EthnicolrModelClass):
         Returns:
             Tuple of (model_path, vocab_path, race_path) as strings.
         """
+        base_path = resources.files(__name__.split(".")[0])
+        vocab_path = str(base_path / cls.VOCABFN) if cls.VOCABFN else None
+        race_path = str(base_path / cls.RACEFN) if cls.RACEFN else None
         return (
-            str(resources.files(__name__.split(".")[0]) / cls.MODELFN),
-            str(resources.files(__name__.split(".")[0]) / cls.VOCABFN),
-            str(resources.files(__name__.split(".")[0]) / cls.RACEFN),
+            str(base_path / cls.MODELFN),
+            vocab_path,
+            race_path,
         )
 
     @classmethod
@@ -178,6 +181,10 @@ class WikiLnModel(EthnicolrModelClass):
         processable_df = working_df[~to_skip].copy()
         skipped_df = working_df[to_skip].copy()
 
+        # Ensure we have DataFrames, not Series
+        assert isinstance(processable_df, pd.DataFrame)
+        assert isinstance(skipped_df, pd.DataFrame)
+
         if len(processable_df) == 0:
             logger.warning(
                 "No valid last names to process. Returning original data with status info."
@@ -192,6 +199,11 @@ class WikiLnModel(EthnicolrModelClass):
             )
 
             # Run prediction only on processable names
+            if vocab_path is None or race_path is None:
+                raise ValueError(
+                    "Vocabulary and race files must be provided for LSTM models"
+                )
+
             pred_df = cls.transform_and_pred(
                 df=processable_df,
                 newnamecol=lname_col,
@@ -227,7 +239,9 @@ class WikiLnModel(EthnicolrModelClass):
 
             # Sort by original order if possible
             if "__rowindex" in result_df.columns:
-                result_df = result_df.sort_values("__rowindex").reset_index(drop=True)
+                result_df = result_df.sort_values(by="__rowindex").reset_index(
+                    drop=True
+                )
 
             # Clean up temporary columns
             columns_to_drop = ["__rowindex"]
@@ -302,7 +316,7 @@ class WikiLnModel(EthnicolrModelClass):
 
 
 # For backward compatibility
-pred_wiki_ln = WikiLnModel.pred_wiki_ln
+pred_wiki_ln = WikiLnModel.pred_wiki_ln  # type: ignore
 
 
 def main(argv: list[str] | None = None) -> int:

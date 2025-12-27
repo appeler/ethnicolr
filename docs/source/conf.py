@@ -3,7 +3,7 @@
 # ethnicolr documentation build configuration file, created by
 # sphinx-quickstart on Tue Jan 23 19:17:03 2018.
 #
-# This file is execfile()d with the current directory set to its
+# This file is executed with the current directory set to its
 # containing dir.
 #
 # Note that not all possible configuration values are present in this
