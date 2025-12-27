@@ -103,7 +103,7 @@ myst_enable_extensions = [
 ]
 
 # nbsphinx configuration
-nbsphinx_execute = "never"
+nbsphinx_execute = "always"
 nbsphinx_allow_errors = True
 nbsphinx_kernel_name = "python3"
 nbsphinx_timeout = 600
