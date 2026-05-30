@@ -1,6 +1,5 @@
 ## ethnicolr: Predict Race and Ethnicity From Name
 
-![PyPI Authenicated](https://notarypy.soodoku.workers.dev/badge/ethnicolr/0.18.4/ethnicolr-0.18.4-py3-none-any.whl)
 [![CI](https://github.com/appeler/ethnicolr/actions/workflows/ci.yml/badge.svg)](https://github.com/appeler/ethnicolr/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.python.org/pypi/ethnicolr)
 [![Documentation](https://img.shields.io/badge/docs-github.io-blue)](https://appeler.github.io/ethnicolr/)
@@ -201,7 +200,7 @@ or a CSV.
 >                **lname_col** : *{string}* name of the column containing the
 >                last name
 >
->                **Year** : *{2000, 2010}, default=2000* year of census to use
+>                **Year** : *{2000, 2010, 2020}, default=2000* year of census to use
 >   -----------------------------------------------------------------------------
 
 - Output: Appends the following columns to the pandas DataFrame or CSV:

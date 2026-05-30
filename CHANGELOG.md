@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.0] - 2025-05-28
+
+### Added
+- **2020 Census surname data support** for `census_ln` function
+  - 156,619 surnames with race/ethnicity percentages
+  - Use with `census_ln(df, 'name', year=2020)`
+  - CLI default year changed from 2010 to 2020
+
+### Changed
+- `census_ln` now accepts `year` parameter of 2000, 2010, or 2020
+
+## [0.21.1] - 2024-12-27
+
+### Changed
+- Documentation improvements and deduplication
+- Removed lazy loading for simpler imports
+- Added pydoclint and pyright type checking
+
+## [0.21.0] - 2024-12-03
+
+### Changed
+- Documentation consolidation
+- TensorFlow compatibility fixes for Windows
+- CI/CD improvements
+
+## [0.20.0] - 2024-11-30
+
+### Changed
+- Windows TensorFlow support via tensorflow-intel
+- CI workflow enhancements
+- Dependency management improvements
+
 ## [0.19.0] - 2024-11-27
 
 ### Added

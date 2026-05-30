@@ -2,7 +2,7 @@
 """
 Census Last Name Data Module.
 
-Enriches input data with demographic percentages from U.S. Census (2000 or 2010).
+Enriches input data with demographic percentages from U.S. Census (2000, 2010, or 2020).
 """
 
 import importlib.resources as resources
@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 # Constants
 CENSUS2000 = str(resources.files("ethnicolr") / "data/census/census_2000.csv")
 CENSUS2010 = str(resources.files("ethnicolr") / "data/census/census_2010.csv")
+CENSUS2020 = str(resources.files("ethnicolr") / "data/census/census_2020.csv")
 CENSUS_COLS = ["pctwhite", "pctblack", "pctapi", "pctaian", "pct2prace", "pcthispanic"]
 
 
@@ -31,7 +32,7 @@ class CensusLnData:
     """Census last name demographic data enrichment.
 
     Provides functionality to enrich DataFrames with U.S. Census demographic
-    percentages based on last names. Supports both 2000 and 2010 Census data.
+    percentages based on last names. Supports 2000, 2010, and 2020 Census data.
     """
 
     census_df = None
@@ -49,7 +50,7 @@ class CensusLnData:
         Args:
             df: Input DataFrame containing last names.
             lname_col: Column name containing last names.
-            year: Census year (2000 or 2010).
+            year: Census year (2000, 2010, or 2020).
 
         Returns:
             DataFrame with original data plus Census demographic columns:
@@ -61,7 +62,7 @@ class CensusLnData:
             - 'pcthispanic': Percentage Hispanic
 
         Raises:
-            ValueError: If year not in [2000, 2010] or column missing.
+            ValueError: If year not in [2000, 2010, 2020] or column missing.
 
         Example:
             >>> import pandas as pd
@@ -72,8 +73,8 @@ class CensusLnData:
             0   Smith      70.9          2.3
             1  Garcia       3.7         92.8
         """
-        if year not in [2000, 2010]:
-            raise ValueError("Census year must be either 2000 or 2010")
+        if year not in [2000, 2010, 2020]:
+            raise ValueError("Census year must be 2000, 2010, or 2020")
 
         df = EthnicolrModelClass.test_and_norm_df(df, lname_col)
 
@@ -85,7 +86,8 @@ class CensusLnData:
         df[temp_col] = df[lname_col].fillna("").astype(str).str.strip().str.upper()
 
         if cls.census_df is None or cls.census_year != year:
-            census_file = CENSUS2000 if year == 2000 else CENSUS2010
+            census_files = {2000: CENSUS2000, 2010: CENSUS2010, 2020: CENSUS2020}
+            census_file = census_files[year]
             logger.info(f"Loading Census {year} data from {census_file}...")
 
             try:
@@ -151,8 +153,8 @@ def main(argv: list[str] | None = None) -> int:
             argv,
             title="Append Census demographic data by last name",
             default_out="census-output.csv",
-            default_year=2010,
-            year_choices=[2000, 2010],
+            default_year=2020,
+            year_choices=[2000, 2010, 2020],
         )
 
         logger.info(f"Reading input file: {args.input}")

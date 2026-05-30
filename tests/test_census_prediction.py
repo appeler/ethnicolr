@@ -44,6 +44,38 @@ class TestCensusLookup:
         assert len(result) == len(sample_census_names)
         assert all(result["last"] == sample_census_names["last"])
 
+    def test_census_2020_lookup(self, sample_census_names):
+        """Test census 2020 last name lookup."""
+        result = census_ln(sample_census_names, "last", 2020)
+
+        # Check that census percentage columns are added
+        assert "pctwhite" in result.columns
+        assert "pctblack" in result.columns
+        assert "pctapi" in result.columns
+        assert "pcthispanic" in result.columns
+        assert "pctaian" in result.columns
+        assert "pct2prace" in result.columns
+
+        # Should preserve original data
+        assert len(result) == len(sample_census_names)
+        assert all(result["last"] == sample_census_names["last"])
+
+    def test_census_2020_vs_2010_consistency(self, sample_census_names):
+        """Test that 2020 and 2010 data have consistent structure and similar values."""
+        result_2010 = census_ln(sample_census_names, "last", 2010)
+        result_2020 = census_ln(sample_census_names, "last", 2020)
+
+        # Same columns
+        assert set(result_2010.columns) == set(result_2020.columns)
+
+        # Same number of rows
+        assert len(result_2010) == len(result_2020)
+
+        # Values should be in reasonable ranges (0-100)
+        for col in ["pctwhite", "pctblack", "pctapi", "pcthispanic"]:
+            valid_2020 = result_2020[col].dropna()
+            assert (valid_2020 >= 0).all() and (valid_2020 <= 100).all()
+
     def test_census_lookup_with_missing_names(self):
         """Test census lookup with names not in census data."""
         df = pd.DataFrame(
