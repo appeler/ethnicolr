@@ -125,6 +125,20 @@ class CensusLnModel:
         return cls._vocabs[year]
 
     @classmethod
+    def predict_with_confidence(
+        cls,
+        df: pd.DataFrame,
+        lname_col: str,
+        year: int = 2010,
+        conf_int: float = 1.0,
+        num_iter: int = 100,
+    ) -> pd.DataFrame:
+        """Class method interface for CLI compatibility."""
+        return pred_census_ln(
+            df, lname_col, year=year, num_iter=num_iter, conf_int=conf_int
+        )
+
+    @classmethod
     def names_to_sequences(cls, names: list[str], vocab: dict[str, int]) -> np.ndarray:
         sequences = []
         for name in names:
@@ -191,24 +205,39 @@ def pred_census_ln(
     if lname_col not in df.columns:
         raise ValueError(f"Column '{lname_col}' not found in DataFrame")
 
+    # Check for duplicate column names
+    if df.columns.duplicated().any() and (df.columns == lname_col).sum() > 1:
+        raise ValueError(f"Duplicate column name '{lname_col}' found in DataFrame")
+
+    # Handle empty DataFrame
+    if len(df) == 0:
+        result = df.copy()
+        for race in RACES:
+            result[race] = pd.Series(dtype=float)
+        result["race"] = pd.Series(dtype=str)
+        return result
+
     model = CensusLnModel.load_model(year)
     vocab = CensusLnModel.get_vocab(year)
     device = CensusLnModel.get_device()
 
     logger.info(f"Predicting {len(df)} names using Census {year} PyTorch model")
 
-    # Convert names to sequences
-    names = df[lname_col].fillna("").astype(str).tolist()
+    # Convert names to sequences (handle categorical and null values)
+    col_data = df[lname_col]
+    if hasattr(col_data, "cat"):  # Categorical column
+        col_data = col_data.astype(str)
+    names = col_data.fillna("").astype(str).tolist()
     X = CensusLnModel.names_to_sequences(names, vocab)
     X_tensor = torch.from_numpy(X).to(device)
 
     # Get predictions
     with torch.no_grad():
-        if conf_int < 1.0 and num_iter > 1:
+        if conf_int < 1.0:
             # Monte Carlo dropout for confidence intervals
             model.train()  # Enable dropout
             predictions = []
-            for _ in range(num_iter):
+            for _ in range(max(1, num_iter)):
                 logits = model(X_tensor)
                 probs = torch.softmax(logits, dim=1)
                 predictions.append(probs.cpu().numpy())
@@ -234,14 +263,26 @@ def pred_census_ln(
     # Build result DataFrame
     result = df.copy()
 
+    # Normalize names to title case (as done during processing)
+    # Convert to str first to handle categorical columns
+    result[lname_col] = result[lname_col].astype(str).fillna("").str.strip().str.title()
+
+    # Always add base probability columns
     for i, race in enumerate(RACES):
-        if conf_int < 1.0 and std_probs is not None:
+        result[race] = mean_probs[:, i]
+
+    # Add confidence interval columns when requested
+    if (
+        conf_int < 1.0
+        and std_probs is not None
+        and lower is not None
+        and upper is not None
+    ):
+        for i, race in enumerate(RACES):
             result[f"{race}_mean"] = mean_probs[:, i]
             result[f"{race}_std"] = std_probs[:, i]
             result[f"{race}_lb"] = lower[:, i]
             result[f"{race}_ub"] = upper[:, i]
-        else:
-            result[race] = mean_probs[:, i]
 
     # Add predicted race
     pred_indices = mean_probs.argmax(axis=1)
