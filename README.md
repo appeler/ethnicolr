@@ -231,14 +231,12 @@ or a CSV.
   2  jackson    41.93    53.02   0.31    1.04      2.18        1.53
   ```
 
-- **pred_census_ln(df, lname_col, year=2000, num_iter=100,
+- **pred_census_ln(df, lname_col, year=2020, num_iter=100,
   conf_int=1.0)**
 
   - What it does:
     - Removes extra space.
-    - Uses the [last name census 2000
-      model](ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb) or [last name census 2010
-      model](ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb) to predict race and ethnicity.
+    - Uses PyTorch LSTM models trained on Census surname data to predict race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -249,7 +247,7 @@ or a CSV.
                  **namecol** : *{string}* name of the column containing the last
                  name
 
-                 **year** : *{2000, 2010}, default=2000* year of census to use
+                 **year** : *{2000, 2010, 2020}, default=2020* year of census to use
 
                  **num_iter** : *int, default=100* number of iterations to
                  calculate uncertainty in model
