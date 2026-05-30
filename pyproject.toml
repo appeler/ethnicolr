@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "ethnicolr"
-version = "0.21.1"
+version = "0.22.0"
 description = "Modern ML library for race/ethnicity prediction from names with intuitive CLI"
 readme = "README.md"
 # TensorFlow 2.18+ supports Python 3.11-3.12 (no Python 3.13 wheels available yet)

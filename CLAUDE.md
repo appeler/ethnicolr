@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## About ethnicolr
 
-ethnicolr is a Python package that predicts race and ethnicity from names using machine learning models trained on US Census data, Florida voter registration data, and Wikipedia data. The package provides both command-line utilities and Python APIs for race/ethnicity prediction.
+ethnicolr is a Python package that predicts race and ethnicity from names using machine learning models trained on US Census data (2000, 2010, and 2020), Florida voter registration data, and Wikipedia data. The package provides both command-line utilities and Python APIs for race/ethnicity prediction.
 
 ## Development Commands
 
