@@ -1,6 +1,5 @@
 ## ethnicolr: Predict Race and Ethnicity From Name
 
-![PyPI Authenicated](https://notarypy.soodoku.workers.dev/badge/ethnicolr/0.18.4/ethnicolr-0.18.4-py3-none-any.whl)
 [![CI](https://github.com/appeler/ethnicolr/actions/workflows/ci.yml/badge.svg)](https://github.com/appeler/ethnicolr/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.python.org/pypi/ethnicolr)
 [![Documentation](https://img.shields.io/badge/docs-github.io-blue)](https://appeler.github.io/ethnicolr/)
@@ -201,7 +200,7 @@ or a CSV.
 >                **lname_col** : *{string}* name of the column containing the
 >                last name
 >
->                **Year** : *{2000, 2010}, default=2000* year of census to use
+>                **Year** : *{2000, 2010, 2020}, default=2000* year of census to use
 >   -----------------------------------------------------------------------------
 
 - Output: Appends the following columns to the pandas DataFrame or CSV:
@@ -866,6 +865,6 @@ License](https://opensource.org/licenses/MIT).
 
 - [appeler/ethnicolr2](https://github.com/appeler/ethnicolr2) — Ethnicolr implementation with new models in pytorch
 - [appeler/ethnicolor](https://github.com/appeler/ethnicolor) — Race and Ethnicity based on name using data from census, voter reg. files, etc.
-- [appeler/instate](https://github.com/appeler/instate) — instate: predict the state of residence from last name using the indian electoral rolls
 - [appeler/naampy](https://github.com/appeler/naampy) — Infer Sociodemographic Characteristics from Names Using Indian Electoral Rolls
+- [appeler/instate](https://github.com/appeler/instate) — instate: predict the state of residence from last name using the indian electoral rolls
 - [appeler/nc_race_ethnicity](https://github.com/appeler/nc_race_ethnicity) — Evaluation of some of the ethnicolr models on the NC Voter Registration Data + New Models Based on NC Voter Registration Data.
