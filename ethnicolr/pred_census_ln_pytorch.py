@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Census Last Name Race/Ethnicity Prediction Module.
+Census Last Name Race/Ethnicity Prediction Module (PyTorch).
 
 Uses PyTorch LSTM models trained on U.S. Census data to predict race/ethnicity from last names.
 """
@@ -59,7 +59,7 @@ class CensusLSTM(nn.Module):
         return self.fc(hidden)
 
 
-class CensusLnModel:
+class CensusLnPyTorchModel:
     """Census-based last name prediction using PyTorch."""
 
     _models: dict[int, nn.Module] = {}
@@ -82,7 +82,7 @@ class CensusLnModel:
         package = resources.files(__name__.split(".")[0])
         base = Path(str(package)) / "models" / "census" / "lstm"
         return (
-            base / f"census{year}_ln_lstm_pytorch.pt",
+            base / f"census{year}_ln_lstm_pytorch_full.pt",
             base / f"census{year}_ln_vocab_pytorch.csv",
             base / f"census{year}_race_pytorch.csv",
         )
@@ -94,9 +94,12 @@ class CensusLnModel:
 
         model_path, vocab_path, _ = cls.get_model_paths(year)
 
-        if not model_path.exists():
+        # Use state dict path (without _full suffix)
+        state_dict_path = model_path.parent / model_path.name.replace("_full", "")
+
+        if not state_dict_path.exists():
             raise FileNotFoundError(
-                f"PyTorch model not found: {model_path}\n"
+                f"PyTorch model not found: {state_dict_path}\n"
                 f"Train with: python scripts/model-training/census/train_census_lstm_pytorch.py --year {year}"
             )
 
@@ -110,7 +113,7 @@ class CensusLnModel:
 
         # Create model with correct vocab size and load state dict
         model = CensusLSTM(vocab_size=len(vocab_list))
-        state_dict = torch.load(model_path, map_location=device, weights_only=True)
+        state_dict = torch.load(state_dict_path, map_location=device, weights_only=True)
         model.load_state_dict(state_dict)
         model.to(device)
         model.eval()
@@ -144,7 +147,96 @@ class CensusLnModel:
                 padded[i, -len(seq) :] = seq
         return padded
 
+    @classmethod
+    def pred_census_ln(
+        cls,
+        df: pd.DataFrame,
+        lname_col: str,
+        year: int = 2010,
+        num_iter: int = 100,
+        conf_int: float = 1.0,
+    ) -> pd.DataFrame:
+        """Predict race/ethnicity from last names using Census PyTorch model.
 
+        Args:
+            df: Input DataFrame containing last names.
+            lname_col: Name of column containing last names.
+            year: Census year (2000, 2010, or 2020).
+            num_iter: Monte Carlo iterations for confidence intervals.
+            conf_int: Confidence level (1.0 for point estimates only).
+
+        Returns:
+            DataFrame with predictions added.
+        """
+        if year not in [2000, 2010, 2020]:
+            raise ValueError("Census year must be 2000, 2010, or 2020")
+
+        if lname_col not in df.columns:
+            raise ValueError(f"Column '{lname_col}' not found in DataFrame")
+
+        model = cls.load_model(year)
+        vocab = cls.get_vocab(year)
+        device = cls.get_device()
+
+        logger.info(f"Predicting {len(df)} names using Census {year} PyTorch model")
+
+        # Convert names to sequences
+        names = df[lname_col].fillna("").astype(str).tolist()
+        X = cls.names_to_sequences(names, vocab)
+        X_tensor = torch.from_numpy(X).to(device)
+
+        # Get predictions
+        with torch.no_grad():
+            if conf_int < 1.0 and num_iter > 1:
+                # Monte Carlo dropout for confidence intervals
+                model.train()  # Enable dropout
+                predictions = []
+                for _ in range(num_iter):
+                    logits = model(X_tensor)
+                    probs = torch.softmax(logits, dim=1)
+                    predictions.append(probs.cpu().numpy())
+                predictions = np.stack(predictions, axis=0)
+
+                # Calculate statistics
+                mean_probs = predictions.mean(axis=0)
+                std_probs = predictions.std(axis=0)
+
+                alpha = 1 - conf_int
+                lower = np.percentile(predictions, alpha / 2 * 100, axis=0)
+                upper = np.percentile(predictions, (1 - alpha / 2) * 100, axis=0)
+
+                model.eval()
+            else:
+                # Point estimates only
+                logits = model(X_tensor)
+                mean_probs = torch.softmax(logits, dim=1).cpu().numpy()
+                std_probs = None
+                lower = None
+                upper = None
+
+        # Build result DataFrame
+        result = df.copy()
+
+        for i, race in enumerate(RACES):
+            if conf_int < 1.0 and std_probs is not None:
+                result[f"{race}_mean"] = mean_probs[:, i]
+                result[f"{race}_std"] = std_probs[:, i]
+                result[f"{race}_lb"] = lower[:, i]
+                result[f"{race}_ub"] = upper[:, i]
+            else:
+                result[race] = mean_probs[:, i]
+
+        # Add predicted race
+        pred_indices = mean_probs.argmax(axis=1)
+        result["race"] = [RACES[i] for i in pred_indices]
+
+        pred_count = result["race"].notna().sum()
+        logger.info(f"Predicted {pred_count} of {len(df)} rows")
+
+        return result
+
+
+# Convenience function
 def pred_census_ln(
     df: pd.DataFrame,
     lname_col: str,
@@ -154,9 +246,6 @@ def pred_census_ln(
 ) -> pd.DataFrame:
     """Predict race/ethnicity from last names using Census PyTorch model.
 
-    Uses machine learning models trained on U.S. Census surname data
-    to predict race/ethnicity categories: white, black, Asian, Hispanic.
-
     Args:
         df: Input DataFrame containing last names.
         lname_col: Name of column containing last names.
@@ -165,113 +254,30 @@ def pred_census_ln(
         conf_int: Confidence level (1.0 for point estimates only).
 
     Returns:
-        DataFrame with original data plus prediction columns:
-        - 'race': Predicted race category
-        - 'white', 'black', 'api', 'hispanic': Probability scores
-        - Confidence bounds if conf_int < 1.0
-
-    Raises:
-        ValueError: If year not in [2000, 2010, 2020] or column missing.
-        FileNotFoundError: If required model files not found.
+        DataFrame with predictions added.
 
     Example:
         >>> import pandas as pd
-        >>> from ethnicolr import pred_census_ln
-        >>> df = pd.DataFrame({'surname': ['Smith', 'Garcia', 'Wang']})
-        >>> result = pred_census_ln(df, 'surname', year=2020)
-        >>> print(result[['surname', 'race']].head())
-           surname    race
-        0    Smith   white
-        1   Garcia hispanic
-        2     Wang     api
+        >>> from ethnicolr.pred_census_ln_pytorch import pred_census_ln
+        >>> df = pd.DataFrame({'name': ['Smith', 'Garcia', 'Wang']})
+        >>> result = pred_census_ln(df, 'name', year=2020)
+        >>> print(result[['name', 'race']])
     """
-    if year not in [2000, 2010, 2020]:
-        raise ValueError("Census year must be 2000, 2010, or 2020")
-
-    if lname_col not in df.columns:
-        raise ValueError(f"Column '{lname_col}' not found in DataFrame")
-
-    model = CensusLnModel.load_model(year)
-    vocab = CensusLnModel.get_vocab(year)
-    device = CensusLnModel.get_device()
-
-    logger.info(f"Predicting {len(df)} names using Census {year} PyTorch model")
-
-    # Convert names to sequences
-    names = df[lname_col].fillna("").astype(str).tolist()
-    X = CensusLnModel.names_to_sequences(names, vocab)
-    X_tensor = torch.from_numpy(X).to(device)
-
-    # Get predictions
-    with torch.no_grad():
-        if conf_int < 1.0 and num_iter > 1:
-            # Monte Carlo dropout for confidence intervals
-            model.train()  # Enable dropout
-            predictions = []
-            for _ in range(num_iter):
-                logits = model(X_tensor)
-                probs = torch.softmax(logits, dim=1)
-                predictions.append(probs.cpu().numpy())
-            predictions_arr = np.stack(predictions, axis=0)
-
-            # Calculate statistics
-            mean_probs = predictions_arr.mean(axis=0)
-            std_probs = predictions_arr.std(axis=0)
-
-            alpha = 1 - conf_int
-            lower = np.percentile(predictions_arr, alpha / 2 * 100, axis=0)
-            upper = np.percentile(predictions_arr, (1 - alpha / 2) * 100, axis=0)
-
-            model.eval()
-        else:
-            # Point estimates only
-            logits = model(X_tensor)
-            mean_probs = torch.softmax(logits, dim=1).cpu().numpy()
-            std_probs = None
-            lower = None
-            upper = None
-
-    # Build result DataFrame
-    result = df.copy()
-
-    for i, race in enumerate(RACES):
-        if conf_int < 1.0 and std_probs is not None:
-            result[f"{race}_mean"] = mean_probs[:, i]
-            result[f"{race}_std"] = std_probs[:, i]
-            result[f"{race}_lb"] = lower[:, i]
-            result[f"{race}_ub"] = upper[:, i]
-        else:
-            result[race] = mean_probs[:, i]
-
-    # Add predicted race
-    pred_indices = mean_probs.argmax(axis=1)
-    result["race"] = [RACES[i] for i in pred_indices]
-
-    pred_count = result["race"].notna().sum()
-    logger.info(f"Predicted {pred_count} of {len(df)} rows")
-
-    return result
+    return CensusLnPyTorchModel.pred_census_ln(
+        df, lname_col, year=year, num_iter=num_iter, conf_int=conf_int
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Command-line interface for Census last name predictions.
-
-    Provides CLI access to Census-based race/ethnicity prediction.
-
-    Args:
-        argv: Command-line arguments (uses sys.argv if None).
-
-    Returns:
-        Exit code: 0 success, 1 general error, 2 missing files, 3 invalid data.
-    """
+    """CLI for Census last name predictions (PyTorch)."""
     if argv is None:
         argv = sys.argv[1:]
 
     try:
         args = arg_parser(
             argv,
-            title="Predict Race/Ethnicity by last name using Census LSTM model",
-            default_out="census-pred-ln-output.csv",
+            title="Predict Race/Ethnicity by last name using Census PyTorch model",
+            default_out="census-pred-ln-pytorch-output.csv",
             default_year=2020,
             year_choices=[2000, 2010, 2020],
         )
