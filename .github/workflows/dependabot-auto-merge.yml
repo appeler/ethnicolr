@@ -17,10 +17,13 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Grouped PRs report the highest bump anywhere in the group (including
-      # transitive lockfile updates), so trust our own minor-and-patch groups.
-      - name: Enable auto-merge for patch/minor updates
+      # Auto-merge everything except Python-ecosystem majors:
+      # - grouped PRs report the highest bump anywhere in the group (including
+      #   transitive lockfile updates), so trust our own minor-and-patch groups
+      # - GitHub-Actions majors are CI-validated and low blast radius
+      - name: Enable auto-merge for eligible updates
         if: >-
+          steps.metadata.outputs.package-ecosystem == 'github_actions' ||
           contains(steps.metadata.outputs.dependency-group, 'minor-and-patch') ||
           steps.metadata.outputs.update-type != 'version-update:semver-major'
         env:
@@ -32,6 +35,7 @@ jobs:
 
       - name: Flag major updates for manual review
         if: >-
+          steps.metadata.outputs.package-ecosystem != 'github_actions' &&
           !contains(steps.metadata.outputs.dependency-group, 'minor-and-patch') &&
           steps.metadata.outputs.update-type == 'version-update:semver-major'
         env:
