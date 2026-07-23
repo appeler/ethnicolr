@@ -17,8 +17,12 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Grouped PRs report the highest bump anywhere in the group (including
+      # transitive lockfile updates), so trust our own minor-and-patch groups.
       - name: Enable auto-merge for patch/minor updates
-        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        if: >-
+          contains(steps.metadata.outputs.dependency-group, 'minor-and-patch') ||
+          steps.metadata.outputs.update-type != 'version-update:semver-major'
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -27,7 +31,9 @@ jobs:
           gh pr merge --auto --squash "$PR_URL"
 
       - name: Flag major updates for manual review
-        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        if: >-
+          !contains(steps.metadata.outputs.dependency-group, 'minor-and-patch') &&
+          steps.metadata.outputs.update-type == 'version-update:semver-major'
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
