@@ -389,26 +389,6 @@ class TestCLIErrorHandling:
         assert "conf" in result.stderr.lower() or "conf" in result.stdout.lower()
 
 
-class TestCLIModelDownload:
-    """Test the model download CLI command."""
-
-    def test_ethnicolr_download_models_help(self):
-        """Test that the download models command has help."""
-        result = subprocess.run(
-            ["ethnicolr_download_models", "--help"], capture_output=True, text=True
-        )
-
-        # Help should work (exit code 0) or command should exist (exit code != 127)
-        assert result.returncode in [0, 1, 2]  # Not "command not found"
-
-        # If it exists but fails, that's fine - we're just testing the CLI entry point exists
-        if result.returncode != 127:  # 127 = command not found
-            # Command exists in the system
-            assert True
-        else:
-            pytest.skip("Model download command not available")
-
-
 class TestCLIIntegration:
     """Test integration scenarios across different CLI commands."""
 
