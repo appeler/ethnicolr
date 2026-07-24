@@ -18,7 +18,13 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
-from .torch_utils import NameLSTM, get_device
+from .torch_utils import (
+    NameLSTM,
+    apply_prior,
+    conformal_sets,
+    get_device,
+    load_model_stats,
+)
 from .utils import arg_parser
 
 logging.basicConfig(
@@ -36,6 +42,7 @@ class CensusLnModel:
 
     _models: dict[int, nn.Module] = {}
     _vocabs: dict[int, dict[str, int]] = {}
+    _stats: dict[int, dict | None] = {}
     _device: torch.device | None = None
 
     @classmethod
@@ -83,6 +90,7 @@ class CensusLnModel:
         model.to(device)
         model.eval()
         cls._models[year] = model
+        cls._stats[year] = load_model_stats(model_path)
 
         return model
 
@@ -133,6 +141,8 @@ def pred_census_ln(
     year: int = 2010,
     num_iter: int = 100,
     conf_int: float = 1.0,
+    prior: dict[str, float] | None = None,
+    coverage: float | None = None,
 ) -> pd.DataFrame:
     """Predict race/ethnicity from last names using Census PyTorch model.
 
@@ -188,6 +198,26 @@ def pred_census_ln(
     model = CensusLnModel.load_model(year)
     vocab = CensusLnModel.get_vocab(year)
     device = CensusLnModel.get_device()
+    stats = CensusLnModel._stats.get(year)
+    temperature = stats["temperature"] if stats else 1.0
+
+    if (prior is not None or coverage is not None) and conf_int < 1.0:
+        raise ValueError("prior and coverage require point predictions (conf_int=1)")
+    if prior is not None and coverage is not None:
+        raise ValueError(
+            "prior and coverage cannot be combined: the conformal guarantee "
+            "is calibrated for unreweighted probabilities"
+        )
+    if (prior is not None or coverage is not None) and stats is None:
+        raise ValueError(
+            "this model has no calibration stats file; run "
+            "scripts/model-training/calibrate_model.py"
+        )
+    if coverage is not None and f"{coverage:.2f}" not in stats["conformal_quantiles"]:
+        raise ValueError(
+            f"coverage must be one of {sorted(stats['conformal_quantiles'])}, "
+            f"got {coverage}"
+        )
 
     logger.info(f"Predicting {len(df)} names using Census {year} PyTorch model")
 
@@ -207,7 +237,7 @@ def pred_census_ln(
             predictions = []
             for _ in range(max(1, num_iter)):
                 logits = model(X_tensor)
-                probs = torch.softmax(logits, dim=1)
+                probs = torch.softmax(logits / temperature, dim=1)
                 predictions.append(probs.cpu().numpy())
             predictions_arr = np.stack(predictions, axis=0)
 
@@ -223,7 +253,11 @@ def pred_census_ln(
         else:
             # Point estimates only
             logits = model(X_tensor)
-            mean_probs = torch.softmax(logits, dim=1).cpu().numpy()
+            mean_probs = torch.softmax(logits / temperature, dim=1).cpu().numpy()
+            if prior is not None:
+                mean_probs = apply_prior(
+                    mean_probs, RACES, prior, stats["train_class_distribution"]
+                )
             std_probs = None
             lower = None
             upper = None
@@ -255,6 +289,10 @@ def pred_census_ln(
     # Add predicted race
     pred_indices = mean_probs.argmax(axis=1)
     result["race"] = [RACES[i] for i in pred_indices]
+
+    if coverage is not None:
+        qhat = stats["conformal_quantiles"][f"{coverage:.2f}"]
+        result["race_set"] = conformal_sets(mean_probs, RACES, qhat)
 
     pred_count = result["race"].notna().sum()
     logger.info(f"Predicted {pred_count} of {len(df)} rows")

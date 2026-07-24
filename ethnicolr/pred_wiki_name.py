@@ -122,6 +122,8 @@ class WikiNameModel(EthnicolrModelClass):
         fname_col: str,
         num_iter: int = 100,
         conf_int: float = 1.0,
+        prior: dict[str, float] | None = None,
+        coverage: float | None = None,
     ) -> pd.DataFrame:
         """Predict race/ethnicity from full names using Wikipedia model.
 
@@ -254,6 +256,8 @@ class WikiNameModel(EthnicolrModelClass):
                 maxlen=cls.FEATURE_LEN,
                 num_iter=num_iter,
                 conf_int=conf_int,
+                prior=prior,
+                coverage=coverage,
             )
 
             # For skipped names, add empty prediction columns
