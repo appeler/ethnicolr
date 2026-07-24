@@ -55,7 +55,8 @@ def main() -> int:
     print(f"Downloading {url} -> {args.out}")
     # curl follows the 303 redirect to pre-signed S3 storage and (unlike
     # urllib) drops the custom auth header on the cross-host redirect,
-    # which S3 requires.
+    # which S3 requires. The header goes through stdin config so the token
+    # never appears in process arguments.
     result = subprocess.run(
         [
             "curl",
@@ -63,12 +64,14 @@ def main() -> int:
             "--fail",
             "--retry",
             "3",
-            "-H",
-            f"X-Dataverse-key: {token}",
+            "--config",
+            "-",
             "-o",
             str(args.out),
             url,
-        ]
+        ],
+        input=f'header = "X-Dataverse-key: {token}"\n',
+        text=True,
     )
     if result.returncode != 0:
         print(

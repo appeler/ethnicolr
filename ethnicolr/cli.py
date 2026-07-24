@@ -11,13 +11,6 @@ from pathlib import Path
 import click
 import pandas as pd
 
-from .download import (
-    DownloadError,
-    ModelNotAvailableError,
-    download_model,
-    get_installed_models,
-    list_available_models,
-)
 from .model_base import ModelRegistry
 from .pred_census_ln import CensusLnModel
 from .pred_fl_reg_ln import FloridaRegLnModel
@@ -475,7 +468,7 @@ def predict_wiki(
 
 @cli.group()
 def models():
-    """Manage prediction models (download, list, info)."""
+    """Inspect bundled prediction models (list, info)."""
     pass
 
 
@@ -509,106 +502,6 @@ def list_models(detailed: bool):
             if model_class.__doc__:
                 doc_lines = model_class.__doc__.strip().split("\n")
                 click.echo(f"  Description: {doc_lines[0]}")
-
-
-@models.command("download")
-@click.argument("model_type", type=click.Choice(["census", "wiki", "florida", "nc"]))
-@click.option("--year", type=str, help="Specific model year to download")
-@click.option("--force", is_flag=True, help="Force redownload existing files")
-def download_models(model_type: str, year: str | None, force: bool):
-    """
-    Download prediction model files.
-
-    Downloads pre-trained models and vocabulary files for the specified
-    model type. Models are required for prediction but are not included
-    in the base package due to size constraints.
-
-    Examples:
-
-    \b
-        # Download all Census models
-        ethnicolr models download census
-
-        # Download specific year
-        ethnicolr models download census --year 2010
-
-        # Force redownload
-        ethnicolr models download census --force
-    """
-    try:
-        click.echo(f"Downloading {model_type} models...")
-
-        # Show available years if none specified
-        if not year:
-            available = list_available_models()
-            years_available = available.get(model_type, [])
-            if years_available:
-                click.echo(f"Available years: {', '.join(years_available)}")
-
-        # Perform download
-        downloaded_files = download_model(model_type=model_type, year=year, force=force)
-
-        if downloaded_files:
-            click.echo(
-                click.style(f"{CHECK} Download completed successfully!", fg="green")
-            )
-            click.echo(f"Downloaded {len(downloaded_files)} files for {model_type}")
-
-            if year:
-                click.echo(f"Model ready: ethnicolr predict {model_type}")
-            else:
-                click.echo(f"Models ready: ethnicolr predict {model_type}")
-        else:
-            click.echo(
-                click.style("No files downloaded (may already exist)", fg="yellow")
-            )
-            click.echo("Use --force to redownload existing files")
-
-    except ModelNotAvailableError as e:
-        raise click.ClickException(f"Model not available: {e}") from e
-    except DownloadError as e:
-        raise click.ClickException(f"Download failed: {e}") from e
-    except Exception as e:
-        raise click.ClickException(f"Unexpected error: {e}") from e
-
-
-@models.command("status")
-def model_status():
-    """Show status of installed and available models."""
-    try:
-        available = list_available_models()
-        installed = get_installed_models()
-
-        click.echo(click.style("Model Status", bold=True))
-        click.echo("=" * 40)
-
-        for model_type in available.keys():
-            click.echo(f"\n{click.style(model_type.upper(), fg='blue', bold=True)}")
-
-            available_years = available[model_type]
-            installed_years = installed.get(model_type, [])
-
-            for year in available_years:
-                if year in installed_years:
-                    status = click.style(f"{CHECK} Installed", fg="green")
-                else:
-                    status = click.style(f"{CROSS} Not installed", fg="yellow")
-                click.echo(f"  {year}: {status}")
-
-            if not available_years:
-                click.echo("  No versions available")
-
-        # Summary
-        total_available = sum(len(years) for years in available.values())
-        total_installed = sum(len(years) for years in installed.values())
-
-        click.echo(f"\nSummary: {total_installed}/{total_available} models installed")
-
-        if total_installed < total_available:
-            click.echo("\nTo download models: ethnicolr models download <model_type>")
-
-    except Exception as e:
-        raise click.ClickException(f"Failed to check model status: {e}") from e
 
 
 @models.command("info")

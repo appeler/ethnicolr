@@ -47,7 +47,7 @@ ethnicolr is a Python package that predicts race and ethnicity from names using 
 
 ### Data and Models
 - `ethnicolr/data/` - Training datasets (census, Wikipedia, voter registration)
-- `ethnicolr/models/` - Pre-trained LSTM models stored as .h5 files and vocabulary CSV files
+- `ethnicolr/models/` - Pre-trained PyTorch LSTM models stored as .pt state dicts with vocabulary/race CSV files
 - Models are organized by source: `census/`, `wiki/`, `fl_voter_reg/`, `nc_voter_reg/`
 
 ### Command Line Interface
@@ -58,7 +58,6 @@ The package provides CLI commands defined in pyproject.toml:
 - `pred_fl_reg_name` / `pred_fl_reg_ln` - Florida voter registration predictions
 - `pred_fl_reg_*_five_cat` - 5-category Florida models
 - `pred_nc_reg_name` - North Carolina predictions
-- `ethnicolr_download_models` - Download model files
 
 ### Testing Structure
 - Tests are in `tests/` with descriptive numeric prefixes
@@ -67,10 +66,11 @@ The package provides CLI commands defined in pyproject.toml:
 
 ## Key Dependencies
 
-- **TensorFlow/Keras**: For LSTM model inference (version 2.13.x)
+- **PyTorch**: For LSTM model inference (torch>=2.0)
 - **pandas**: Data manipulation and CSV I/O
 - **numpy**: Numerical operations
-- Models work with standard TensorFlow installations across all platforms (Windows, macOS, Linux)
+- Models work with standard PyTorch installations across all platforms (Windows, macOS, Linux)
+- Inference runs on CPU by default (CUDA auto-selected when available); set `ETHNICOLR_DEVICE` to override. MPS is never auto-selected because virtualized Apple Silicon environments (e.g. GitHub Actions macOS runners) return incorrect LSTM output on it.
 
 ## Important Notes
 
@@ -97,30 +97,11 @@ The package provides CLI commands defined in pyproject.toml:
 
 This addresses issues with Canadian/international datasets containing accented names, titles, and special characters.
 
-## Known Issues
-
-### Protobuf Warnings with TensorFlow
-You may see protobuf version warnings when using TensorFlow:
-```
-UserWarning: Protobuf gencode version 5.28.3 is exactly one major version older than the runtime version 6.31.1
-```
-
-This is a TensorFlow compatibility issue and does not affect functionality. To suppress these warnings:
-```bash
-export TF_CPP_MIN_LOG_LEVEL=3
-```
-
-Or in Python:
-```python
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import warnings
-warnings.filterwarnings('ignore', category=UserWarning, module='google.protobuf')
-```
-
 ## Model File Locations
 
 Pre-trained models are stored in `ethnicolr/models/*/lstm/` directories:
-- `.h5` files contain the neural network weights
-- `.csv` files contain vocabulary mappings
+- `.pt` files contain PyTorch state dicts for the shared `NameLSTM` architecture
+- `*_vocab_pt.csv` files contain n-gram vocabularies (quoted, since n-grams may end in spaces)
+- `*_race_pt.csv` files list the output classes in logit order
 - Models are loaded dynamically based on the prediction function used
+- Retrain any model with `scripts/model-training/train_name_lstm.py` (census: `scripts/model-training/census/train_census_lstm_pytorch.py`)

@@ -48,16 +48,14 @@ pip install ethnicolr
 
 Notes:
 
-> - The models are run and verified on TensorFlow 2.x using Python 3.10
->   through 3.12
-> - If you install on Windows, Theano installation typically needs
->   admin. privileges on the shell.
+> - Models run on PyTorch and are verified on Python 3.11 through 3.13.
+> - All model files ship with the package; no separate download step is
+>   needed.
 
 ### Jupyter Quickstart
 
 ```bash
 pip install ethnicolr jupyter
-python -m ethnicolr.cli models download census
 jupyter notebook ethnicolr/examples
 ```
 
@@ -71,11 +69,8 @@ Ethnicolr now provides a modern, user-friendly command-line interface using Clic
 ### Quick Start
 
 ```bash
-# Check which models are available
-python -m ethnicolr.cli models status
-
-# Download required models
-python -m ethnicolr.cli models download census
+# List bundled models
+python -m ethnicolr.cli models list
 
 # Run predictions
 python -m ethnicolr.cli predict census data.csv -l surname -o results.csv
@@ -102,15 +97,8 @@ python -m ethnicolr.cli predict wiki data.csv -l surname
 #### Model Management
 
 ```bash
-# Check installation status of all models
-python -m ethnicolr.cli models status
-
 # List available prediction models
 python -m ethnicolr.cli models list --detailed
-
-# Download specific models
-python -m ethnicolr.cli models download census --year 2010
-python -m ethnicolr.cli models download florida
 
 # Get information about a model
 python -m ethnicolr.cli models info census
@@ -288,7 +276,7 @@ or a CSV.
   - What it does:
     - Removes extra space.
     - Uses the [last name wiki
-      model](ethnicolr/models/ethnicolr_keras_lstm_wiki_ln.ipynb) to predict the race and ethnicity.
+      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -363,7 +351,7 @@ or a CSV.
   - What it does:
     - Removes extra space.
     - Uses the [full name wiki
-      model](ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb) to predict the race and ethnicity.
+      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -422,7 +410,7 @@ or a CSV.
   - What does it do?:
     - Removes extra space, if there.
     - Uses the [last name FL registration
-      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln.ipynb) to predict the race and ethnicity.
+      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -496,7 +484,7 @@ or a CSV.
   - What it does:
     - Removes extra space.
     - Uses the [full name FL
-      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_name.ipynb) to predict the race and ethnicity.
+      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -559,7 +547,7 @@ or a CSV.
   - What does it do?:
     - Removes extra space, if there.
     - Uses the [last name FL registration
-      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb) to predict the race and ethnicity.
+      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -628,7 +616,7 @@ or a CSV.
   - What it does:
     - Removes extra space.
     - Uses the [full name FL
-      model](ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb) to predict the race and ethnicity.
+      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
@@ -697,7 +685,7 @@ or a CSV.
   - What it does:
     - Removes extra space.
     - Uses the [full name NC
-      model](ethnicolr/models/ethnicolr_keras_lstm_nc_12_cat_model.ipynb) to predict the race and ethnicity.
+      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
 
     ----------------------------------------------------------------------------
     Parameters    
