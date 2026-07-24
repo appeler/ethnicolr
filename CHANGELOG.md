@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-07-25
+
+Complete migration from TensorFlow to PyTorch, all models retrained, and a
+refreshed Wikipedia/Wikidata training corpus. (#121, #122, #123, #124, #125)
+
+### Added
+- Reproducible Wikidata data pipeline (`scripts/data-acquisition/wiki/`):
+  fetches ~4M people from the public QLever SPARQL endpoint and labels them
+  via auditable country/ethnic-group mapping tables. The wiki models now
+  train on 3.69M rows (25x the 2009-era dataset).
+- Scripted acquisition for the Florida and North Carolina voter data
+  (`scripts/data-acquisition/`, Dataverse token via `DATAVERSE_API_TOKEN`).
+- One parameterized trainer (`scripts/model-training/train_name_lstm.py`)
+  replacing the Keras notebooks; reports top-2/top-3 accuracy.
+- `ETHNICOLR_DEVICE` environment variable (`cpu`/`cuda`/`mps`) for device
+  selection; CUDA auto-selected when available, CPU otherwise.
+- Python 3.13 support (`requires-python >=3.11,<3.14`, numpy >= 1.26 without
+  the 2.0 cap).
+
+### Changed
+- Inference engine rewritten on PyTorch; models ship as `.pt` state dicts.
+- All nine LSTM models retrained from their original data sources. Held-out
+  accuracy: wiki_ln 0.78 (was 0.67), wiki_name 0.86 (was 0.71), fl_ln 0.81,
+  fl_name 0.84, FL five-cat 0.59-0.63 (balanced), nc_name 0.57 (12-class).
+- Monte Carlo dropout confidence intervals now work for every model
+  (the old NC model shipped with dropout 0.0, so its intervals were
+  degenerate zero-width).
+
+### Fixed
+- macOS mispredictions in CI: MPS is never auto-selected (virtualized Apple
+  Silicon environments advertise MPS but return incorrect LSTM output).
+- Florida five-category models silently reused whichever year variant
+  (2017/2022) loaded first; the model cache is now keyed by model path.
+- Vocabulary CSVs are quoted so n-grams with meaningful trailing spaces
+  survive; a pre-commit hook had been stripping them.
+
+### Removed
+- TensorFlow, tensorflow-intel, and protobuf dependencies (the `inference`
+  extra is gone; the base install is all you need).
+- Legacy `.h5` models, Keras-era vocab files, and the Keras training
+  notebooks.
+- The stale model-download machinery: `ethnicolr/download.py`, the
+  `ethnicolr models download`/`status` commands, and the broken
+  `ethnicolr_download_models` entry point. All model files ship with the
+  package.
+
 ## [0.22.0] - 2025-05-28
 
 ### Added
