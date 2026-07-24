@@ -239,12 +239,7 @@ def save_model_for_ethnicolr(
     torch.save(model.state_dict(), model_path)
     print(f"Saved model to {model_path}")
 
-    # Save full model for easy loading
-    full_model_path = output_dir / f"census{year}_ln_lstm_pytorch_full.pt"
-    torch.save(model, full_model_path)
-    print(f"Saved full model to {full_model_path}")
-
-    # Save vocabulary (same format as Keras version)
+    # Save vocabulary
     vocab_path = output_dir / f"census{year}_ln_vocab_pytorch.csv"
     vocab_df = pd.DataFrame(words_list, columns=["vocab"])
     vocab_df.to_csv(vocab_path, index=False, encoding="utf-8")

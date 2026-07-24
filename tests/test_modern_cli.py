@@ -82,9 +82,8 @@ class TestMainCLI:
             text=True,
         )
         assert result.returncode == 0
-        assert "download" in result.stdout
         assert "list" in result.stdout
-        assert "status" in result.stdout
+        assert "info" in result.stdout
 
 
 class TestPredictCommands:
@@ -258,16 +257,6 @@ class TestModelsCommands:
         assert result.returncode == 0
         assert "Available Prediction Models" in result.stdout
 
-    def test_models_status(self):
-        """Test models status command."""
-        result = subprocess.run(
-            [sys.executable, "-m", "ethnicolr.cli", "models", "status"],
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0
-        assert "Model Status" in result.stdout
-
     def test_models_info_census(self):
         """Test models info for census."""
         result = subprocess.run(
@@ -277,16 +266,6 @@ class TestModelsCommands:
         )
         assert result.returncode == 0
         assert "CENSUS" in result.stdout.upper()
-
-    def test_models_download_help(self):
-        """Test models download help."""
-        result = subprocess.run(
-            [sys.executable, "-m", "ethnicolr.cli", "models", "download", "--help"],
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0
-        assert "Download prediction model files" in result.stdout
 
 
 class TestQuickPredict:
@@ -403,10 +382,10 @@ class TestCLIIntegration:
     """Test CLI integration scenarios."""
 
     def test_models_then_predict_workflow(self, sample_input_file, temp_output_dir):
-        """Test workflow: check status, then predict."""
-        # Step 1: Check model status
+        """Test workflow: list models, then predict."""
+        # Step 1: List models
         status_result = subprocess.run(
-            [sys.executable, "-m", "ethnicolr.cli", "models", "status"],
+            [sys.executable, "-m", "ethnicolr.cli", "models", "list"],
             capture_output=True,
             text=True,
         )

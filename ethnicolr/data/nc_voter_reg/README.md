@@ -1,3 +1,8 @@
-## NC Voter Registration Data
+# NC Voter Registration Data
 
-Download `ncvoter_Statewide.zip` from [NC Voter Registration Data](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/NEFUBN) then extract and preprocess by this [script](nc_voter_name_race_ethic.ipynb)
+Training data comes from the restricted [NC Voter Registration Data](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/NEFUBN)
+dataset on Harvard Dataverse (`ncvoter_Statewide.zip`). Access requires a
+Dataverse account with permission; set `DATAVERSE_API_TOKEN` and use
+`scripts/data-acquisition/download_dataverse.py` to download, then
+`scripts/data-acquisition/nc_voter_reg/prepare_nc_data.py` to build the
+training CSV consumed by `scripts/model-training/train_name_lstm.py`.
