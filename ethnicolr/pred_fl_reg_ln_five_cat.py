@@ -37,6 +37,8 @@ class FloridaRegLnFiveCatModel(EthnicolrModelClass):
         lname_col: str,
         num_iter: int = 100,
         conf_int: float = 1.0,
+        prior: dict[str, float] | None = None,
+        coverage: float | None = None,
         year: int = 2022,
     ) -> pd.DataFrame:
         """
@@ -126,6 +128,8 @@ class FloridaRegLnFiveCatModel(EthnicolrModelClass):
             maxlen=cls.FEATURE_LEN,
             num_iter=num_iter,
             conf_int=conf_int,
+            prior=prior,
+            coverage=coverage,
         )
 
         return rdf

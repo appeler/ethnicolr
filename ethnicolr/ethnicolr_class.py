@@ -10,7 +10,14 @@ import pandas as pd
 import torch
 
 from .model_base import AbstractLSTMModel, InvalidInputError
-from .torch_utils import NameLSTM, get_device, pad_sequences
+from .torch_utils import (
+    NameLSTM,
+    apply_prior,
+    conformal_sets,
+    get_device,
+    load_model_stats,
+    pad_sequences,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -79,11 +86,14 @@ class EthnicolrModelClass(AbstractLSTMModel):
             model.load_state_dict(state)
             model.to(device)
             model.eval()
+            stats = load_model_stats(cls._resolve_path(model_fn))
             entry = {
                 "vocab_dict": {gram: idx for idx, gram in enumerate(vocab)},
                 "race": race,
                 "model": model,
                 "device": device,
+                "stats": stats,
+                "temperature": stats["temperature"] if stats else 1.0,
             }
             cls._model_cache[key] = entry
         return entry
@@ -217,6 +227,8 @@ class EthnicolrModelClass(AbstractLSTMModel):
         maxlen: int,
         num_iter: int,
         conf_int: float,
+        prior: dict[str, float] | None = None,
+        coverage: float | None = None,
     ) -> pd.DataFrame:
         """Transform names to features and generate predictions.
 
@@ -267,6 +279,30 @@ class EthnicolrModelClass(AbstractLSTMModel):
         entry = cls._load_resources(vocab_fn, race_fn, model_fn)
         model = entry["model"]
         race = entry["race"]
+        stats = entry["stats"]
+        temperature = entry["temperature"]
+
+        if (prior is not None or coverage is not None) and conf_int != 1:
+            raise ValueError(
+                "prior and coverage require point predictions (conf_int=1)"
+            )
+        if prior is not None and coverage is not None:
+            raise ValueError(
+                "prior and coverage cannot be combined: the conformal "
+                "guarantee is calibrated for unreweighted probabilities"
+            )
+        if (prior is not None or coverage is not None) and stats is None:
+            raise ValueError(
+                "this model has no calibration stats file; run "
+                "scripts/model-training/calibrate_model.py"
+            )
+        if coverage is not None:
+            available = stats["conformal_quantiles"] if stats else {}
+            key = f"{coverage:.2f}"
+            if key not in available:
+                raise ValueError(
+                    f"coverage must be one of {sorted(available)}, got {coverage}"
+                )
 
         # Vectorize input
         logger.debug(f"Vectorizing {len(df)} names using {ngrams}-grams")
@@ -279,9 +315,18 @@ class EthnicolrModelClass(AbstractLSTMModel):
 
         if conf_int == 1:
             with torch.no_grad():
-                proba = torch.softmax(model(X_tensor), dim=1).cpu().numpy()
+                proba = (
+                    torch.softmax(model(X_tensor) / temperature, dim=1).cpu().numpy()
+                )
+            if prior is not None:
+                proba = apply_prior(
+                    proba, race, prior, stats["train_class_distribution"]
+                )
             proba_df = pd.DataFrame(proba, columns=race)
             proba_df["race"] = proba_df.idxmax(axis=1)
+            if coverage is not None:
+                qhat = stats["conformal_quantiles"][f"{coverage:.2f}"]
+                proba_df["race_set"] = conformal_sets(proba, race, qhat)
             proba_df.index = df.index
             final_df = pd.concat([df, proba_df], axis=1)
 
@@ -297,7 +342,9 @@ class EthnicolrModelClass(AbstractLSTMModel):
             with torch.no_grad():
                 preds = np.stack(
                     [
-                        torch.softmax(model(X_tensor), dim=1).cpu().numpy()
+                        torch.softmax(model(X_tensor) / temperature, dim=1)
+                        .cpu()
+                        .numpy()
                         for _ in range(max(1, num_iter))
                     ],
                     axis=0,

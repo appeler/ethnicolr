@@ -47,6 +47,34 @@ Balanced-class numbers are measured against a uniform class distribution
 (chance = 1/n classes), so they are not comparable to the unbalanced
 4-category numbers.
 
+### Calibrated probabilities, priors, and prediction sets
+
+Every model ships with measured calibration and conformal statistics
+([model cards](https://appeler.github.io/ethnicolr/model_cards.html),
+[statistical principles](https://appeler.github.io/ethnicolr/statistical_principles.html)):
+
+- **Calibrated probabilities.** Outputs are temperature-scaled on held-out
+  data, and per-model reliability diagrams, ECE, and Brier scores are
+  published — so `hispanic = 0.83` is a checkable claim, not a raw score.
+- **`prior=`** reweights predictions to your population's demographics
+  (essential for the class-balanced FL five-category and NC models, and the
+  name-likelihood step of BISG-style pipelines à la Imai & Khanna's wru or
+  surgeo):
+
+  ```python
+  pred_fl_reg_ln_five_cat(df, "last", prior={"asian": .03, "hispanic": .27,
+                                             "nh_black": .15, "nh_white": .50,
+                                             "other": .05})
+  ```
+
+- **`coverage=`** returns conformal prediction sets — the smallest set of
+  classes guaranteed to contain the true class at the requested rate
+  (0.80/0.90/0.95), verified empirically on held-out data:
+
+  ```python
+  pred_wiki_name(df, "last", "first", coverage=0.90)  # adds a race_set column
+  ```
+
 ### Performance and device selection
 
 Inference runs on CPU by default and auto-selects CUDA when available. Set
