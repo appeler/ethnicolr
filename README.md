@@ -6,17 +6,53 @@
 [![PePy Downloads](https://static.pepy.tech/badge/ethnicolr)](https://www.pepy.tech/projects/ethnicolr)
 
 We exploit the US census data, the Florida voting registration data, and
-the Wikipedia data collected by Skiena and colleagues to predict race
-and ethnicity based on first and last name or just the last name. The
-granularity at which we predict the race depends on the dataset. For
-instance, Skiena et al.\' Wikipedia data is at the ethnic group level,
-while the census data we use in the model (the raw data has additional
-categories of Native Americans and Bi-racial) merely categorizes between
-Non-Hispanic Whites, Non-Hispanic Blacks, Asians, and Hispanics.
+Wikipedia/Wikidata data to predict race and ethnicity based on first and
+last name or just the last name. The granularity at which we predict the
+race depends on the dataset. For instance, the Wikipedia/Wikidata models
+predict at the ethnic-group level (13 categories), while the census
+models (the raw data has additional categories of Native Americans and
+Bi-racial) categorize between Non-Hispanic Whites, Non-Hispanic Blacks,
+Asians, and Hispanics.
 
-### New Package With New Models in Pytorch
+### What's new in 1.0
 
-[https://github.com/appeler/ethnicolr2](https://github.com/appeler/ethnicolr2)
+- **Pure PyTorch.** TensorFlow is gone; the package installs and runs with
+  just `torch`, `pandas`, `numpy`, and `click`, on Python 3.11–3.13.
+- **All nine models retrained** from their original data sources with a
+  single reproducible trainer (`scripts/model-training/train_name_lstm.py`).
+- **Wikipedia models trained on 25× more data.** A new scripted pipeline
+  (`scripts/data-acquisition/wiki/`) extends the 2009-era Wikipedia dataset
+  with ~3.5M fresh Wikidata-derived names (3.69M rows total). Held-out
+  accuracy on 13 classes improved from 0.67→0.78 (last name) and
+  0.71→0.86 (full name); for ~91–95% of names the true category is in the
+  model's top 3 predictions.
+- **Honest uncertainty.** Every prediction returns the full class
+  probability distribution, and Monte Carlo dropout confidence intervals
+  work for all models.
+
+#### Model accuracy (held-out test sets)
+
+| Model | Classes | Accuracy | Top-3 |
+|---|---|---|---|
+| `pred_census_ln` (2000/2010/2020) | 4 | ~0.79 | — |
+| `pred_wiki_ln` | 13 | 0.78 | 0.91 |
+| `pred_wiki_name` | 13 | 0.86 | 0.95 |
+| `pred_fl_reg_ln` | 4 | 0.81 | — |
+| `pred_fl_reg_name` | 4 | 0.84 | — |
+| `pred_fl_reg_ln_five_cat` | 5 (balanced) | 0.59 | — |
+| `pred_fl_reg_name_five_cat` | 5 (balanced) | 0.63 | — |
+| `pred_nc_reg_name` | 12 (balanced) | 0.57 | — |
+
+Balanced-class numbers are measured against a uniform class distribution
+(chance = 1/n classes), so they are not comparable to the unbalanced
+4-category numbers.
+
+### Performance and device selection
+
+Inference runs on CPU by default and auto-selects CUDA when available. Set
+`ETHNICOLR_DEVICE=cpu|cuda|mps` to override. MPS (Apple Silicon GPU) is
+opt-in only because some virtualized macOS environments advertise MPS but
+compute incorrect LSTM results on it.
 
 ### Streamlit App
 
@@ -807,14 +843,21 @@ underlying Python scripts are posted
 # Data
 
 In particular, we utilize the last-name\--race data from the [2000
-census](http://www.census.gov/topics/population/genealogy/data/2000_surnames.html) and [2010
-census](http://www.census.gov/topics/population/genealogy/data/2010_surnames.html), the [Wikipedia data](ethnicolr/data/wiki/) collected by Skiena and colleagues, and the Florida voter
-registration data from early 2017.
+census](http://www.census.gov/topics/population/genealogy/data/2000_surnames.html), [2010
+census](http://www.census.gov/topics/population/genealogy/data/2010_surnames.html), and 2020 census;
+the [Wikipedia data](ethnicolr/data/wiki/) collected by Skiena and colleagues,
+extended with ~3.5M fresh names from
+[Wikidata](https://www.wikidata.org/) via a
+[reproducible pipeline](scripts/data-acquisition/wiki/) (3.69M rows total);
+the Florida voter registration data (2017 and 2022 extracts); and the North
+Carolina voter registration data.
 
 - [Census](ethnicolr/data/census/)
-- [The Wikipedia dataset](ethnicolr/data/wiki/)
+- [The Wikipedia/Wikidata dataset](ethnicolr/data/wiki/)
 - [Florida voter registration
   database](http://dx.doi.org/10.7910/DVN/UBIG3F)
+- [North Carolina voter registration
+  database](http://dx.doi.org/10.7910/DVN/NEFUBN)
 
 ### Evaluation
 
