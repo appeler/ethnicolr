@@ -42,6 +42,24 @@ class TestFloridaLastNamePrediction:
         # Should include 'other' category
         assert "other" in result.columns
 
+    def test_five_category_year_variants_not_cached_together(
+        self, sample_florida_names
+    ):
+        """The 2022 and 2017 model variants must produce different outputs.
+
+        Regression test: the old engine cached one model per class, so after
+        predicting with one year the other year silently reused it.
+        """
+        result_2022 = pred_fl_reg_ln_five_cat(
+            sample_florida_names.copy(), "last", year=2022
+        )
+        result_2017 = pred_fl_reg_ln_five_cat(
+            sample_florida_names.copy(), "last", year=2017
+        )
+
+        prob_cols = ["asian", "hispanic", "nh_black", "nh_white", "other"]
+        assert not result_2022[prob_cols].equals(result_2017[prob_cols])
+
     def test_four_category_with_confidence(self, sample_florida_names):
         """Test 4-category last name prediction with confidence intervals."""
         result = pred_fl_reg_ln(sample_florida_names, "last", conf_int=0.9)

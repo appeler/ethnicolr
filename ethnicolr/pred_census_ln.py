@@ -18,7 +18,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
-from .torch_utils import get_device
+from .torch_utils import NameLSTM, get_device
 from .utils import arg_parser
 
 logging.basicConfig(
@@ -29,35 +29,6 @@ logger = logging.getLogger(__name__)
 RACES = ["api", "black", "hispanic", "white"]
 NGRAMS = 2
 FEATURE_LEN = 20
-
-
-class CensusLSTM(nn.Module):
-    """Character-bigram LSTM for race/ethnicity prediction."""
-
-    def __init__(
-        self,
-        vocab_size: int,
-        embed_dim: int = 32,
-        hidden_dim: int = 128,
-        num_classes: int = 4,
-        dropout: float = 0.2,
-    ):
-        super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=0)
-        self.lstm = nn.LSTM(
-            embed_dim,
-            hidden_dim,
-            batch_first=True,
-            dropout=dropout if dropout > 0 else 0,
-        )
-        self.dropout = nn.Dropout(dropout)
-        self.fc = nn.Linear(hidden_dim, num_classes)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        embedded = self.embedding(x)
-        _, (hidden, _) = self.lstm(embedded)
-        hidden = self.dropout(hidden.squeeze(0))
-        return self.fc(hidden)
 
 
 class CensusLnModel:
@@ -106,7 +77,7 @@ class CensusLnModel:
         cls._vocabs[year] = {word: idx for idx, word in enumerate(vocab_list)}
 
         # Create model with correct vocab size and load state dict
-        model = CensusLSTM(vocab_size=len(vocab_list))
+        model = NameLSTM(vocab_size=len(vocab_list), num_classes=len(RACES))
         state_dict = torch.load(model_path, map_location=device, weights_only=True)
         model.load_state_dict(state_dict)
         model.to(device)

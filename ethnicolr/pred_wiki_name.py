@@ -63,9 +63,9 @@ class WikiNameModel(EthnicolrModelClass):
     beyond the basic Census classifications.
     """
 
-    MODELFN = "models/wiki/lstm/wiki_name_lstm.h5"
-    VOCABFN = "models/wiki/lstm/wiki_name_vocab.csv"
-    RACEFN = "models/wiki/lstm/wiki_name_race.csv"
+    MODELFN = "models/wiki/lstm/wiki_name_lstm_pt.pt"
+    VOCABFN = "models/wiki/lstm/wiki_name_vocab_pt.csv"
+    RACEFN = "models/wiki/lstm/wiki_name_race_pt.csv"
 
     NGRAMS = 2
     FEATURE_LEN = 25
