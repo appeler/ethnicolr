@@ -41,7 +41,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --group docs --extra inference
+          uv sync --group docs
           uv add --group docs matplotlib ipython
 
       - name: Build documentation
