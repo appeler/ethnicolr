@@ -20,9 +20,8 @@ Usage:
 
 import argparse
 import os
+import subprocess
 import sys
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 BASE = "https://dataverse.harvard.edu/api/access/datafile"
@@ -53,24 +52,33 @@ def main() -> int:
         url = f"{BASE}/:persistentId?persistentId={args.persistent_id}"
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    request = urllib.request.Request(url, headers={"X-Dataverse-key": token})
     print(f"Downloading {url} -> {args.out}")
-    try:
-        with urllib.request.urlopen(request) as response, open(args.out, "wb") as fh:
-            total = 0
-            while chunk := response.read(1 << 20):
-                fh.write(chunk)
-                total += len(chunk)
-                print(f"\r{total / (1 << 20):,.0f} MB", end="", flush=True)
-    except urllib.error.HTTPError as exc:
+    # curl follows the 303 redirect to pre-signed S3 storage and (unlike
+    # urllib) drops the custom auth header on the cross-host redirect,
+    # which S3 requires.
+    result = subprocess.run(
+        [
+            "curl",
+            "-L",
+            "--fail",
+            "--retry",
+            "3",
+            "-H",
+            f"X-Dataverse-key: {token}",
+            "-o",
+            str(args.out),
+            url,
+        ]
+    )
+    if result.returncode != 0:
         print(
-            f"\nDownload failed ({exc.code} {exc.reason}). Your token may lack "
-            "access to this restricted file; request access on the dataset page "
-            "or download manually in a browser.",
+            "Download failed. Your token may lack access to this restricted "
+            "file; request access on the dataset page or download manually "
+            "in a browser.",
             file=sys.stderr,
         )
         return 1
-    print(f"\nDone: {args.out}")
+    print(f"Done: {args.out}")
     return 0
 
 

@@ -59,6 +59,13 @@ def main() -> None:
             check=True,
             capture_output=True,
         )
+        # The 2022 archive nests a zip inside the 7z
+        for nested in Path(tmp).rglob("*.zip"):
+            subprocess.run(
+                ["7z", "x", str(nested), f"-o{tmp}", "-y"],
+                check=True,
+                capture_output=True,
+            )
         txt_files = sorted(Path(tmp).rglob("*.txt"))
         if not txt_files:
             raise FileNotFoundError(f"No .txt voter files found in {args.archive}")
