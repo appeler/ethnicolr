@@ -1,0 +1,201 @@
+qid,country,category,person_count
+Q30,United States,DROP,673128
+Q142,France,"GreaterEuropean,WestEuropean,French",412808
+Q183,Germany,"GreaterEuropean,WestEuropean,Germanic",334113
+Q17,Japan,"Asian,GreaterEastAsian,Japanese",257549
+Q145,United Kingdom,"GreaterEuropean,British",236721
+Q15180,Soviet Union,"GreaterEuropean,EastEuropean",195987
+Q29,Spain,"GreaterEuropean,WestEuropean,Hispanic",181268
+Q38,Italy,"GreaterEuropean,WestEuropean,Italian",155375
+Q16,Canada,DROP,143325
+Q36,Poland,"GreaterEuropean,EastEuropean",127537
+Q9903,Ming dynasty,"Asian,GreaterEastAsian,EastAsian",123974
+Q20,Norway,"GreaterEuropean,WestEuropean,Nordic",119759
+Q34,Sweden,"GreaterEuropean,WestEuropean,Nordic",117913
+Q252,Indonesia,"GreaterAfrican,Muslim",113382
+Q159,Russia,"GreaterEuropean,EastEuropean",108228
+Q29999,Kingdom of the Netherlands,"GreaterEuropean,WestEuropean,Germanic",108217
+Q155,Brazil,DROP,95180
+Q668,India,"Asian,IndianSubContinent",93972
+Q43,Turkey,"GreaterAfrican,Muslim",92070
+Q174193,United Kingdom of Great Britain and Ireland,"GreaterEuropean,British",83652
+Q33,Finland,"GreaterEuropean,WestEuropean,Nordic",77230
+Q39,Switzerland,DROP,73895
+Q31,Belgium,DROP,69907
+Q408,Australia,DROP,69852
+Q28,Hungary,"GreaterEuropean,EastEuropean",69740
+Q34266,Russian Empire,"GreaterEuropean,EastEuropean",69095
+Q148,People's Republic of China,"Asian,GreaterEastAsian,EastAsian",68934
+Q172579,Kingdom of Italy,"GreaterEuropean,WestEuropean,Italian",65354
+Q40,Austria,"GreaterEuropean,WestEuropean,Germanic",65261
+Q8733,Qing dynasty,"Asian,GreaterEastAsian,EastAsian",60600
+Q756617,Kingdom of Denmark,"GreaterEuropean,WestEuropean,Nordic",59599
+Q884,South Korea,"Asian,GreaterEastAsian,EastAsian",59505
+Q212,Ukraine,"GreaterEuropean,EastEuropean",53614
+Q33946,Czechoslovakia,"GreaterEuropean,EastEuropean",53534
+Q414,Argentina,"GreaterEuropean,WestEuropean,Hispanic",48130
+Q215,Slovenia,"GreaterEuropean,EastEuropean",44116
+Q7462,Song dynasty,"Asian,GreaterEastAsian,EastAsian",42464
+Q801,Israel,"GreaterEuropean,Jewish",41772
+Q191,Estonia,"GreaterEuropean,EastEuropean",39090
+Q218,Romania,"GreaterEuropean,EastEuropean",38505
+Q9683,Tang dynasty,"Asian,GreaterEastAsian,EastAsian",37874
+Q96,Mexico,"GreaterEuropean,WestEuropean,Hispanic",36845
+Q664,New Zealand,DROP,36425
+Q213,Czech Republic,"GreaterEuropean,EastEuropean",35893
+Q188712,Empire of Japan,"Asian,GreaterEastAsian,Japanese",35495
+Q41,Greece,"GreaterEuropean,EastEuropean",32500
+Q865,Taiwan,"Asian,GreaterEastAsian,EastAsian",27913
+Q45,Portugal,"GreaterEuropean,WestEuropean,Hispanic",26131
+Q1033,Nigeria,"GreaterAfrican,Africans",23565
+Q419,Peru,"GreaterEuropean,WestEuropean,Hispanic",23502
+Q794,Iran,"GreaterAfrican,Muslim",23049
+Q16957,German Democratic Republic,"GreaterEuropean,WestEuropean,Germanic",21320
+Q258,South Africa,DROP,20942
+Q7313,Yuan dynasty,"Asian,GreaterEastAsian,EastAsian",19668
+Q27,Ireland,"GreaterEuropean,British",18891
+Q219,Bulgaria,"GreaterEuropean,EastEuropean",18759
+Q77,Uruguay,"GreaterEuropean,WestEuropean,Hispanic",18697
+Q129286,British Raj,"Asian,IndianSubContinent",17916
+Q298,Chile,"GreaterEuropean,WestEuropean,Hispanic",17876
+Q161885,Kingdom of Great Britain,"GreaterEuropean,British",17466
+Q172107,Polish–Lithuanian Commonwealth,"GreaterEuropean,EastEuropean",16604
+Q739,Colombia,"GreaterEuropean,WestEuropean,Hispanic",16383
+Q12560,Ottoman Empire,"GreaterAfrican,Muslim",16222
+Q1206012,German Reich,"GreaterEuropean,WestEuropean,Germanic",15436
+Q184,Belarus,"GreaterEuropean,EastEuropean",14440
+Q843,Pakistan,"Asian,IndianSubContinent",14377
+Q37,Lithuania,"GreaterEuropean,EastEuropean",13772
+Q79,Egypt,"GreaterAfrican,Muslim",13555
+Q869,Thailand,"Asian,GreaterEastAsian,EastAsian",13505
+Q403,Serbia,"GreaterEuropean,EastEuropean",13450
+Q28513,Austria–Hungary,DROP,12958
+Q833,Malaysia,DROP,12102
+Q1775277,Dominion of India,"Asian,IndianSubContinent",12000
+Q179876,Kingdom of England,"GreaterEuropean,British",11646
+Q533534,Cisleithania,DROP,11396
+Q214,Slovakia,"GreaterEuropean,EastEuropean",11210
+Q224,Croatia,"GreaterEuropean,EastEuropean",11022
+Q211,Latvia,"GreaterEuropean,EastEuropean",10979
+Q83286,Socialist Federal Republic of Yugoslavia,"GreaterEuropean,EastEuropean",10964
+Q717,Venezuela,"GreaterEuropean,WestEuropean,Hispanic",10473
+Q928,Philippines,DROP,9981
+Q902,Bangladesh,"Asian,IndianSubContinent",9766
+Q191077,Kingdom of Yugoslavia,"GreaterEuropean,EastEuropean",9705
+Q227,Azerbaijan,"GreaterAfrican,Muslim",9375
+Q1747689,Ancient Rome,DROP,8973
+Q131964,Austrian Empire,"GreaterEuropean,WestEuropean,Germanic",8931
+Q1028,Morocco,"GreaterAfrican,Muslim",8703
+Q189,Iceland,"GreaterEuropean,WestEuropean,Nordic",7942
+Q262,Algeria,"GreaterAfrican,Muslim",7918
+Q1036,Uganda,"GreaterAfrican,Africans",7859
+Q117,Ghana,"GreaterAfrican,Africans",7710
+Q241,Cuba,"GreaterEuropean,WestEuropean,Hispanic",7577
+Q27306,Kingdom of Prussia,"GreaterEuropean,WestEuropean,Germanic",7554
+Q32,Luxembourg,DROP,7514
+Q881,Vietnam,"Asian,GreaterEastAsian,EastAsian",7426
+Q399,Armenia,"GreaterEuropean,EastEuropean",7174
+Q13426199,Republic of China,"Asian,GreaterEastAsian,EastAsian",7124
+Q232,Kazakhstan,"GreaterAfrican,Muslim",6846
+Q948,Tunisia,"GreaterAfrican,Muslim",6840
+Q1009,Cameroon,"GreaterAfrican,Africans",6807
+Q230,Georgia,"GreaterEuropean,EastEuropean",6632
+Q222,Albania,"GreaterEuropean,EastEuropean",6362
+Q851,Saudi Arabia,"GreaterAfrican,Muslim",6185
+Q974,Democratic Republic of the Congo,"GreaterAfrican,Africans",6131
+Q205662,Tokugawa shogunate,"Asian,GreaterEastAsian,Japanese",6033
+Q45670,Kingdom of Portugal,"GreaterEuropean,WestEuropean,Hispanic",5930
+Q736,Ecuador,"GreaterEuropean,WestEuropean,Hispanic",5867
+Q796,Iraq,"GreaterAfrican,Muslim",5860
+Q114,Kenya,"GreaterAfrican,Africans",5389
+Q207272,Second Polish Republic,"GreaterEuropean,EastEuropean",5330
+Q822,Lebanon,"GreaterAfrican,Muslim",4888
+Q43287,German Empire,"GreaterEuropean,WestEuropean,Germanic",4837
+Q15102440,"Kingdom of Serbs, Croats and Slovenes","GreaterEuropean,EastEuropean",4753
+Q225,Bosnia and Herzegovina,"GreaterEuropean,EastEuropean",4715
+Q170072,Dutch Republic,"GreaterEuropean,WestEuropean,Germanic",4505
+Q858,Syria,"GreaterAfrican,Muslim",4357
+Q854,Sri Lanka,"Asian,IndianSubContinent",4310
+Q1041,Senegal,"GreaterAfrican,Africans",4180
+Q924,Tanzania,"GreaterAfrican,Africans",4063
+Q786,Dominican Republic,"GreaterEuropean,WestEuropean,Hispanic",4018
+Q229,Cyprus,DROP,3926
+Q62633,Grand Duchy of Finland,"GreaterEuropean,WestEuropean,Nordic",3785
+Q115,Ethiopia,"GreaterAfrican,Africans",3625
+Q221,North Macedonia,"GreaterEuropean,EastEuropean",3623
+Q1008,Ivory Coast,"GreaterAfrican,Africans",3618
+Q836,Myanmar,"Asian,GreaterEastAsian,EastAsian",3613
+Q219060,Palestine,"GreaterAfrican,Muslim",3610
+Q790,Haiti,"GreaterEuropean,WestEuropean,French",3595
+Q70972,Kingdom of France,"GreaterEuropean,WestEuropean,French",3537
+Q265,Uzbekistan,"GreaterAfrican,Muslim",3483
+Q4948,Republic of Venice,"GreaterEuropean,WestEuropean,Italian",3465
+Q750,Bolivia,"GreaterEuropean,WestEuropean,Hispanic",3462
+Q334,Singapore,"Asian,GreaterEastAsian,EastAsian",3458
+Q766,Jamaica,DROP,3406
+Q28179,Joseon,"Asian,GreaterEastAsian,EastAsian",3400
+Q217,Moldova,"GreaterEuropean,EastEuropean",3354
+Q954,Zimbabwe,"GreaterAfrican,Africans",3343
+Q733,Paraguay,"GreaterEuropean,WestEuropean,Hispanic",3309
+Q800,Costa Rica,"GreaterEuropean,WestEuropean,Hispanic",3222
+Q2305208,Russian Socialist Federative Soviet Republic,"GreaterEuropean,EastEuropean",3218
+Q1054923,British Hong Kong,"Asian,GreaterEastAsian,EastAsian",3156
+Q55,Netherlands,"GreaterEuropean,WestEuropean,Germanic",3150
+Q916,Angola,"GreaterAfrican,Africans",2785
+Q837,Nepal,"Asian,IndianSubContinent",2780
+Q12548,Holy Roman Empire,"GreaterEuropean,WestEuropean,Germanic",2761
+Q36704,Yugoslavia,"GreaterEuropean,EastEuropean",2737
+Q810,Jordan,"GreaterAfrican,Muslim",2619
+Q889,Afghanistan,"GreaterAfrican,Muslim",2584
+Q912,Mali,"GreaterAfrican,Africans",2518
+Q233,Malta,DROP,2496
+Q12544,Byzantine Empire,DROP,2450
+Q1029,Mozambique,"GreaterAfrican,Africans",2377
+Q963,Botswana,"GreaterAfrican,Africans",2377
+Q774,Guatemala,"GreaterEuropean,WestEuropean,Hispanic",2361
+Q1006,Guinea,"GreaterAfrican,Africans",2360
+Q423,North Korea,"Asian,GreaterEastAsian,EastAsian",2323
+Q792,El Salvador,"GreaterEuropean,WestEuropean,Hispanic",2272
+Q1049,Sudan,"GreaterAfrican,Muslim",2256
+Q962,Benin,"GreaterAfrican,Africans",2185
+Q7318,Nazi Germany,"GreaterEuropean,WestEuropean,Germanic",2184
+Q804,Panama,"GreaterEuropean,WestEuropean,Hispanic",2161
+Q754,Trinidad and Tobago,DROP,2151
+Q236,Montenegro,"GreaterEuropean,EastEuropean",2130
+Q813,Kyrgyzstan,"GreaterAfrican,Muslim",2126
+Q503585,Korea under Japanese rule,"Asian,GreaterEastAsian,EastAsian",2081
+Q711,Mongolia,"Asian,GreaterEastAsian,EastAsian",2047
+Q965,Burkina Faso,"GreaterAfrican,Africans",2032
+Q243610,Ukrainian People's Republic,"GreaterEuropean,EastEuropean",2025
+Q817,Kuwait,"GreaterAfrican,Muslim",2002
+Q971,Republic of the Congo,"GreaterAfrican,Africans",1999
+Q171150,Kingdom of Hungary,"GreaterEuropean,EastEuropean",1973
+Q1037,Rwanda,"GreaterAfrican,Africans",1972
+Q805,Yemen,"GreaterAfrican,Muslim",1946
+Q1072949,Western Han,"Asian,GreaterEastAsian,EastAsian",1936
+Q204920,Crown of Aragon,"GreaterEuropean,WestEuropean,Hispanic",1931
+Q8646,Hong Kong,"Asian,GreaterEastAsian,EastAsian",1913
+Q783,Honduras,"GreaterEuropean,WestEuropean,Hispanic",1881
+Q1020,Malawi,"GreaterAfrican,Africans",1880
+Q878,United Arab Emirates,"GreaterAfrican,Muslim",1873
+Q730,Suriname,DROP,1842
+Q953,Zambia,"GreaterAfrican,Africans",1805
+Q945,Togo,"GreaterAfrican,Africans",1800
+Q2017684,French protectorate of Tunisia,"GreaterAfrican,Muslim",1796
+Q1019,Madagascar,"GreaterAfrican,Africans",1756
+Q1005,The Gambia,"GreaterAfrican,Africans",1666
+Q1000,Gabon,"GreaterAfrican,Africans",1660
+Q1030,Namibia,DROP,1593
+Q929,Central African Republic,"GreaterAfrican,Africans",1557
+Q154195,Kingdom of Bavaria,"GreaterEuropean,WestEuropean,Germanic",1544
+Q657,Chad,"GreaterAfrican,Africans",1534
+Q238,San Marino,"GreaterEuropean,WestEuropean,Italian",1518
+Q170174,Papal States,"GreaterEuropean,WestEuropean,Italian",1510
+Q1032,Niger,"GreaterAfrican,Africans",1501
+Q958,South Sudan,"GreaterAfrican,Africans",1501
+Q811,Nicaragua,"GreaterEuropean,WestEuropean,Hispanic",1499
+Q398,Bahrain,"GreaterAfrican,Muslim",1482
+Q863,Tajikistan,"GreaterAfrican,Muslim",1420
+Q2577303,Kingdom of Sardinia,"GreaterEuropean,WestEuropean,Italian",1417
+Q1649871,Kingdom of Poland,"GreaterEuropean,EastEuropean",1381
+Q170468,United Arab Republic,"GreaterAfrican,Muslim",1372
