@@ -5,20 +5,12 @@
 set -e  # Exit on any error
 
 echo "🔧 Local CI: Installing dependencies..."
-uv sync --group test --group inference --group dev
+uv sync --all-extras --dev
 
-echo "🔧 Local CI: Installing package in development mode..."
-uv pip install --no-deps -e .
-
-echo "🔧 Local CI: Fallback TensorFlow installation if needed..."
-uv run python -c "import tensorflow" || uv pip install "tensorflow>=2.15.0,<3.0.0"
-
-echo "✅ Local CI: Verifying TensorFlow installation..."
-uv run python -c "import tensorflow; print('✓ TensorFlow version:', tensorflow.__version__)"
+echo "✅ Local CI: Verifying installation..."
+uv run python -c "import torch; print('✓ PyTorch version:', torch.__version__)"
 uv run python -c "import pandas; print('✓ Pandas version:', pandas.__version__)"
 uv run python -c "import numpy; print('✓ NumPy version:', numpy.__version__)"
-echo "Testing TensorFlow functionality..."
-uv run python -c "import tensorflow as tf; print('✓ TensorFlow can create tensors:', tf.constant([1, 2, 3]))"
 
 echo "🔍 Local CI: Running linting checks..."
 uv run ruff check .

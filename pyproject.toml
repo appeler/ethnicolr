@@ -7,8 +7,7 @@ name = "ethnicolr"
 version = "0.22.0"
 description = "Modern ML library for race/ethnicity prediction from names with intuitive CLI"
 readme = "README.md"
-# TensorFlow 2.18+ supports Python 3.11-3.12 (no Python 3.13 wheels available yet)
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.11,<3.14"
 license = "MIT"
 
 authors = [
@@ -35,11 +34,13 @@ classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
 ]
 
 dependencies = [
   "pandas>=2.2.0",
-  "numpy>=1.26.0,<2.0.0",
+  "numpy>=1.26.0",
   "click>=8.0.0",
   "torch>=2.0.0",
 ]
@@ -66,17 +67,6 @@ pred_fl_reg_name_five_cat = "ethnicolr.pred_fl_reg_name_five_cat:main"
 pred_nc_reg_name = "ethnicolr.pred_nc_reg_name:main"
 
 [project.optional-dependencies]
-# Minimal convenience extra (doesn't add anything beyond base deps,
-# but keeps compatibility with existing usage like `ethnicolr[base]`.
-# Runtime inference stack
-inference = [
-  "tensorflow>=2.15.0,<3.0.0; sys_platform != 'win32'",  # Full TensorFlow for Mac/Linux
-  "tensorflow-intel>=2.15.0,<3.0.0; sys_platform == 'win32'",  # Intel's official Windows CPU build with proper tensorflow module
-  "protobuf>=4.21.0,<7.0.0",
-  "typing-extensions>=4.4,<5.0",
-]
-
-# Test stack (no TF here; you combine with `[inference]`)
 test = [
   "pytest>=7.0",
   "pytest-cov>=4.0",
@@ -142,10 +132,6 @@ docs = [
 
 # UV configuration
 [tool.uv]
-# Universal lockfile generation - resolve deps for all platforms
-# environments = []  # Commented out to allow cross-platform dependency resolution
-# Ensure Windows AMD64 gets compatible wheels (fixes tensorflow-io-gcs-filesystem)
-required-environments = ["sys_platform == 'win32' and platform_machine == 'AMD64'"]
 
 [tool.uv.build-backend]
 module-root = ""
@@ -238,13 +224,3 @@ known_first_party = ["ethnicolr"]
 
 # Tell deptry these are dev dependency groups (won't be flagged as unused)
 pep621_dev_dependency_groups = ["test", "dev", "docs"]
-
-# Map package names to module names
-package_module_name_map = { tensorflow-intel = "tensorflow" }
-
-# Only ignore truly exceptional cases that can't be categorized above
-per_rule_ignores = { DEP002 = [
-  "tensorflow-intel",   # Platform-specific runtime dependency (Windows only)
-  "protobuf",          # TensorFlow runtime dependency
-  "typing-extensions"   # Runtime compatibility shim
-] }
