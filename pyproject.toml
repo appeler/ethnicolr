@@ -97,6 +97,11 @@ docs = [
 
 # --- uv dependency groups (for `uv sync --group ...`) ---
 [dependency-groups]
+# Model training scripts (scripts/model-training/)
+training = [
+  "scikit-learn>=1.4",
+]
+
 # Note: inference removed from here - already defined in [project.optional-dependencies]
 # This prevents UV dependency resolution conflicts
 
