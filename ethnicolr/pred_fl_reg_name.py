@@ -29,9 +29,9 @@ class FloridaRegNameModel(EthnicolrModelClass):
     Florida full-name LSTM prediction model.
     """
 
-    MODELFN = "models/fl_voter_reg/lstm/fl_all_name_lstm.h5"
-    VOCABFN = "models/fl_voter_reg/lstm/fl_all_name_vocab.csv"
-    RACEFN = "models/fl_voter_reg/lstm/fl_name_race.csv"
+    MODELFN = "models/fl_voter_reg/lstm/fl_name_lstm_pt.pt"
+    VOCABFN = "models/fl_voter_reg/lstm/fl_name_vocab_pt.csv"
+    RACEFN = "models/fl_voter_reg/lstm/fl_name_race_pt.csv"
 
     NGRAMS = 2
     FEATURE_LEN = 25

@@ -23,9 +23,9 @@ logger = logging.getLogger(__name__)
 
 
 class FloridaRegLnFiveCatModel(EthnicolrModelClass):
-    MODELFN = "models/fl_voter_reg/lstm/fl_all_ln_lstm_5_cat{0:s}.h5"
-    VOCABFN = "models/fl_voter_reg/lstm/fl_all_ln_vocab_5_cat{0:s}.csv"
-    RACEFN = "models/fl_voter_reg/lstm/fl_ln_five_cat_race{0:s}.csv"
+    MODELFN = "models/fl_voter_reg/lstm/fl_ln_five_cat{0:s}_lstm_pt.pt"
+    VOCABFN = "models/fl_voter_reg/lstm/fl_ln_five_cat{0:s}_vocab_pt.csv"
+    RACEFN = "models/fl_voter_reg/lstm/fl_ln_five_cat{0:s}_race_pt.csv"
 
     NGRAMS = 2
     FEATURE_LEN = 20

@@ -46,9 +46,9 @@ class FloridaRegLnModel(EthnicolrModelClass):
     def get_model_paths(cls):
         package = resources.files(__name__.split(".")[0])
         return (
-            str(package / "models/fl_voter_reg/lstm/fl_all_ln_lstm.h5"),
-            str(package / "models/fl_voter_reg/lstm/fl_all_ln_vocab.csv"),
-            str(package / "models/fl_voter_reg/lstm/fl_ln_race.csv"),
+            str(package / "models/fl_voter_reg/lstm/fl_ln_lstm_pt.pt"),
+            str(package / "models/fl_voter_reg/lstm/fl_ln_vocab_pt.csv"),
+            str(package / "models/fl_voter_reg/lstm/fl_ln_race_pt.csv"),
         )
 
     @classmethod

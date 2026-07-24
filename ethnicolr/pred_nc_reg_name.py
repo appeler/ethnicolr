@@ -29,11 +29,12 @@ class NCRegNameModel(EthnicolrModelClass):
     North Carolina 12-category full name prediction model.
     """
 
-    MODELFN = "models/nc_voter_reg/lstm/nc_voter_name_lstm_oversample.h5"
-    VOCABFN = "models/nc_voter_reg/lstm/nc_voter_name_vocab_oversample.csv"
-    RACEFN = "models/nc_voter_reg/lstm/nc_name_race.csv"
+    MODELFN = "models/nc_voter_reg/lstm/nc_name_lstm_pt.pt"
+    VOCABFN = "models/nc_voter_reg/lstm/nc_name_vocab_pt.csv"
+    RACEFN = "models/nc_voter_reg/lstm/nc_name_race_pt.csv"
 
-    NGRAMS = (2, 3)
+    # The historical (2, 3) range only ever produced bigrams (range(2, 3) == [2])
+    NGRAMS = 2
     FEATURE_LEN = 25
 
     @classmethod
