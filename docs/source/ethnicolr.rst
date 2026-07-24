@@ -57,8 +57,8 @@ Or
    conda install -c soodoku ethnicolr
 
 Notes:
- - The models are run and verified on TensorFlow 2.x using Python 3.7 and 3.8 and lower will work. TensorFlow 1.x has been deprecated.
- - If you are installing on Windows, Theano installation typically needs admin. privileges on the shell.
+ - The models run on PyTorch and are verified on Python 3.11 through 3.13.
+ - All model files ship with the package; no separate download step is needed.
 
 General API
 ------------------
@@ -183,8 +183,8 @@ where the data is:
 
       -  Removes extra space.
       -  Uses the `last name census 2000
-         model <ethnicolr/models/ethnicolr_keras_lstm_census2000_ln.ipynb>`__ or
-         `last name census 2010 model <ethnicolr/models/ethnicolr_keras_lstm_census2010_ln.ipynb>`__
+         model <scripts/model-training/census/train_census_lstm_pytorch.py>`__ or
+         `last name census 2010 model <scripts/model-training/census/train_census_lstm_pytorch.py>`__
          to predict the race and ethnicity.
 
 
@@ -236,7 +236,7 @@ where the data is:
 
       -  Removes extra space.
       -  Uses the `last name wiki
-         model <ethnicolr/models/ethnicolr_keras_lstm_wiki_ln.ipynb>`__ to
+         model <scripts/model-training/train_name_lstm.py>`__ to
          predict the race and ethnicity.
 
 
@@ -314,7 +314,7 @@ where the data is:
 
       -  Removes extra space.
       -  Uses the `full name wiki
-         model <ethnicolr/models/ethnicolr_keras_lstm_wiki_name.ipynb>`__
+         model <scripts/model-training/train_name_lstm.py>`__
          to predict the race and ethnicity.
 
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -374,7 +374,7 @@ where the data is:
 
       -  Removes extra space, if there.
       -  Uses the `last name FL registration
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln.ipynb>`__
+         model <scripts/model-training/train_name_lstm.py>`__
          to predict the race and ethnicity.
 
    +--------------+---------------------------------------------------------------------------------------------------------------------+
@@ -449,7 +449,7 @@ where the data is:
 
       -  Removes extra space.
       -  Uses the `full name FL
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_name.ipynb>`__
+         model <scripts/model-training/train_name_lstm.py>`__
          to predict the race and ethnicity.
 
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -512,7 +512,7 @@ where the data is:
 
       -  Removes extra space, if there.
       -  Uses the `last name FL registration
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb>`__
+         model <scripts/model-training/train_name_lstm.py>`__
          to predict the race and ethnicity.
 
    +--------------+---------------------------------------------------------------------------------------------------------------------+
@@ -581,7 +581,7 @@ where the data is:
 
       -  Removes extra space.
       -  Uses the `full name FL
-         model <ethnicolr/models/ethnicolr_keras_lstm_fl_voter_ln_five_cat.ipynb>`__
+         model <scripts/model-training/train_name_lstm.py>`__
          to predict the race and ethnicity.
 
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -650,7 +650,7 @@ where the data is:
 
       -  Removes extra space.
       -  Uses the `full name NC
-         model <ethnicolr/models/ethnicolr_keras_lstm_nc_12_cat_model.ipynb>`__
+         model <scripts/model-training/train_name_lstm.py>`__
          to predict the race and ethnicity.
 
    +--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
