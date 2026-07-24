@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Adjacent Repositories Recommender
-        uses: gojiplus/adjacent@v1.3
+        uses: gojiplus/adjacent@v1.4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}  # ✅ Pass the required token
 

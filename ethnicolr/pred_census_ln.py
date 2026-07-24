@@ -18,6 +18,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
+from .torch_utils import get_device
 from .utils import arg_parser
 
 logging.basicConfig(
@@ -68,14 +69,10 @@ class CensusLnModel:
 
     @classmethod
     def get_device(cls) -> torch.device:
-        if cls._device is None:
-            if torch.cuda.is_available():
-                cls._device = torch.device("cuda")
-            elif torch.backends.mps.is_available():
-                cls._device = torch.device("mps")
-            else:
-                cls._device = torch.device("cpu")
-        return cls._device
+        device = cls._device
+        if device is None:
+            device = cls._device = get_device()
+        return device
 
     @classmethod
     def get_model_paths(cls, year: int) -> tuple[Path, Path, Path]:

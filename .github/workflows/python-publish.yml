@@ -21,7 +21,7 @@ jobs:
       id-token: write  # required for trusted publishing
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -69,7 +69,7 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: ethnicolr v${{ env.RELEASE_VERSION }}
           tag_name: ${{ env.TAG_NAME }}

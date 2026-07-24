@@ -1,5 +1,5 @@
 [build-system]
-requires = ["uv_build>=0.9.15,<0.10.0"]
+requires = ["uv_build>=0.9.15,<0.12.0"]
 build-backend = "uv_build"
 
 [project]
@@ -64,7 +64,6 @@ pred_fl_reg_ln = "ethnicolr.pred_fl_reg_ln:main"
 pred_fl_reg_ln_five_cat = "ethnicolr.pred_fl_reg_ln_five_cat:main"
 pred_fl_reg_name_five_cat = "ethnicolr.pred_fl_reg_name_five_cat:main"
 pred_nc_reg_name = "ethnicolr.pred_nc_reg_name:main"
-ethnicolr_download_models = "ethnicolr.utils.download:main"
 
 [project.optional-dependencies]
 # Minimal convenience extra (doesn't add anything beyond base deps,
