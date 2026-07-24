@@ -1,0 +1,120 @@
+qid,ethnic_group,category,person_count
+Q42740,Han Chinese people,"Asian,GreaterEastAsian,EastAsian",39786
+Q49085,African Americans,"GreaterAfrican,Africans",8887
+Q79797,Armenians,"GreaterEuropean,EastEuropean",2696
+Q1130350,Minangkabau,"GreaterAfrican,Muslim",2681
+Q2995285,White Brazilians,"GreaterEuropean,WestEuropean,Hispanic",2628
+Q752526,Galicians,"GreaterEuropean,WestEuropean,Hispanic",2128
+Q170217,Czechs,"GreaterEuropean,EastEuropean",1602
+Q7325,Jewish people,"GreaterEuropean,Jewish",1484
+Q2587830,Pardo Brazilians,"GreaterEuropean,WestEuropean,Hispanic",1445
+Q145665,Manchu,"Asian,GreaterEastAsian,EastAsian",1098
+Q503963,Bamar,"Asian,GreaterEastAsian,EastAsian",958
+Q6122670,Māori,DROP,805
+Q41975,Mongols,"Asian,GreaterEastAsian,EastAsian",657
+Q388315,African Brazilians,"GreaterAfrican,Africans",657
+Q49078,White Americans,DROP,581
+Q1983634,Odia people,"Asian,IndianSubContinent",561
+Q44806,Ukrainians,"GreaterEuropean,EastEuropean",507
+Q49542,Russians,"GreaterEuropean,EastEuropean",490
+Q817393,black people,DROP,455
+Q846570,Americans,DROP,444
+Q1026,Poles,"GreaterEuropean,EastEuropean",398
+Q190168,Yoruba people,"GreaterAfrican,Africans",366
+Q842438,British,"GreaterEuropean,British",364
+Q235155,white people,DROP,361
+Q10312754,Japanese Canadians,"Asian,GreaterEastAsian,Japanese",359
+Q1945786,Chinese Indonesians,"Asian,GreaterEastAsian,EastAsian",349
+Q142702,Malays,"GreaterAfrican,Muslim",343
+Q12223,Kurds,"GreaterAfrican,Muslim",321
+Q726673,Swedish-speaking population of Finland,"GreaterEuropean,WestEuropean,Nordic",318
+Q189975,Inuit,DROP,299
+Q539051,Greeks,"GreaterEuropean,EastEuropean",287
+Q42406,English people,"GreaterEuropean,British",279
+Q108266,Navajo,DROP,271
+Q484464,Koreans,"Asian,GreaterEastAsian,EastAsian",257
+Q121842,French,"GreaterEuropean,WestEuropean,French",253
+Q216151,Vietnamese people,"Asian,GreaterEastAsian,EastAsian",235
+Q42884,Germans,"GreaterEuropean,WestEuropean,Germanic",226
+Q244157,Igbo people,"GreaterAfrican,Africans",205
+Q33938,Hausa people,"GreaterAfrican,Africans",197
+Q35323,Arabs,"GreaterAfrican,Muslim",194
+Q170826,Irish people,"GreaterEuropean,British",174
+Q34069,Ashkenazi Jews,"GreaterEuropean,Jewish",158
+Q678551,American Jews,"GreaterEuropean,Jewish",158
+Q50001,Italians,"GreaterEuropean,WestEuropean,Italian",153
+Q472834,Thai people,"Asian,GreaterEastAsian,EastAsian",152
+Q105405,Cherokee,DROP,146
+Q581921,Mexican Americans,"GreaterEuropean,WestEuropean,Hispanic",143
+Q18973,Georgians,"GreaterEuropean,EastEuropean",141
+Q8060,Romani people,DROP,140
+Q46118,Uyghurs,"GreaterAfrican,Muslim",139
+Q171336,Slovaks,"GreaterEuropean,EastEuropean",136
+Q3267254,Afro-Uruguayan,"GreaterEuropean,WestEuropean,Hispanic",136
+Q1075293,Irish Americans,"GreaterEuropean,British",135
+Q974693,Italian Americans,"GreaterEuropean,WestEuropean,Italian",135
+Q483569,Belarusians,"GreaterEuropean,EastEuropean",132
+Q2436423,Macedonians,"GreaterEuropean,EastEuropean",130
+Q1200528,Malaysian Chinese,"Asian,GreaterEastAsian,EastAsian",126
+Q165192,Swedes,"GreaterEuropean,WestEuropean,Nordic",126
+Q482942,Azerbaijanis,"GreaterAfrican,Muslim",126
+Q1156766,Japanese Americans,"Asian,GreaterEastAsian,Japanese",120
+Q181634,Scottish people,"GreaterEuropean,British",118
+Q388467,Afro-Cuban,"GreaterEuropean,WestEuropean,Hispanic",118
+Q126756,Basques,"GreaterEuropean,WestEuropean,Hispanic",117
+Q157139,Baltic Germans,"GreaterEuropean,WestEuropean,Germanic",114
+Q161652,Japanese people,"Asian,GreaterEastAsian,Japanese",112
+Q35565,Tatars,"GreaterAfrican,Muslim",110
+Q117458,Crimean Tatars,"GreaterAfrican,Muslim",102
+Q1752440,Israeli Jews,"GreaterEuropean,Jewish",102
+Q127885,Serbs,"GreaterEuropean,EastEuropean",98
+Q188779,Norwegians,"GreaterEuropean,WestEuropean,Nordic",97
+Q201190,Palestinians,"GreaterAfrican,Muslim",97
+Q141817,German Americans,"GreaterEuropean,WestEuropean,Germanic",96
+Q133255,Bulgarians,"GreaterEuropean,EastEuropean",92
+Q97704261,South Africans,DROP,92
+Q276879,Korean Americans,"Asian,GreaterEastAsian,EastAsian",91
+Q485150,Romanians,"GreaterEuropean,EastEuropean",91
+Q1146100,Chinese Americans,"Asian,GreaterEastAsian,EastAsian",86
+Q518188,Czech Americans,"GreaterEuropean,EastEuropean",85
+Q101452272,Azerbaijanis,"GreaterAfrican,Muslim",81
+Q2556103,Pashtuns,"GreaterAfrican,Muslim",77
+Q313323,Volksdeutsche,"GreaterEuropean,WestEuropean,Germanic",76
+Q15863,Slovenes,"GreaterEuropean,EastEuropean",75
+Q133032,Hungarians,"GreaterEuropean,EastEuropean",75
+Q140420,Rusyns,"GreaterEuropean,EastEuropean",74
+Q1413685,Filipino Americans,DROP,70
+Q893594,Puerto Ricans,"GreaterEuropean,WestEuropean,Hispanic",68
+Q84072,Turks,"GreaterAfrican,Muslim",67
+Q102251,Sephardi Jews,"GreaterEuropean,Jewish",66
+Q2408653,Thai Chinese,"Asian,GreaterEastAsian,EastAsian",66
+Q45315,Berbers,"GreaterAfrican,Muslim",66
+Q160894,Spaniards,"GreaterEuropean,WestEuropean,Hispanic",64
+Q2643509,Indian Americans,"Asian,IndianSubContinent",63
+Q179248,Albanians,"GreaterEuropean,EastEuropean",59
+Q49297,Native Americans in the United States,DROP,57
+Q1790886,Cuban Americans,"GreaterEuropean,WestEuropean,Hispanic",56
+Q402913,Bengalis,"Asian,IndianSubContinent",55
+Q167420,Croats,"GreaterEuropean,EastEuropean",51
+Q1061510,Egyptians,"GreaterAfrican,Muslim",49
+Q170284,Finns,"GreaterEuropean,WestEuropean,Nordic",49
+Q1258074,Sindhis,"Asian,IndianSubContinent",46
+Q1189552,Polish Americans,"GreaterEuropean,EastEuropean",44
+Q164714,Danes,"GreaterEuropean,WestEuropean,Nordic",40
+Q173302,Estonians,"GreaterEuropean,EastEuropean",36
+Q2657969,Vietnamese Americans,"Asian,GreaterEastAsian,EastAsian",35
+Q4969441,British Americans,"GreaterEuropean,British",34
+Q58669,Hispanic and Latino Americans,"GreaterEuropean,WestEuropean,Hispanic",34
+Q1344183,English Americans,"GreaterEuropean,British",33
+Q1065371,Italian Brazilians,"GreaterEuropean,WestEuropean,Italian",33
+Q501837,Mizrahi Jews,"GreaterEuropean,Jewish",33
+Q115026,Swedish Americans,"GreaterEuropean,WestEuropean,Nordic",32
+Q3476361,Scottish Americans,"GreaterEuropean,British",32
+Q854323,Punjabis,"Asian,IndianSubContinent",32
+Q1369944,French Americans,"GreaterEuropean,WestEuropean,French",30
+Q49540,Latvians,"GreaterEuropean,EastEuropean",30
+Q188353,Welsh people,"GreaterEuropean,British",28
+Q857880,French Canadians,"GreaterEuropean,WestEuropean,French",27
+Q1193808,Norwegian Americans,"GreaterEuropean,WestEuropean,Nordic",26
+Q1058496,Dutch Americans,"GreaterEuropean,WestEuropean,Germanic",24
+Q484206,Persians,"GreaterAfrican,Muslim",22

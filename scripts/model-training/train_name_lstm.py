@@ -11,7 +11,8 @@ Usage:
     python train_name_lstm.py nc_name --device mps
 
 Data expectations (see scripts/data-acquisition/):
-    wiki:  ethnicolr/data/wiki/wiki_name_race.csv (in repo)
+    wiki:  <data-dir>/wiki_name_race_2026.csv.gz (built by wiki/prepare_wiki_data.py;
+           merges the 2009-era in-repo CSV with fresh Wikidata people)
     fl:    <data-dir>/fl_reg_name_race.csv.gz and fl_reg_name_race_2022.csv.gz
     nc:    <data-dir>/nc_voter_name_race.csv.gz
 """
@@ -70,7 +71,7 @@ MODEL_CONFIGS = {
         20,
         20,
         "wiki/lstm/wiki_ln",
-        "ethnicolr/data/wiki/wiki_name_race.csv",
+        "wiki_name_race_2026.csv.gz",
         13,
     ),
     "wiki_name": ModelConfig(
@@ -79,7 +80,7 @@ MODEL_CONFIGS = {
         25,
         20,
         "wiki/lstm/wiki_name",
-        "ethnicolr/data/wiki/wiki_name_race.csv",
+        "wiki_name_race_2026.csv.gz",
         13,
     ),
     "fl_ln": ModelConfig(
@@ -142,9 +143,16 @@ MODEL_CONFIGS = {
 }
 
 
-def load_wiki(path: Path, rng: np.random.Generator) -> pd.DataFrame:
+def load_wiki(
+    path: Path, rng: np.random.Generator, max_per_class: int = 300_000
+) -> pd.DataFrame:
     df = pd.read_csv(path)
     df = df.dropna(subset=["name_first", "name_last"])
+    # Cap dominant categories so 13-class balance stays workable
+    seed = int(rng.integers(2**31))
+    df = df.groupby("race", group_keys=False)[df.columns].apply(
+        lambda g: g.sample(min(len(g), max_per_class), random_state=seed)
+    )
     return df[["name_last", "name_first", "race"]]
 
 
@@ -228,6 +236,21 @@ def build_vocab(names: pd.Series) -> list[str]:
     return ["UNK"] + [word for _, word in sorted_items]
 
 
+def topk_accuracy(model, loader, device, ks=(2, 3)):
+    """Fraction of samples whose true label is within the top-k predictions."""
+    model.eval()
+    hits = dict.fromkeys(ks, 0)
+    total = 0
+    with torch.no_grad():
+        for X_batch, y_batch in loader:
+            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+            topk = model(X_batch).topk(max(ks), dim=1).indices
+            for k in ks:
+                hits[k] += (topk[:, :k] == y_batch.unsqueeze(1)).any(dim=1).sum().item()
+            total += y_batch.size(0)
+    return {k: hits[k] / total for k in ks}
+
+
 def run_epoch(model, loader, criterion, device, optimizer=None):
     training = optimizer is not None
     model.train() if training else model.eval()
@@ -281,11 +304,7 @@ def main() -> None:
     torch.manual_seed(args.seed)
     rng = np.random.default_rng(args.seed)
 
-    data_path = (
-        REPO_ROOT / cfg.data_file
-        if cfg.loader == "wiki"
-        else args.data_dir / cfg.data_file
-    )
+    data_path = args.data_dir / cfg.data_file
     if not data_path.exists():
         raise FileNotFoundError(
             f"Training data not found: {data_path}\n"
@@ -358,6 +377,8 @@ def main() -> None:
         cpu_model, test_loader, criterion, torch.device("cpu")
     )
     print(f"\nTest accuracy (CPU eval): {test_acc:.4f}")
+    topk = topk_accuracy(cpu_model, test_loader, torch.device("cpu"))
+    print(" ".join(f"top-{k} accuracy: {v:.4f}" for k, v in sorted(topk.items())))
     print(classification_report(y_true, y_pred, target_names=races))
     print(confusion_matrix(y_true, y_pred))
 
