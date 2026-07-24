@@ -11,6 +11,8 @@ ethnicolr: Predict Race and Ethnicity From Name
    :caption: Contents:
 
    ethnicolr
+   statistical_principles
+   model_cards
 
 .. toctree::
    :maxdepth: 2
