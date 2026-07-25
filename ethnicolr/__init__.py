@@ -9,6 +9,7 @@ from __future__ import annotations
 
 # Direct imports - no lazy loading needed
 from .census_ln import census_ln
+from .dict_models import census_fn, pred_census_name, pred_voter_name
 from .pred_census_ln import pred_census_ln
 from .pred_fl_reg_ln import pred_fl_reg_ln
 from .pred_fl_reg_ln_five_cat import pred_fl_reg_ln_five_cat
@@ -20,6 +21,9 @@ from .pred_wiki_name import pred_wiki_name
 
 __all__ = [
     "census_ln",
+    "census_fn",
+    "pred_census_name",
+    "pred_voter_name",
     "pred_census_ln",
     "pred_wiki_ln",
     "pred_wiki_name",

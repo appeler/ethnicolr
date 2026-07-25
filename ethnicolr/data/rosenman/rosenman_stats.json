@@ -1,0 +1,13 @@
+{
+  "source": "Rosenman, Olivella & Imai (2023), doi:10.7910/DVN/YL2OXB (CC0)",
+  "population": "registered voters in AL, FL, GA, LA, NC, SC",
+  "voter_population_marginal": {
+    "white": 0.656992573371927,
+    "black": 0.22749949687834053,
+    "hispanic": 0.08256726400593056,
+    "asian": 0.01714192362841555,
+    "other": 0.0157987421153866
+  },
+  "n_first_names": 135777,
+  "n_last_names": 338169
+}

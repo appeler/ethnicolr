@@ -57,6 +57,9 @@ ethnicolr = "ethnicolr.cli:cli"
 
 # Legacy CLI (backward compatibility)
 census_ln = "ethnicolr.census_ln:main"
+census_fn = "ethnicolr.dict_models:census_fn_main"
+pred_census_name = "ethnicolr.dict_models:pred_census_name_main"
+pred_voter_name = "ethnicolr.dict_models:pred_voter_name_main"
 pred_census_ln = "ethnicolr.pred_census_ln:main"
 pred_wiki_name = "ethnicolr.pred_wiki_name:main"
 pred_wiki_ln = "ethnicolr.pred_wiki_ln:main"
@@ -97,9 +100,11 @@ docs = [
 
 # --- uv dependency groups (for `uv sync --group ...`) ---
 [dependency-groups]
-# Model training scripts (scripts/model-training/)
+# Model training and data-acquisition scripts (scripts/)
 training = [
   "scikit-learn>=1.4",
+  "openpyxl>=3.1",
+  "pyreadr>=0.5",
 ]
 
 # Note: inference removed from here - already defined in [project.optional-dependencies]
