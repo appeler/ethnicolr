@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-07-25
+
+A statistical-rigor release: calibrated probabilities and formal uncertainty
+across all models, first names in the census pipeline, academic name
+dictionaries, and a global name-origin model. (#127, #128, #129)
+
+### Added
+- **Calibration + conformal layer** (#127). Every model ships a stats file
+  with a fitted temperature (probabilities are now measured-calibrated, not
+  assumed), the training class distribution, and split-conformal quantiles.
+  - `prior=` on every prediction function reweights probabilities to a target
+    population (`p_adj ∝ p·π_target/π_train`) — the base-rate fix for the
+    class-balanced models and the name-likelihood step for BISG pipelines.
+  - `coverage=` adds a conformal prediction set (`race_set`/`origin_set`) with
+    empirically verified marginal coverage at 0.80/0.90/0.95.
+  - Model cards and a statistical-principles guide document reference
+    populations, calibration, weighting, and the conformal guarantee.
+- **Census 2020 first names + dictionary estimators** (#128):
+  - `census_fn` — first-name lookup against the Census 2020 first-name file
+    (53,616 names; first such release since 1990).
+  - `pred_census_name` — six-category first+last posterior via naive Bayes
+    with LSTM fallback and a `basis` column ("Tyrone Smith" → ~90% Black).
+  - `pred_voter_name` — five-category posterior from the CC0
+    Rosenman-Olivella-Imai voter-file dictionaries (338k surnames).
+  - `conf_int=` on `census_ln`/`census_fn` for exact Wilson score intervals.
+- **`pred_wiki_origin`** (#129) — name → country-of-origin over 90 countries,
+  trained on 3.6M Wikidata people (62% top-1 / 81% top-3; chance ≈ 1.1%).
+
+### Changed
+- NC calibration re-inflates deduplicated names to person frequency, so its
+  guarantees describe a random person rather than a random unique name.
+
 ## [1.0.0] - 2026-07-25
 
 Complete migration from TensorFlow to PyTorch, all models retrained, and a
