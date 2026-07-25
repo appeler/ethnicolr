@@ -149,6 +149,20 @@ names, honest for rare ones. The 2020 counts additionally carry the Census
 Bureau's disclosure-avoidance noise (±3 per cell at 95% probability), which
 the intervals do not model; for counts above a few hundred it is negligible.
 
+## The origin model's reference population
+
+`pred_wiki_origin` predicts the likely *country of origin of a name* over
+~130 country classes, trained on Wikidata people using citizenship as the
+label. Two caveats are part of its meaning: the reference population is
+people notable enough for Wikipedia/Wikidata, and citizenship is a proxy for
+name origin — for migrants the two differ (melting-pot citizenships and
+ambiguous historical unions are excluded from training for exactly this
+reason; see the auditable mapping in
+`scripts/data-acquisition/wiki/mappings/country_to_origin.csv`). With ~130
+classes, single-country answers are often genuinely uncertain: prefer the
+full distribution, `coverage=` sets, or aggregate columns into regions, e.g.
+`df[["Sweden", "Norway", "Denmark", "Finland", "Iceland"]].sum(axis=1)`.
+
 ## References
 
 - Guo, Pleiss, Sun & Weinberger (2017). *On Calibration of Modern Neural
