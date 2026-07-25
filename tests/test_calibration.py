@@ -27,13 +27,16 @@ class TestStatsArtifacts:
         models = sorted(MODELS_DIR.rglob("*_lstm_pt.pt")) + sorted(
             MODELS_DIR.rglob("*_lstm_pytorch.pt")
         )
-        assert len(models) == 12
+        assert len(models) >= 12
         for model_path in models:
             stats = load_model_stats(model_path)
             assert stats is not None, f"missing stats for {model_path.name}"
 
-    def test_all_twelve_stats_present(self):
-        assert len(all_stats_files()) == 12
+    def test_stats_count_matches_models(self):
+        models = sorted(MODELS_DIR.rglob("*_lstm_pt.pt")) + sorted(
+            MODELS_DIR.rglob("*_lstm_pytorch.pt")
+        )
+        assert len(all_stats_files()) == len(models)
 
     def test_stats_schema(self):
         for path in all_stats_files():

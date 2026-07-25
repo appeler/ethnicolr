@@ -73,6 +73,15 @@ First names matter: "Smith" alone is majority-white, but "Tyrone Smith" is
 ~90% Black under the census tables. `census_ln(..., conf_int=0.95)` also
 gains exact Wilson bounds.
 
+**Global name origin.** `pred_wiki_origin` predicts likely country of origin
+over ~90 countries (62% top-1, 81% top-3; chance ≈ 1%), trained on Wikidata:
+
+```python
+from ethnicolr import pred_wiki_origin
+pred_wiki_origin(df, "last", "first")  # adds an `origin` column + per-country probabilities
+# Tanaka Yuki → Japan, Kowalski Piotr → Poland, Nguyen Minh → Vietnam
+```
+
 ### Calibrated probabilities, priors, and prediction sets
 
 Every model ships with measured calibration and conformal statistics

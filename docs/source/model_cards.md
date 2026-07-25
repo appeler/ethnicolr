@@ -19,17 +19,19 @@ Methodology: see [Statistical principles](statistical_principles.md).
 | nc_name | 12 | 0.555 | 0.827 | 0.013→0.014 | 0.556 | 0.899 | 7.5 | 1.046 |
 | wiki_ln | 13 | 0.775 | 0.907 | 0.015→0.018 | 0.330 | 0.901 | 8.1 | 1.015 |
 | wiki_name | 13 | 0.863 | 0.954 | 0.009→0.010 | 0.205 | 0.901 | 8.0 | 1.010 |
+| wiki_origin | 90 | 0.626 | 0.809 | 0.023→0.021 | 0.491 | 0.900 | 24.4 | 0.992 |
 
 Headline findings:
 
-- **The models are close to calibrated out of the box** (ECE ≈ 0.01,
-  temperatures ≈ 1.0–1.05). This is now measured on held-out data for every
+- **The models are close to calibrated out of the box** (ECE ≈ 0.01–0.02,
+  temperatures ≈ 1.0). This is now measured on held-out data for every
   release rather than assumed.
 - **Conformal coverage is empirically on target** (within ±1pp of nominal
   at 0.80/0.90/0.95 for all models).
 - **Set sizes quantify name ambiguity honestly.** A census prediction needs
-  ~2.7 of 4 classes for 90% coverage; NC needs ~7.5 of 12 — last names
-  simply do not pin down fine-grained categories, and the sets say so.
+  ~2.7 of 4 classes for 90% coverage; the 90-country origin model needs ~24
+  — last names simply do not pin down fine-grained classes, and the sets
+  say so.
 
 ## Dictionary estimators
 
