@@ -208,6 +208,7 @@ def load_trainer_model(key: str, args) -> dict:
         weights = np.ones(len(test_idx))
         weighting = {
             "wiki": "unique notable person (Wikipedia/Wikidata)",
+            "origin": "unique notable person (Wikipedia/Wikidata)",
             "fl_4cat": "person (registered FL voter sample)",
             "fl_5cat": "person, class-balanced (200k/class FL voter sample)",
         }[cfg.loader]
