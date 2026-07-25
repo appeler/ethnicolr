@@ -47,6 +47,32 @@ Balanced-class numbers are measured against a uniform class distribution
 (chance = 1/n classes), so they are not comparable to the unbalanced
 4-category numbers.
 
+### First names, dictionary estimators, and exact intervals
+
+The census models now use first names too. Three dictionary estimators expose
+exact conditional frequencies from public tables — no neural net where the
+name is in-dictionary:
+
+```python
+from ethnicolr import census_fn, pred_census_name, pred_voter_name
+
+# First-name lookup (Census 2020, first release since 1990), with exact
+# Wilson intervals from the published counts
+census_fn(df, "first", conf_int=0.95)
+
+# First+last posterior over six census categories (naive Bayes across the
+# census tables; LSTM fallback for out-of-dictionary surnames — see `basis`)
+pred_census_name(df, "last", "first")
+
+# Five-category posterior from the Rosenman-Olivella-Imai voter-file
+# dictionaries (338k surnames, 136k first names; CC0)
+pred_voter_name(df, "last", "first")
+```
+
+First names matter: "Smith" alone is majority-white, but "Tyrone Smith" is
+~90% Black under the census tables. `census_ln(..., conf_int=0.95)` also
+gains exact Wilson bounds.
+
 ### Calibrated probabilities, priors, and prediction sets
 
 Every model ships with measured calibration and conformal statistics
