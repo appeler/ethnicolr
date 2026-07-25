@@ -40,7 +40,11 @@ class CensusLnData:
 
     @classmethod
     def census_ln(
-        cls, df: pd.DataFrame, lname_col: str, year: int = 2000
+        cls,
+        df: pd.DataFrame,
+        lname_col: str,
+        year: int = 2000,
+        conf_int: float | None = None,
     ) -> pd.DataFrame:
         """Append Census demographic percentages by last name.
 
@@ -51,6 +55,9 @@ class CensusLnData:
             df: Input DataFrame containing last names.
             lname_col: Column name containing last names.
             year: Census year (2000, 2010, or 2020).
+            conf_int: Optional confidence level (e.g. 0.95) to add exact
+                Wilson score bounds (``<col>_lb``/``<col>_ub``) computed from
+                the published name counts.
 
         Returns:
             DataFrame with original data plus Census demographic columns:
@@ -91,13 +98,15 @@ class CensusLnData:
             logger.info(f"Loading Census {year} data from {census_file}...")
 
             try:
-                columns_to_use: list[str] = ["name"] + CENSUS_COLS
+                columns_to_use: list[str] = ["name", "count"] + CENSUS_COLS
                 census_df = pd.read_csv(
                     census_file,
                     usecols=columns_to_use,  # type: ignore
                 ).dropna(subset=["name"])
-
-                census_df.columns = [temp_col] + CENSUS_COLS
+                census_df = census_df[columns_to_use]
+                for col in CENSUS_COLS + ["count"]:
+                    census_df[col] = pd.to_numeric(census_df[col], errors="coerce")
+                census_df.columns = [temp_col, "__census_count"] + CENSUS_COLS
                 cls.census_df = census_df
                 cls.census_year = year
 
@@ -112,6 +121,19 @@ class CensusLnData:
         start_cols = set(df.columns)
 
         rdf = pd.merge(df, cls.census_df, how="left", on=temp_col)
+
+        if conf_int is not None:
+            if not 0 < conf_int < 1:
+                raise ValueError("conf_int must be between 0 and 1")
+            from .dict_models import wilson_interval
+
+            counts = rdf["__census_count"].to_numpy(dtype=float)
+            for col in CENSUS_COLS:
+                p = rdf[col].to_numpy(dtype=float) / 100
+                lb, ub = wilson_interval(p, counts, conf_int)
+                rdf[f"{col}_lb"] = (lb * 100).round(2)
+                rdf[f"{col}_ub"] = (ub * 100).round(2)
+        rdf.drop(columns=["__census_count"], inplace=True, errors="ignore")
 
         if temp_col in df.columns:
             df.drop(columns=[temp_col], inplace=True)

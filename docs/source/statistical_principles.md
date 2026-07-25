@@ -114,6 +114,41 @@ probability can be precisely estimated yet wrong, or noisy yet calibrated —
 so intervals and conformal sets complement rather than replace each other.
 These intervals carry no frequentist coverage guarantee.
 
+## Dictionary estimators and the independence assumption
+
+`census_fn`, `pred_census_name`, and `pred_voter_name` are *dictionary*
+estimators: exact conditional frequencies from public tables (Census 2020
+first-name and surname files; the Rosenman-Olivella-Imai voter-file
+dictionaries), no neural network involved for in-dictionary names.
+
+Combining first and last names uses naive Bayes:
+
+```
+p(race | first, last) ∝ p(race | last) · p(race | first) / π(race)
+```
+
+which assumes first and last names are conditionally independent given race.
+This is an approximation — culturally correlated first/last pairs (e.g. a
+distinctively Irish first name with an Irish surname) make the combined
+posterior somewhat overconfident, because the two names partially repeat the
+same evidence. The `basis` column records exactly what evidence each row's
+estimate used, including LSTM fallback for out-of-dictionary surnames.
+
+Reference populations differ and are part of each estimator's meaning:
+census tables describe the 2020 US enumerated population; the voter
+dictionaries describe registered voters in AL/FL/GA/LA/NC/SC (their implied
+race marginal ships in `rosenman_stats.json` and anchors the `prior=`
+adjustment).
+
+## Exact intervals for census lookups
+
+`census_ln(..., conf_int=0.95)` and `census_fn(..., conf_int=0.95)` add
+Wilson score bounds computed from the published name counts. These capture
+sampling uncertainty in the published proportions — near-zero for common
+names, honest for rare ones. The 2020 counts additionally carry the Census
+Bureau's disclosure-avoidance noise (±3 per cell at 95% probability), which
+the intervals do not model; for counts above a few hundred it is negligible.
+
 ## References
 
 - Guo, Pleiss, Sun & Weinberger (2017). *On Calibration of Modern Neural

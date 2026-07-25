@@ -31,6 +31,19 @@ Headline findings:
   ~2.7 of 4 classes for 90% coverage; NC needs ~7.5 of 12 — last names
   simply do not pin down fine-grained categories, and the sets say so.
 
+## Dictionary estimators
+
+| Estimator | Categories | Source | Coverage | License |
+|---|---|---|---|---|
+| census_ln / census_fn | 6 census groups | Census 2000/2010/2020 surname + 2020 first-name files | surnames ≥100 occurrences (~90% of people); first names ≥100 (~94%) | Public domain |
+| pred_census_name | 6 (4 on LSTM fallback) | census tables + census LSTM fallback | see `basis` column per row | Public domain |
+| pred_voter_name | 5 (white, black, hispanic, asian, other) | Rosenman-Olivella-Imai voter dictionaries (338k surnames, 136k first names) | registered voters, AL/FL/GA/LA/NC/SC | CC0 |
+
+Dictionary probabilities are exact conditional frequencies — no calibration
+step is needed; their uncertainty is sampling error (Wilson intervals for the
+census tables) plus the naive-Bayes approximation for combined names (see
+statistical principles).
+
 ## Evaluation weighting per model
 
 The guarantees above refer to the population each model was evaluated on:
