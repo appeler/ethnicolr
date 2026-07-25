@@ -140,6 +140,16 @@ MODEL_CONFIGS = {
         "nc_voter_name_race.csv.gz",
         12,
     ),
+    # Country-of-origin model; n_classes 0 = derived from data
+    "wiki_origin": ModelConfig(
+        "origin",
+        "name",
+        25,
+        8,
+        "wiki/lstm/wiki_origin",
+        "wiki_origin.csv.gz",
+        0,
+    ),
 }
 
 
@@ -205,8 +215,16 @@ def load_nc(
     return df[["name_last", "name_first", "race"]]
 
 
+def load_origin(
+    path: Path, rng: np.random.Generator, n_samples: int = 1_000_000
+) -> pd.DataFrame:
+    """Origin dataset: same shape as wiki data, tighter per-class cap."""
+    return load_wiki(path, rng, max_per_class=50_000)
+
+
 LOADERS = {
     "wiki": load_wiki,
+    "origin": load_origin,
     "fl_4cat": load_fl_4cat,
     "fl_5cat": load_fl_5cat,
     "nc": load_nc,
@@ -321,7 +339,7 @@ def main() -> None:
     print(df["race"].value_counts())
 
     races = sorted(df["race"].unique())
-    if len(races) != cfg.n_classes:
+    if cfg.n_classes and len(races) != cfg.n_classes:
         raise ValueError(f"Expected {cfg.n_classes} classes, got {len(races)}: {races}")
 
     features = build_features(df, cfg.feature)

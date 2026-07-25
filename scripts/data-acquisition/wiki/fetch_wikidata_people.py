@@ -59,7 +59,12 @@ def build_query(anchor: str, offset: int) -> str:
 def run_query(endpoint: str, query: str, retries: int = 3) -> list[list[str]]:
     data = urllib.parse.urlencode({"query": query}).encode()
     request = urllib.request.Request(
-        endpoint, data=data, headers={"Accept": "text/csv"}
+        endpoint,
+        data=data,
+        headers={
+            "Accept": "text/csv",
+            "User-Agent": "ethnicolr-research/1.0 (https://github.com/appeler/ethnicolr)",
+        },
     )
     for attempt in range(retries):
         try:
@@ -79,8 +84,11 @@ def run_query(endpoint: str, query: str, retries: int = 3) -> list[list[str]]:
 
 
 def fetch_anchor(endpoint: str, anchor: str, out_path: Path) -> int:
+    # Write to a temp file and rename on success so failed fetches leave
+    # nothing behind (a partial file would defeat --skip-existing)
+    tmp_path = out_path.with_suffix(".tmp")
     total = 0
-    with open(out_path, "w", newline="") as fh:
+    with open(tmp_path, "w", newline="") as fh:
         writer = csv.writer(fh)
         writer.writerow(["person", "label", "family_name", "given_name"])
         offset = 0
@@ -91,6 +99,7 @@ def fetch_anchor(endpoint: str, anchor: str, out_path: Path) -> int:
             if len(rows) < PAGE_SIZE:
                 break
             offset += PAGE_SIZE
+    tmp_path.replace(out_path)
     return total
 
 
@@ -112,11 +121,13 @@ def main() -> None:
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
     with open(args.mappings / "country_to_category.csv") as fh:
-        countries = [
-            row
-            for row in csv.DictReader(fh)
-            if row["category"] != "DROP" and (not args.only or row["qid"] in args.only)
-        ]
+        rows = list(csv.DictReader(fh))
+    if args.only:
+        # Explicit selection overrides the category filter (other pipelines,
+        # e.g. the origin model, use countries the ethnicity mapping drops)
+        countries = [row for row in rows if row["qid"] in args.only]
+    else:
+        countries = [row for row in rows if row["category"] != "DROP"]
 
     # Everyone with an ethnic-group statement, regardless of citizenship,
     # plus the person -> ethnic-group edge list used for label overrides

@@ -1,0 +1,201 @@
+qid,country,origin,person_count
+Q30,United States,DROP,673128
+Q142,France,France,412808
+Q183,Germany,Germany,334113
+Q17,Japan,Japan,257549
+Q145,United Kingdom,United Kingdom,236721
+Q15180,Soviet Union,DROP,195987
+Q29,Spain,Spain,181268
+Q38,Italy,Italy,155375
+Q16,Canada,DROP,143325
+Q36,Poland,Poland,127537
+Q9903,Ming dynasty,China,123974
+Q20,Norway,Norway,119759
+Q34,Sweden,Sweden,117913
+Q252,Indonesia,Indonesia,113382
+Q159,Russia,Russia,108228
+Q29999,Kingdom of the Netherlands,Netherlands,108217
+Q155,Brazil,Brazil,95180
+Q668,India,India,93972
+Q43,Turkey,Turkey,92070
+Q174193,United Kingdom of Great Britain and Ireland,United Kingdom,83652
+Q33,Finland,Finland,77230
+Q39,Switzerland,Switzerland,73895
+Q31,Belgium,Belgium,69907
+Q408,Australia,DROP,69852
+Q28,Hungary,Hungary,69740
+Q34266,Russian Empire,DROP,69095
+Q148,People's Republic of China,China,68934
+Q172579,Kingdom of Italy,Italy,65354
+Q40,Austria,Austria,65261
+Q8733,Qing dynasty,China,60600
+Q756617,Kingdom of Denmark,Denmark,59599
+Q884,South Korea,South Korea,59505
+Q212,Ukraine,Ukraine,53614
+Q33946,Czechoslovakia,DROP,53534
+Q414,Argentina,Argentina,48130
+Q215,Slovenia,Slovenia,44116
+Q7462,Song dynasty,China,42464
+Q801,Israel,Israel,41772
+Q191,Estonia,Estonia,39090
+Q218,Romania,Romania,38505
+Q9683,Tang dynasty,China,37874
+Q96,Mexico,Mexico,36845
+Q664,New Zealand,DROP,36425
+Q213,Czech Republic,Czech Republic,35893
+Q188712,Empire of Japan,Japan,35495
+Q41,Greece,Greece,32500
+Q865,Taiwan,Taiwan,27913
+Q45,Portugal,Portugal,26131
+Q1033,Nigeria,Nigeria,23565
+Q419,Peru,Peru,23502
+Q794,Iran,Iran,23049
+Q16957,German Democratic Republic,Germany,21320
+Q258,South Africa,South Africa,20942
+Q7313,Yuan dynasty,China,19668
+Q27,Ireland,Ireland,18891
+Q219,Bulgaria,Bulgaria,18759
+Q77,Uruguay,Uruguay,18697
+Q129286,British Raj,India,17916
+Q298,Chile,Chile,17876
+Q161885,Kingdom of Great Britain,United Kingdom,17466
+Q172107,Polish–Lithuanian Commonwealth,Poland,16604
+Q739,Colombia,Colombia,16383
+Q12560,Ottoman Empire,Turkey,16222
+Q1206012,German Reich,Germany,15436
+Q184,Belarus,Belarus,14440
+Q843,Pakistan,Pakistan,14377
+Q37,Lithuania,Lithuania,13772
+Q79,Egypt,Egypt,13555
+Q869,Thailand,Thailand,13505
+Q403,Serbia,Serbia,13450
+Q28513,Austria–Hungary,DROP,12958
+Q833,Malaysia,Malaysia,12102
+Q1775277,Dominion of India,India,12000
+Q179876,Kingdom of England,United Kingdom,11646
+Q533534,Cisleithania,DROP,11396
+Q214,Slovakia,Slovakia,11210
+Q224,Croatia,Croatia,11022
+Q211,Latvia,Latvia,10979
+Q83286,Socialist Federal Republic of Yugoslavia,DROP,10964
+Q717,Venezuela,Venezuela,10473
+Q928,Philippines,Philippines,9981
+Q902,Bangladesh,Bangladesh,9766
+Q191077,Kingdom of Yugoslavia,DROP,9705
+Q227,Azerbaijan,Azerbaijan,9375
+Q1747689,Ancient Rome,DROP,8973
+Q131964,Austrian Empire,Austria,8931
+Q1028,Morocco,Morocco,8703
+Q189,Iceland,Iceland,7942
+Q262,Algeria,Algeria,7918
+Q1036,Uganda,Uganda,7859
+Q117,Ghana,Ghana,7710
+Q241,Cuba,Cuba,7577
+Q27306,Kingdom of Prussia,Germany,7554
+Q32,Luxembourg,Luxembourg,7514
+Q881,Vietnam,Vietnam,7426
+Q399,Armenia,Armenia,7174
+Q13426199,Republic of China,China,7124
+Q232,Kazakhstan,Kazakhstan,6846
+Q948,Tunisia,Tunisia,6840
+Q1009,Cameroon,Cameroon,6807
+Q230,Georgia,Georgia,6632
+Q222,Albania,Albania,6362
+Q851,Saudi Arabia,Saudi Arabia,6185
+Q974,Democratic Republic of the Congo,Democratic Republic of the Congo,6131
+Q205662,Tokugawa shogunate,Japan,6033
+Q45670,Kingdom of Portugal,Portugal,5930
+Q736,Ecuador,Ecuador,5867
+Q796,Iraq,Iraq,5860
+Q114,Kenya,Kenya,5389
+Q207272,Second Polish Republic,Poland,5330
+Q822,Lebanon,Lebanon,4888
+Q43287,German Empire,Germany,4837
+Q15102440,"Kingdom of Serbs, Croats and Slovenes",DROP,4753
+Q225,Bosnia and Herzegovina,Bosnia and Herzegovina,4715
+Q170072,Dutch Republic,Netherlands,4505
+Q858,Syria,Syria,4357
+Q854,Sri Lanka,Sri Lanka,4310
+Q1041,Senegal,Senegal,4180
+Q924,Tanzania,Tanzania,4063
+Q786,Dominican Republic,Dominican Republic,4018
+Q229,Cyprus,Cyprus,3926
+Q62633,Grand Duchy of Finland,Finland,3785
+Q115,Ethiopia,Ethiopia,3625
+Q221,North Macedonia,North Macedonia,3623
+Q1008,Ivory Coast,Ivory Coast,3618
+Q836,Myanmar,Myanmar,3613
+Q219060,Palestine,Palestine,3610
+Q790,Haiti,Haiti,3595
+Q70972,Kingdom of France,France,3537
+Q265,Uzbekistan,Uzbekistan,3483
+Q4948,Republic of Venice,Italy,3465
+Q750,Bolivia,Bolivia,3462
+Q334,Singapore,Singapore,3458
+Q766,Jamaica,Jamaica,3406
+Q28179,Joseon,South Korea,3400
+Q217,Moldova,Moldova,3354
+Q954,Zimbabwe,Zimbabwe,3343
+Q733,Paraguay,Paraguay,3309
+Q800,Costa Rica,Costa Rica,3222
+Q2305208,Russian Socialist Federative Soviet Republic,Russia,3218
+Q1054923,British Hong Kong,Hong Kong,3156
+Q55,Netherlands,Netherlands,3150
+Q916,Angola,Angola,2785
+Q837,Nepal,Nepal,2780
+Q12548,Holy Roman Empire,DROP,2761
+Q36704,Yugoslavia,DROP,2737
+Q810,Jordan,Jordan,2619
+Q889,Afghanistan,Afghanistan,2584
+Q912,Mali,Mali,2518
+Q233,Malta,Malta,2496
+Q12544,Byzantine Empire,DROP,2450
+Q1029,Mozambique,Mozambique,2377
+Q963,Botswana,Botswana,2377
+Q774,Guatemala,Guatemala,2361
+Q1006,Guinea,Guinea,2360
+Q423,North Korea,North Korea,2323
+Q792,El Salvador,El Salvador,2272
+Q1049,Sudan,Sudan,2256
+Q962,Benin,Benin,2185
+Q7318,Nazi Germany,Germany,2184
+Q804,Panama,Panama,2161
+Q754,Trinidad and Tobago,Trinidad and Tobago,2151
+Q236,Montenegro,Montenegro,2130
+Q813,Kyrgyzstan,Kyrgyzstan,2126
+Q503585,Korea under Japanese rule,South Korea,2081
+Q711,Mongolia,Mongolia,2047
+Q965,Burkina Faso,Burkina Faso,2032
+Q243610,Ukrainian People's Republic,Ukraine,2025
+Q817,Kuwait,Kuwait,2002
+Q971,Republic of the Congo,Republic of the Congo,1999
+Q171150,Kingdom of Hungary,Hungary,1973
+Q1037,Rwanda,Rwanda,1972
+Q805,Yemen,Yemen,1946
+Q1072949,Western Han,China,1936
+Q204920,Crown of Aragon,Spain,1931
+Q8646,Hong Kong,Hong Kong,1913
+Q783,Honduras,Honduras,1881
+Q1020,Malawi,Malawi,1880
+Q878,United Arab Emirates,United Arab Emirates,1873
+Q730,Suriname,Suriname,1842
+Q953,Zambia,Zambia,1805
+Q945,Togo,Togo,1800
+Q2017684,French protectorate of Tunisia,Tunisia,1796
+Q1019,Madagascar,Madagascar,1756
+Q1005,The Gambia,The Gambia,1666
+Q1000,Gabon,Gabon,1660
+Q1030,Namibia,Namibia,1593
+Q929,Central African Republic,Central African Republic,1557
+Q154195,Kingdom of Bavaria,Germany,1544
+Q657,Chad,Chad,1534
+Q238,San Marino,San Marino,1518
+Q170174,Papal States,Italy,1510
+Q1032,Niger,Niger,1501
+Q958,South Sudan,South Sudan,1501
+Q811,Nicaragua,Nicaragua,1499
+Q398,Bahrain,Bahrain,1482
+Q863,Tajikistan,Tajikistan,1420
+Q2577303,Kingdom of Sardinia,Italy,1417
+Q1649871,Kingdom of Poland,Poland,1381
+Q170468,United Arab Republic,Egypt,1372

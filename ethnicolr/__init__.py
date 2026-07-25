@@ -18,6 +18,7 @@ from .pred_fl_reg_name_five_cat import pred_fl_reg_name_five_cat
 from .pred_nc_reg_name import pred_nc_reg_name
 from .pred_wiki_ln import pred_wiki_ln
 from .pred_wiki_name import pred_wiki_name
+from .pred_wiki_origin import pred_wiki_origin
 
 __all__ = [
     "census_ln",
@@ -27,6 +28,7 @@ __all__ = [
     "pred_census_ln",
     "pred_wiki_ln",
     "pred_wiki_name",
+    "pred_wiki_origin",
     "pred_fl_reg_ln",
     "pred_fl_reg_name",
     "pred_nc_reg_name",
