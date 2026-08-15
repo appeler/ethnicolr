@@ -1,83 +1,21 @@
 name: Dependabot auto-merge
 
-on: pull_request
+# All the logic lives in py-canon, so a fix there reaches this repo on its
+# next run instead of waiting for someone to copy a file across.
 
-permissions:
-  contents: write
-  pull-requests: write
+on:
+  pull_request:
+  schedule:
+    # Every three hours, offset off the hour so it does not queue behind the
+    # crowd of on-the-hour jobs.
+    - cron: "37 */3 * * *"
+  workflow_dispatch:
+
+permissions: {}
 
 jobs:
   auto-merge:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    if: github.event.pull_request.user.login == 'dependabot[bot]'
-    steps:
-      - name: Fetch Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      # Auto-merge everything except Python-ecosystem majors:
-      # - grouped PRs report the highest bump anywhere in the group (including
-      #   transitive lockfile updates), so trust our own minor-and-patch groups
-      # - GitHub-Actions majors are CI-validated and low blast radius
-      # An unrecognised or empty update-type is NOT eligible, so metadata
-      # failures leave the PR open rather than merging it. Each branch is a
-      # full if/case, never `test && var=true`: under `bash -e` a failing test
-      # as the last statement of a step fails the whole step.
-      - name: Decide eligibility
-        id: gate
-        env:
-          ECOSYSTEM: ${{ steps.metadata.outputs.package-ecosystem }}
-          GROUP: ${{ steps.metadata.outputs.dependency-group }}
-          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
-        run: |
-          eligible=false
-          if [ "$ECOSYSTEM" = "github_actions" ]; then
-            eligible=true
-          fi
-          case "$GROUP" in
-            *minor-and-patch*) eligible=true ;;
-          esac
-          case "$UPDATE_TYPE" in
-            version-update:semver-minor|version-update:semver-patch) eligible=true ;;
-          esac
-          echo "ecosystem=$ECOSYSTEM group=$GROUP update-type=$UPDATE_TYPE eligible=$eligible"
-          echo "eligible=$eligible" >> "$GITHUB_OUTPUT"
-
-      # No `gh pr review --approve`: it fails outright where the repo has
-      # "Allow GitHub Actions to create and approve pull requests" off, which
-      # aborted the step before the merge ever ran. Our rulesets require status
-      # checks, not reviews, and GitHub's own documented example does not
-      # approve either.
-      - name: Enable auto-merge for eligible updates
-        if: steps.gate.outputs.eligible == 'true'
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if err=$(gh pr merge --auto --squash "$PR_URL" 2>&1); then
-            printf '%s\n' "$err"
-            exit 0
-          fi
-          printf '%s\n' "$err"
-          # GitHub refuses to arm auto-merge on a PR it currently considers
-          # mergeable, and this job finishes in seconds -- often before the
-          # required check runs exist. Do not merge directly here: "clean" at
-          # t+4s does not mean the checks passed.
-          case "$err" in
-            *"clean status"*|*"not mergeable"*|*"Auto merge is not allowed"*)
-              echo "::warning::auto-merge not armable yet; leaving PR open"
-              exit 0 ;;
-          esac
-          exit 1
-
-      - name: Flag ineligible updates for manual review
-        if: steps.gate.outputs.eligible != 'true' && github.event.action == 'opened'
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr comment "$PR_URL" --body \
-            "Left open for manual review — auto-merge covers GitHub-Actions updates, our minor-and-patch groups, and patch/minor Python bumps."
+    permissions:
+      contents: write        # arm auto-merge, or squash-merge outright
+      pull-requests: write   # label, comment, merge
+    uses: gojiplus/py-canon/.github/workflows/reusable-dependabot-auto-merge.yml@v1
