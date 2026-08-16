@@ -213,11 +213,15 @@ def pred_census_ln(
             "this model has no calibration stats file; run "
             "scripts/model-training/calibrate_model.py"
         )
-    if coverage is not None and f"{coverage:.2f}" not in stats["conformal_quantiles"]:
-        raise ValueError(
-            f"coverage must be one of {sorted(stats['conformal_quantiles'])}, "
-            f"got {coverage}"
-        )
+    if coverage is not None:
+        # Guaranteed by the check above: stats is None only when neither prior
+        # nor coverage was given.
+        assert stats is not None
+        if f"{coverage:.2f}" not in stats["conformal_quantiles"]:
+            raise ValueError(
+                f"coverage must be one of {sorted(stats['conformal_quantiles'])}, "
+                f"got {coverage}"
+            )
 
     logger.info(f"Predicting {len(df)} names using Census {year} PyTorch model")
 
@@ -255,6 +259,7 @@ def pred_census_ln(
             logits = model(X_tensor)
             mean_probs = torch.softmax(logits / temperature, dim=1).cpu().numpy()
             if prior is not None:
+                assert stats is not None  # guaranteed by the check above
                 mean_probs = apply_prior(
                     mean_probs, RACES, prior, stats["train_class_distribution"]
                 )
@@ -291,6 +296,7 @@ def pred_census_ln(
     result["race"] = [RACES[i] for i in pred_indices]
 
     if coverage is not None:
+        assert stats is not None  # guaranteed by the check above
         qhat = stats["conformal_quantiles"][f"{coverage:.2f}"]
         result["race_set"] = conformal_sets(mean_probs, RACES, qhat)
 
