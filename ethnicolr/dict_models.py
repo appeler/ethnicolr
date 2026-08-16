@@ -24,6 +24,7 @@ import json
 import logging
 import sys
 from statistics import NormalDist
+from typing import cast
 
 import numpy as np
 import pandas as pd
@@ -100,6 +101,8 @@ class _Tables:
             )
             marginal = weights.sum(axis=0)
             cls._census_marginal = marginal / marginal.sum()
+        # Set by the branch above on first call, cached after.
+        assert cls._census_marginal is not None
         return cls._census_marginal
 
     @classmethod
@@ -107,7 +110,8 @@ class _Tables:
         if which not in cls._rosenman:
             path = ROSENMAN_FIRST if which == "first" else ROSENMAN_LAST
             df = pd.read_csv(path).dropna(subset=["name"])
-            cls._rosenman[which] = df.set_index("name")[VOTER_CATS]
+            # A list key always yields a DataFrame; the stubs widen it.
+            cls._rosenman[which] = cast(pd.DataFrame, df.set_index("name")[VOTER_CATS])
         return cls._rosenman[which]
 
     @classmethod
@@ -164,7 +168,7 @@ def census_fn(
     df = EthnicolrModelClass.test_and_norm_df(df, fname_col)
 
     table = _Tables.census_first()
-    keys = _norm_names(df[fname_col])
+    keys = _norm_names(cast(pd.Series, df[fname_col]))
     matched = table.reindex(keys)
 
     rdf = df.copy()
@@ -181,7 +185,7 @@ def census_fn(
             rdf[f"{col}_lb"] = (lb * 100).round(2)
             rdf[f"{col}_ub"] = (ub * 100).round(2)
 
-    matched_n = int(matched[CENSUS_PCT_COLS[0]].notna().sum())
+    matched_n = int(cast(pd.Series, matched[CENSUS_PCT_COLS[0]]).notna().sum())
     logger.info(f"Matched {matched_n} of {len(rdf)} first names")
     return rdf
 
@@ -235,8 +239,8 @@ def pred_census_name(
         raise ValueError("lname_col and fname_col must exist in the DataFrame")
 
     rdf = df.copy()
-    last_keys = _norm_names(rdf[lname_col])
-    first_keys = _norm_names(rdf[fname_col])
+    last_keys = _norm_names(cast(pd.Series, rdf[lname_col]))
+    first_keys = _norm_names(cast(pd.Series, rdf[fname_col]))
 
     last_table = _Tables.census_last(year)
     first_table = _Tables.census_first()
@@ -354,8 +358,8 @@ def pred_voter_name(
         raise ValueError("lname_col and fname_col must exist in the DataFrame")
 
     rdf = df.copy()
-    last_keys = _norm_names(rdf[lname_col])
-    first_keys = _norm_names(rdf[fname_col])
+    last_keys = _norm_names(cast(pd.Series, rdf[lname_col]))
+    first_keys = _norm_names(cast(pd.Series, rdf[fname_col]))
 
     last_table = _Tables.rosenman("last")
     first_table = _Tables.rosenman("first")
