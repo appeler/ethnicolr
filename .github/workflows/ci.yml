@@ -28,7 +28,7 @@ jobs:
           enable-cache: true
 
       - name: Install project dependencies
-        run: uv sync --all-extras --dev -v
+        run: uv sync --all-extras --all-groups -v
 
 
       - name: Verify installation
@@ -58,7 +58,7 @@ jobs:
           enable-cache: true
 
       - name: Install dev dependencies
-        run: uv sync --all-extras --dev
+        run: uv sync --all-extras --all-groups
 
 
       - name: Run linting
