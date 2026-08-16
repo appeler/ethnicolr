@@ -70,22 +70,8 @@ pred_fl_reg_ln_five_cat = "ethnicolr.pred_fl_reg_ln_five_cat:main"
 pred_fl_reg_name_five_cat = "ethnicolr.pred_fl_reg_name_five_cat:main"
 pred_nc_reg_name = "ethnicolr.pred_nc_reg_name:main"
 
-[project.optional-dependencies]
-test = [
-  "pytest>=7.0",
-  "pytest-cov>=4.0",
-  "pytest-xdist>=3.0",
-]
-
-dev = [
-  "pytest>=7.0",
-  "pytest-cov>=4.0",
-  "pytest-xdist>=3.0",
-  "ruff>=0.7.0",
-  "mypy>=1.0",
-  "pre-commit>=3.0",
-]
-
+# --- uv dependency groups (for `uv sync --group ...`) ---
+[dependency-groups]
 docs = [
   "sphinx>=7.0",
   "furo>=2024.1.29",
@@ -98,9 +84,19 @@ docs = [
   "ipython>=8.0.0",
   "matplotlib>=3.5.0",
 ]
-
-# --- uv dependency groups (for `uv sync --group ...`) ---
-[dependency-groups]
+dev = [
+  "pytest>=7.0",
+  "pytest-cov>=4.0",
+  "pytest-xdist>=3.0",
+  "ruff>=0.7.0",
+  "mypy>=1.0",
+  "pre-commit>=3.0",
+]
+test = [
+  "pytest>=7.0",
+  "pytest-cov>=4.0",
+  "pytest-xdist>=3.0",
+]
 # Model training and data-acquisition scripts (scripts/)
 training = [
   "scikit-learn>=1.4",
@@ -111,35 +107,7 @@ training = [
 # Note: inference removed from here - already defined in [project.optional-dependencies]
 # This prevents UV dependency resolution conflicts
 
-test = [
-  "pytest>=7.0",
-  "pytest-cov>=4.0",
-  "pytest-xdist>=3.0",
-]
 
-dev = [
-  "pytest>=7.0",
-  "pytest-cov>=4.0",
-  "pytest-xdist>=3.0",
-  "ruff>=0.7.0",
-  "mypy>=1.0",
-  "pre-commit>=3.0",
-  "pydoclint>=0.8.3",
-  "pyright>=1.1.407",
-]
-
-docs = [
-  "sphinx>=7.0",
-  "furo>=2024.1.29",
-  "sphinx-autodoc-typehints>=1.25",
-  "sphinx-copybutton>=0.5",
-  "myst-parser>=2.0",
-  "nbsphinx>=0.9.0",
-  "pandoc>=2.0",
-  "ipykernel>=6.0",
-  "ipython>=8.0.0",
-  "matplotlib>=3.5.0",
-]
 
 # UV configuration
 [tool.uv]
@@ -196,9 +164,10 @@ addopts = [
   "-ra",
   "--strict-markers",
   "--cov=ethnicolr",
+  # term-missing only: nothing in CI uploads or reads a coverage file, so the
+  # html and xml reports were writing htmlcov/ and coverage.xml into the tree
+  # on every run for no reader. Ask for them explicitly when you want them.
   "--cov-report=term-missing",
-  "--cov-report=html",
-  "--cov-report=xml",
 ]
 markers = [
   "slow: marks tests as slow (deselect with '-m \"not slow\"')",
@@ -235,3 +204,17 @@ known_first_party = ["ethnicolr"]
 
 # Tell deptry these are dev dependency groups (won't be flagged as unused)
 pep621_dev_dependency_groups = ["test", "dev", "docs"]
+
+[tool.pyright]
+# The shipped package. streamlit/ is a demo app and scripts/ is one-off data
+# acquisition and training; unscoped, pyright reported 130 errors and 86 of
+# them came from those two directories.
+include = ["ethnicolr"]
+typeCheckingMode = "standard"
+
+[tool.codespell]
+# The census and wiki tables are names, not prose. codespell reported 12,249
+# findings across this repo and every one was in the corpora or the model
+# files -- there are no misspellings in the source. Auto-"correcting" a name
+# would also silently corrupt the data these models are trained on.
+skip = "*.csv,*.parquet,*.joblib,*.h5,*.keras,./ethnicolr/data,./ethnicolr/models,uv.lock"
