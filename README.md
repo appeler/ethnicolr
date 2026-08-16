@@ -78,7 +78,10 @@ over ~90 countries (62% top-1, 81% top-3; chance ≈ 1%), trained on Wikidata:
 
 ```python
 from ethnicolr import pred_wiki_origin
-pred_wiki_origin(df, "last", "first")  # adds an `origin` column + per-country probabilities
+
+pred_wiki_origin(
+    df, "last", "first"
+)  # adds an `origin` column + per-country probabilities
 # Tanaka Yuki → Japan, Kowalski Piotr → Poland, Nguyen Minh → Vietnam
 ```
 
@@ -97,9 +100,17 @@ Every model ships with measured calibration and conformal statistics
   surgeo):
 
   ```python
-  pred_fl_reg_ln_five_cat(df, "last", prior={"asian": .03, "hispanic": .27,
-                                             "nh_black": .15, "nh_white": .50,
-                                             "other": .05})
+  pred_fl_reg_ln_five_cat(
+      df,
+      "last",
+      prior={
+          "asian": 0.03,
+          "hispanic": 0.27,
+          "nh_black": 0.15,
+          "nh_white": 0.50,
+          "other": 0.05,
+      },
+  )
   ```
 
 - **`coverage=`** returns conformal prediction sets — the smallest set of
