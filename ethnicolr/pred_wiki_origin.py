@@ -73,6 +73,12 @@ class WikiOriginModel(EthnicolrModelClass):
             + working[fname_col].fillna("").astype(str).str.strip()
         ).str.strip()
 
+        # The base declares VOCABFN/RACEFN as `str | None` because non-LSTM
+        # models have neither. This is an LSTM model and sets both; narrowing
+        # them in the subclass does not work, since a mutable ClassVar is
+        # invariant and `str` is not assignable to `str | None`.
+        assert cls.VOCABFN is not None and cls.RACEFN is not None
+
         rdf = cls.transform_and_pred(
             df=working,
             newnamecol="__name",
