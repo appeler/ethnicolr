@@ -4,11 +4,12 @@ build-backend = "uv_build"
 
 [project]
 name = "ethnicolr"
-version = "1.1.0"
-description = "Modern ML library for race/ethnicity prediction from names with intuitive CLI"
+version = "2.0.0"
+description = "Name-pattern estimates with calibrated probabilities and explicit abstention"
 readme = "README.md"
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.11"
 license = "MIT"
+license-files = ["LICENSE"]
 
 authors = [
   { name = "Gaurav Sood", email = "contact@gsood.com" },
@@ -36,12 +37,15 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 
 dependencies = [
   "pandas>=2.2.0",
   "numpy>=1.26.0",
   "click>=8.0.0",
+  "huggingface_hub>=1.0.0",
+  "pyarrow>=25.0.0",
   "torch>=2.0.0",
 ]
 
@@ -52,70 +56,48 @@ dependencies = [
 "Source Code" = "https://github.com/appeler/ethnicolr"
 
 [project.scripts]
-# Modern CLI (primary interface)
 ethnicolr = "ethnicolr.cli:cli"
 
-# Legacy CLI (backward compatibility)
-census_ln = "ethnicolr.census_ln:main"
-census_fn = "ethnicolr.dict_models:census_fn_main"
-pred_census_name = "ethnicolr.dict_models:pred_census_name_main"
-pred_voter_name = "ethnicolr.dict_models:pred_voter_name_main"
-pred_census_ln = "ethnicolr.pred_census_ln:main"
-pred_wiki_name = "ethnicolr.pred_wiki_name:main"
-pred_wiki_ln = "ethnicolr.pred_wiki_ln:main"
-pred_wiki_origin = "ethnicolr.pred_wiki_origin:main"
-pred_fl_reg_name = "ethnicolr.pred_fl_reg_name:main"
-pred_fl_reg_ln = "ethnicolr.pred_fl_reg_ln:main"
-pred_fl_reg_ln_five_cat = "ethnicolr.pred_fl_reg_ln_five_cat:main"
-pred_fl_reg_name_five_cat = "ethnicolr.pred_fl_reg_name_five_cat:main"
-pred_nc_reg_name = "ethnicolr.pred_nc_reg_name:main"
-
-# --- uv dependency groups (for `uv sync --group ...`) ---
 [dependency-groups]
 docs = [
   "sphinx>=7.0",
   "furo>=2024.1.29",
+  "py-canon @ git+https://github.com/gojiplus/py-canon@v1",
   "sphinx-autodoc-typehints>=1.25",
   "sphinx-copybutton>=0.5",
   "myst-parser>=2.0",
-  "nbsphinx>=0.9.0",
-  "pandoc>=2.0",
-  "ipykernel>=6.0",
-  "ipython>=8.0.0",
-  "matplotlib>=3.5.0",
 ]
 dev = [
   "pytest>=7.0",
   "pytest-cov>=4.0",
   "pytest-xdist>=3.0",
   "ruff>=0.7.0",
-  "mypy>=1.0",
   "pre-commit>=3.0",
+  "pyright>=1.1.411",
 ]
 test = [
   "pytest>=7.0",
   "pytest-cov>=4.0",
   "pytest-xdist>=3.0",
 ]
-# Model training and data-acquisition scripts (scripts/)
 training = [
   "scikit-learn>=1.4",
   "openpyxl>=3.1",
   "pyreadr>=0.5",
 ]
 
-# Note: inference removed from here - already defined in [project.optional-dependencies]
-# This prevents UV dependency resolution conflicts
-
-
-
-# UV configuration
 [tool.uv]
 
 [tool.uv.build-backend]
 module-root = ""
+source-exclude = [
+  "/ethnicolr/.DS_Store",
+  "/ethnicolr/.pytype",
+  "/ethnicolr/data/**/.DS_Store",
+  "/ethnicolr/data/**/*.csv",
+  "/ethnicolr/data/**/*.csv.gz",
+]
 
-# Ruff configuration
 [tool.ruff]
 line-length = 88
 target-version = "py311"
@@ -206,9 +188,8 @@ known_first_party = ["ethnicolr"]
 pep621_dev_dependency_groups = ["test", "dev", "docs"]
 
 [tool.pyright]
-# The shipped package. streamlit/ is a demo app and scripts/ is one-off data
-# acquisition and training; unscoped, pyright reported 130 errors and 86 of
-# them came from those two directories.
+# Type-check the shipped package. Data acquisition and model training have
+# separate runtime dependencies and validation commands.
 include = ["ethnicolr"]
 typeCheckingMode = "standard"
 

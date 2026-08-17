@@ -2,8 +2,8 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
+SPHINXOPTS    = -W --keep-going
+SPHINXBUILD   = uv run sphinx-build
 SPHINXPROJ    = ethnicolr
 SOURCEDIR     = source
 BUILDDIR      = build

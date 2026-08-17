@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
-import json
+import hashlib
+import math
 import os
+import unicodedata
+from functools import cache
 from pathlib import Path
 
 import numpy as np
@@ -11,66 +14,118 @@ import torch
 import torch.nn as nn
 
 
-class NameLSTM(nn.Module):
+def name_support_reason(value: str) -> str | None:
+    """Return why a normalized name cannot be scored, if it is unsupported."""
+    if not value.strip():
+        return "missing-name"
+    letters = [character for character in value if character.isalpha()]
+    if not letters:
+        return "no-letters"
+    if not all(
+        unicodedata.name(character, "").startswith("LATIN ") for character in letters
+    ):
+        return "unsupported-script"
+    return None
+
+
+def validate_mc_dropout(uncertainty_level: float | None, mc_iterations: int) -> None:
+    """Validate an optional Monte Carlo dropout uncertainty request."""
+    if uncertainty_level is None:
+        return
+    if isinstance(uncertainty_level, bool) or not isinstance(
+        uncertainty_level, (int, float)
+    ):
+        raise TypeError("uncertainty_level must be a finite number")
+    if not math.isfinite(float(uncertainty_level)) or not 0 < uncertainty_level < 1:
+        raise ValueError("uncertainty_level must be strictly between 0 and 1")
+    if isinstance(mc_iterations, bool) or not isinstance(mc_iterations, int):
+        raise TypeError("mc_iterations must be an integer")
+    if mc_iterations < 2:
+        raise ValueError("mc_iterations must be at least 2")
+
+
+@cache
+def artifact_revision(*paths: Path) -> str:
+    """Return an immutable SHA-256 revision for an ordered artifact bundle."""
+    digest = hashlib.sha256()
+    for path in paths:
+        digest.update(path.name.encode())
+        digest.update(b"\0")
+        with path.open("rb") as artifact:
+            for chunk in iter(lambda: artifact.read(1024 * 1024), b""):
+                digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+class CharacterNgramLSTM(nn.Module):
     """Character n-gram LSTM shared by all ethnicolr prediction models."""
 
     def __init__(
         self,
-        vocab_size: int,
-        num_classes: int,
-        embed_dim: int = 32,
-        hidden_dim: int = 128,
+        vocabulary_size: int,
+        category_count: int,
+        embedding_dimension: int = 32,
+        hidden_dimension: int = 128,
         dropout: float = 0.2,
     ):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=0)
-        self.lstm = nn.LSTM(embed_dim, hidden_dim, batch_first=True)
+        self.embedding = nn.Embedding(
+            vocabulary_size, embedding_dimension, padding_idx=0
+        )
+        self.lstm = nn.LSTM(embedding_dimension, hidden_dimension, batch_first=True)
         self.dropout = nn.Dropout(dropout)
-        self.fc = nn.Linear(hidden_dim, num_classes)
+        self.output_layer = nn.Linear(hidden_dimension, category_count)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        embedded = self.embedding(x)
+    def forward(self, input_sequences: torch.Tensor) -> torch.Tensor:
+        embedded = self.embedding(input_sequences)
         _, (hidden, _) = self.lstm(embedded)
         hidden = self.dropout(hidden.squeeze(0))
-        return self.fc(hidden)
+        return self.output_layer(hidden)
 
 
-def pad_sequences(sequences: list[list[int]], maxlen: int) -> np.ndarray:
+def load_character_ngram_model(
+    model_path: Path,
+    vocabulary_size: int,
+    category_count: int,
+    device: torch.device,
+) -> CharacterNgramLSTM:
+    """Load a character n-gram model from a packaged state dictionary."""
+    model = CharacterNgramLSTM(
+        vocabulary_size=vocabulary_size, category_count=category_count
+    )
+    model_state = torch.load(model_path, map_location=device, weights_only=True)
+    model_state = {
+        (
+            key.replace("fc.", "output_layer.", 1) if key.startswith("fc.") else key
+        ): value
+        for key, value in model_state.items()
+    }
+    model.load_state_dict(model_state)
+    model.to(device)
+    model.eval()
+    return model
+
+
+def pad_name_sequences(
+    sequences: list[list[int]], max_sequence_length: int
+) -> np.ndarray:
     """Pre-pad integer sequences with zeros to a fixed length.
 
-    Sequences longer than ``maxlen`` keep their first ``maxlen`` tokens.
+    Sequences longer than the maximum keep their first tokens.
     """
-    padded = np.zeros((len(sequences), maxlen), dtype=np.int64)
-    for i, seq in enumerate(sequences):
-        if len(seq) > maxlen:
-            padded[i] = seq[:maxlen]
-        elif len(seq) > 0:
-            padded[i, -len(seq) :] = seq
-    return padded
+    padded_sequences = np.zeros((len(sequences), max_sequence_length), dtype=np.int64)
+    for sequence_index, sequence in enumerate(sequences):
+        if len(sequence) > max_sequence_length:
+            padded_sequences[sequence_index] = sequence[:max_sequence_length]
+        elif sequence:
+            padded_sequences[sequence_index, -len(sequence) :] = sequence
+    return padded_sequences
 
 
-def load_model_stats(model_path: Path) -> dict | None:
-    """Load the calibration/conformal stats JSON shipped next to a model.
-
-    Produced by ``scripts/model-training/calibrate_model.py``. Returns None
-    when the model has no stats file.
-    """
-    name = model_path.name
-    for suffix, stats_suffix in (
-        ("_lstm_pt.pt", "_stats_pt.json"),
-        ("_lstm_pytorch.pt", "_stats_pytorch.json"),
-    ):
-        if name.endswith(suffix):
-            stats_path = model_path.with_name(name.replace(suffix, stats_suffix))
-            if stats_path.exists():
-                return json.loads(stats_path.read_text())
-    return None
-
-
-def apply_prior(
-    probs: np.ndarray,
-    classes: list[str],
-    prior: dict[str, float],
+def adjust_probabilities_for_prior(
+    category_probabilities: np.ndarray,
+    categories: list[str],
+    target_prior: dict[str, float],
     train_distribution: dict[str, float],
 ) -> np.ndarray:
     """Reweight calibrated probabilities to a target class distribution.
@@ -80,31 +135,53 @@ def apply_prior(
     with geographic margins as the target it is the name-likelihood step of
     BISG-style pipelines.
     """
-    missing = set(classes) - set(prior)
-    if missing:
-        raise ValueError(f"prior is missing classes: {sorted(missing)}")
-    target = np.array([prior[c] for c in classes], dtype=float)
-    if (target < 0).any() or target.sum() <= 0:
-        raise ValueError("prior probabilities must be non-negative and sum > 0")
-    target = target / target.sum()
-    train = np.array([train_distribution[c] for c in classes], dtype=float)
-    adjusted = probs * (target / train)
-    return adjusted / adjusted.sum(axis=1, keepdims=True)
+    missing_categories = set(categories) - set(target_prior)
+    if missing_categories:
+        raise ValueError(
+            f"target_prior is missing classes: {sorted(missing_categories)}"
+        )
+    target_distribution = np.array(
+        [target_prior[category] for category in categories], dtype=float
+    )
+    if (target_distribution < 0).any() or target_distribution.sum() <= 0:
+        raise ValueError("target_prior probabilities must be non-negative and sum > 0")
+    target_distribution = target_distribution / target_distribution.sum()
+    training_distribution = np.array(
+        [train_distribution[category] for category in categories], dtype=float
+    )
+    adjusted_probabilities = category_probabilities * (
+        target_distribution / training_distribution
+    )
+    return adjusted_probabilities / adjusted_probabilities.sum(axis=1, keepdims=True)
 
 
-def conformal_sets(
-    probs: np.ndarray, classes: list[str], qhat: float
+def build_conformal_prediction_sets(
+    category_probabilities: np.ndarray,
+    categories: list[str],
+    conformal_quantile: float,
 ) -> list[list[str]]:
     """Adaptive prediction sets: smallest class sets with cumulative
-    calibrated probability mass reaching the conformal quantile ``qhat``."""
-    order = np.argsort(-probs, axis=1)
-    sorted_probs = np.take_along_axis(probs, order, axis=1)
-    cum = np.cumsum(sorted_probs, axis=1)
-    sizes = (cum < qhat).sum(axis=1) + 1
-    return [[classes[j] for j in order[i, : sizes[i]]] for i in range(probs.shape[0])]
+    calibrated probability mass reaching the conformal quantile."""
+    descending_category_indices = np.argsort(-category_probabilities, axis=1)
+    sorted_probabilities = np.take_along_axis(
+        category_probabilities, descending_category_indices, axis=1
+    )
+    cumulative_probabilities = np.cumsum(sorted_probabilities, axis=1)
+    prediction_set_sizes = (cumulative_probabilities < conformal_quantile).sum(
+        axis=1
+    ) + 1
+    return [
+        [
+            categories[category_index]
+            for category_index in descending_category_indices[
+                row_index, : prediction_set_sizes[row_index]
+            ]
+        ]
+        for row_index in range(category_probabilities.shape[0])
+    ]
 
 
-def get_device() -> torch.device:
+def select_inference_device() -> torch.device:
     """Select the torch device for model inference.
 
     The ``ETHNICOLR_DEVICE`` environment variable (``cpu``, ``cuda``, ``mps``)

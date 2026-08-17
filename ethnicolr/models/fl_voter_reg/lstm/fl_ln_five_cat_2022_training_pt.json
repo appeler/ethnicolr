@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "model": "florida_voter_surname",
+  "seed": 42,
+  "epochs": 20,
+  "batch_size": 256,
+  "learning_rate": 0.001,
+  "requested_source_rows": 1000000,
+  "training_device": "mps",
+  "training_data": {
+    "file": "fl_reg_name_race_2022.csv.gz",
+    "sha256": "6792b0dd5257acf5d8ef84c56f481422ac3a25d264fe5934c8bfde14b1a1a483"
+  },
+  "split": {
+    "training_rows": 700000,
+    "training_source_rows": 334279,
+    "validation_rows": 100000,
+    "validation_source_rows": 100000,
+    "test_rows": 200000,
+    "test_source_rows": 200000,
+    "source_overlap_rows": 0,
+    "split_before_balancing": true,
+    "vocabulary_from_training_only": true,
+    "training_balanced": true
+  },
+  "features": {
+    "input_scope": "surname",
+    "ngram_size": 2,
+    "sequence_length": 20,
+    "vocabulary_size": 1157,
+    "classes": [
+      "asian",
+      "hispanic",
+      "nh_black",
+      "nh_white",
+      "other"
+    ]
+  },
+  "evaluation": {
+    "selected_epoch": 12,
+    "validation_loss": 1.0597505953216553,
+    "validation_accuracy": 0.58581,
+    "loss": 1.054187421836853,
+    "accuracy": 0.58876,
+    "top_2_accuracy": 0.837395,
+    "top_3_accuracy": 0.947475
+  }
+}

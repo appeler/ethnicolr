@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-08-17
+
+### Fixed
+- Split Florida five-category and North Carolina source rows before balancing;
+  vocabularies are now learned from training rows only. New source-disjoint
+  model and calibration artifacts replace the invalid legacy artifacts.
+- Unsupported scripts, non-name inputs, and inputs with no known features now
+  abstain instead of receiving a model-default distribution.
+- Dictionary and hybrid APIs preserve null rows, report explicit misses, and
+  share the same abstention and provenance contract as neural estimators.
+- Monte Carlo dropout summaries use `*_mc_*` names and no longer claim
+  confidence-interval coverage. Invalid levels and fewer than two draws fail
+  before inference.
+- Wilson interval columns use the explicit `*_lower` and `*_upper` suffixes.
+
+### Added
+- Shared inference metadata: name-pattern estimate type, support and abstention,
+  model ID/version/full-bundle SHA-256 revision, reference population,
+  calibration status/reference, and uncertainty method/level.
+- Inference result contract 1.0, including target, input scope, scoring status,
+  and standardized predicted labels and 0–1 probabilities.
+- Explicit prohibition on individual and consequential uses.
+- Schema-versioned JSON for ordered model metadata and explicit Arrow schemas
+  for runtime lookup tables.
+- Source-disjoint Florida surname, Florida full-name, and North Carolina
+  full-name models with training manifests and calibrated conformal sets.
+
+### Changed
+- Runtime Census and Rosenman lookup tables use typed Parquet instead of CSV.
+- Neural weights are downloaded from a full, package-pinned commit in the
+  `gojiberries/ethnicolr` Hugging Face repository instead of shipping in the
+  Python wheel. The standard Hugging Face cache and an explicit local mirror
+  are supported.
+- Census suppression markers are resolved with the documented remaining-mass
+  allocation during table normalization.
+- Public functions use consistent `lookup_*` and `estimate_*` names. Model
+  selectors and legacy per-model modules were removed.
+- Florida exposes one current surname estimator and one current full-name
+  estimator, both trained on the 2022 source.
+- Internal model, function, and variable names now describe their role rather
+  than preserving historical abbreviations.
+
+### Removed
+- The Streamlit application. Model distribution and any future interactive
+  demo are separate concerns; a demo can be deployed as a Hugging Face Space.
+- Obsolete 2017 Florida model variants and compatibility aliases.
+- CSV model metadata and runtime lookup tables after verified JSON and Parquet
+  conversion.
+
 ## [1.1.0] - 2026-07-25
 
 A statistical-rigor release: calibrated probabilities and formal uncertainty
@@ -15,22 +64,22 @@ dictionaries, and a global name-origin model. (#127, #128, #129)
 - **Calibration + conformal layer** (#127). Every model ships a stats file
   with a fitted temperature (probabilities are now measured-calibrated, not
   assumed), the training class distribution, and split-conformal quantiles.
-  - `prior=` on every prediction function reweights probabilities to a target
+  - `target_prior=` on every prediction function reweights probabilities to a target
     population (`p_adj ∝ p·π_target/π_train`) — the base-rate fix for the
     class-balanced models and the name-likelihood step for BISG pipelines.
-  - `coverage=` adds a conformal prediction set (`race_set`/`origin_set`) with
+  - `conformal_coverage=` adds a conformal prediction set (`race_set`/`origin_set`) with
     empirically verified marginal coverage at 0.80/0.90/0.95.
   - Model cards and a statistical-principles guide document reference
     populations, calibration, weighting, and the conformal guarantee.
 - **Census 2020 first names + dictionary estimators** (#128):
-  - `census_fn` — first-name lookup against the Census 2020 first-name file
+  - `lookup_census_first_name` — first-name lookup against the Census 2020 first-name file
     (53,616 names; first such release since 1990).
-  - `pred_census_name` — six-category first+last posterior via naive Bayes
+  - `estimate_census_full_name` — six-category first+last posterior via naive Bayes
     with LSTM fallback and a `basis` column ("Tyrone Smith" → ~90% Black).
-  - `pred_voter_name` — five-category posterior from the CC0
-    Rosenman-Olivella-Imai voter-file dictionaries (338k surnames).
-  - `conf_int=` on `census_ln`/`census_fn` for exact Wilson score intervals.
-- **`pred_wiki_origin`** (#129) — name → country-of-origin over 90 countries,
+  - `estimate_voter_file_full_name` — five-category estimate from the
+    CC0 six-state voter-file name dictionary (338k surnames).
+  - `uncertainty_level=` on `lookup_census_surname`/`lookup_census_first_name` for exact Wilson score intervals.
+- **`estimate_wikipedia_origin`** (#129) — name → country-of-origin over 90 countries,
   trained on 3.6M Wikidata people (62% top-1 / 81% top-3; chance ≈ 1.1%).
 
 ### Changed
@@ -86,13 +135,13 @@ refreshed Wikipedia/Wikidata training corpus. (#121, #122, #123, #124, #125)
 ## [0.22.0] - 2025-05-28
 
 ### Added
-- **2020 Census surname data support** for `census_ln` function
+- **2020 Census surname data support** for `lookup_census_surname` function
   - 156,619 surnames with race/ethnicity percentages
-  - Use with `census_ln(df, 'name', year=2020)`
+  - Use with `lookup_census_surname(df, 'name', year=2020)`
   - CLI default year changed from 2010 to 2020
 
 ### Changed
-- `census_ln` now accepts `year` parameter of 2000, 2010, or 2020
+- `lookup_census_surname` now accepts `year` parameter of 2000, 2010, or 2020
 
 ## [0.21.1] - 2024-12-27
 

@@ -5,18 +5,17 @@ Tests for census-based race prediction functionality.
 import pandas as pd
 import pytest
 
-from ethnicolr.census_ln import census_ln
-from ethnicolr.pred_census_ln import pred_census_ln
+from ethnicolr import estimate_census_surname, lookup_census_surname
 
 from .helpers import assert_prediction_quality
 
 
 class TestCensusLookup:
-    """Test the census_ln statistical lookup function."""
+    """Test the lookup_census_surname statistical lookup function."""
 
     def test_census_2000_lookup(self, sample_census_names):
         """Test census 2000 last name lookup."""
-        result = census_ln(sample_census_names, "last", 2000)
+        result = lookup_census_surname(sample_census_names, "last", year=2000)
 
         # Check that census percentage columns are added
         assert "pctwhite" in result.columns
@@ -30,7 +29,7 @@ class TestCensusLookup:
 
     def test_census_2010_lookup(self, sample_census_names):
         """Test census 2010 last name lookup."""
-        result = census_ln(sample_census_names, "last", 2010)
+        result = lookup_census_surname(sample_census_names, "last", year=2010)
 
         # Check that census percentage columns are added
         assert "pctwhite" in result.columns
@@ -46,7 +45,7 @@ class TestCensusLookup:
 
     def test_census_2020_lookup(self, sample_census_names):
         """Test census 2020 last name lookup."""
-        result = census_ln(sample_census_names, "last", 2020)
+        result = lookup_census_surname(sample_census_names, "last", year=2020)
 
         # Check that census percentage columns are added
         assert "pctwhite" in result.columns
@@ -62,8 +61,8 @@ class TestCensusLookup:
 
     def test_census_2020_vs_2010_consistency(self, sample_census_names):
         """Test that 2020 and 2010 data have consistent structure and similar values."""
-        result_2010 = census_ln(sample_census_names, "last", 2010)
-        result_2020 = census_ln(sample_census_names, "last", 2020)
+        result_2010 = lookup_census_surname(sample_census_names, "last", year=2010)
+        result_2020 = lookup_census_surname(sample_census_names, "last", year=2020)
 
         # Same columns
         assert set(result_2010.columns) == set(result_2020.columns)
@@ -82,7 +81,7 @@ class TestCensusLookup:
             [{"last": "veryrareuncommonname", "id": 1}, {"last": "smith", "id": 2}]
         )
 
-        result = census_ln(df, "last", 2010)
+        result = lookup_census_surname(df, "last", year=2010)
         assert len(result) == 2
         assert "pctwhite" in result.columns
 
@@ -93,7 +92,7 @@ class TestCensusPrediction:
     @pytest.mark.parametrize("year", [2000, 2010])
     def test_basic_prediction(self, sample_census_names, year):
         """Test basic census prediction for both census years."""
-        result = pred_census_ln(sample_census_names, "last", year)
+        result = estimate_census_surname(sample_census_names, "last", year=year)
 
         # Validate prediction quality
         assert_prediction_quality(result, "census")
@@ -108,12 +107,14 @@ class TestCensusPrediction:
         assert len(result) == len(sample_census_names)
 
     @pytest.mark.parametrize("year", [2000, 2010])
-    def test_prediction_with_confidence_intervals(self, sample_census_names, year):
-        """Test census prediction with confidence intervals."""
-        result = pred_census_ln(sample_census_names, "last", year, conf_int=0.9)
+    def test_prediction_with_uncertainty_intervals(self, sample_census_names, year):
+        """Test census prediction with MC-dropout uncertainty summaries."""
+        result = estimate_census_surname(
+            sample_census_names, "last", year=year, uncertainty_level=0.9
+        )
 
-        # Validate prediction quality including confidence intervals
-        assert_prediction_quality(result, "census", with_confidence=True)
+        # Validate prediction quality including MC-dropout uncertainty summaries
+        assert_prediction_quality(result, "census", with_uncertainty=True)
 
         # Check that most predictions are reasonable (ML models aren't 100% accurate)
         if "true_race" in result.columns:
@@ -122,7 +123,7 @@ class TestCensusPrediction:
 
     def test_prediction_extensive_dataset(self, extensive_names):
         """Test census prediction on larger, more realistic dataset."""
-        result = pred_census_ln(extensive_names, "last", 2010)
+        result = estimate_census_surname(extensive_names, "last", year=2010)
 
         # Validate prediction quality
         assert_prediction_quality(result, "census")
@@ -148,7 +149,7 @@ class TestCensusPrediction:
 
     def test_prediction_preserves_input_columns(self, sample_census_names):
         """Test that prediction preserves all input columns."""
-        result = pred_census_ln(sample_census_names, "last", 2010)
+        result = estimate_census_surname(sample_census_names, "last", year=2010)
 
         # Should have all original columns plus prediction columns
         for col in sample_census_names.columns:
@@ -171,32 +172,34 @@ class TestCensusPrediction:
             ]
         )
 
-        result = pred_census_ln(df, "surname", 2010)
+        result = estimate_census_surname(df, "surname", year=2010)
         assert_prediction_quality(result, "census")
         assert len(result) == 2
 
     def test_prediction_deterministic(self, sample_census_names):
         """Test that predictions are deterministic (same input -> same output)."""
-        result1 = pred_census_ln(sample_census_names, "last", 2010)
-        result2 = pred_census_ln(sample_census_names, "last", 2010)
+        result1 = estimate_census_surname(sample_census_names, "last", year=2010)
+        result2 = estimate_census_surname(sample_census_names, "last", year=2010)
 
         # Results should be identical
         pd.testing.assert_frame_equal(result1, result2)
 
     @pytest.mark.parametrize("conf_level", [0.8, 0.9, 0.95])
     def test_confidence_interval_levels(self, sample_census_names, conf_level):
-        """Test different confidence interval levels."""
-        result = pred_census_ln(sample_census_names, "last", 2010, conf_int=conf_level)
-        assert_prediction_quality(result, "census", with_confidence=True)
+        """Test different MC-dropout uncertainty summary levels."""
+        result = estimate_census_surname(
+            sample_census_names, "last", year=2010, uncertainty_level=conf_level
+        )
+        assert_prediction_quality(result, "census", with_uncertainty=True)
 
-        # Should have confidence interval columns
-        mean_cols = [col for col in result.columns if col.endswith("_mean")]
+        # Should have MC-dropout uncertainty summary columns
+        mean_cols = [col for col in result.columns if col.endswith("_mc_mean")]
         assert len(mean_cols) == 4  # One for each race
 
     def test_census_year_consistency(self, sample_census_names):
         """Test that different census years produce consistent result structure."""
-        result_2000 = pred_census_ln(sample_census_names, "last", 2000)
-        result_2010 = pred_census_ln(sample_census_names, "last", 2010)
+        result_2000 = estimate_census_surname(sample_census_names, "last", year=2000)
+        result_2010 = estimate_census_surname(sample_census_names, "last", year=2010)
 
         # Both should have same columns structure (except for census-specific columns)
         race_cols_2000 = [

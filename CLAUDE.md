@@ -1,107 +1,73 @@
-# CLAUDE.md
+# Ethnicolr development guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Ethnicolr provides name-pattern estimates from published lookup tables and
+PyTorch models. It does not infer a person's identity, ancestry, citizenship,
+race, or ethnicity. Do not describe or build individual profiling or
+consequential-decision uses.
 
-## About ethnicolr
+## Development commands
 
-ethnicolr is a Python package that predicts race and ethnicity from names using machine learning models trained on US Census data (2000, 2010, and 2020), Florida voter registration data, and Wikipedia data. The package provides both command-line utilities and Python APIs for race/ethnicity prediction.
+```bash
+uv sync --all-groups
+make lint
+make test
+make docs
+make build
+make ci
+```
 
-## Development Commands
+`make ci` is the local release gate. It runs Ruff, Pyright, all tests with
+coverage, the warnings-as-errors Sphinx build, and the distribution build.
 
-### Testing
-- Run all tests: `pytest`
-- Run tests with coverage: `pytest --cov=ethnicolr`
-- Run specific test file: `pytest tests/test_010_census_ln.py`
+## Public API
 
-### Code Quality
-- Format code: `ruff format .`
-- Fix import sorting and basic issues: `ruff check . --fix`
-- Lint code (check only): `ruff check .`
-- All quality checks: `ruff format . && ruff check . --fix && ruff check .`
+Public functions use two verbs:
 
-### Installation
-- Install package in development mode: `pip install -e .`
-- Install with optional dependencies: `pip install -e .[dev,test]`
-- For macOS: `pip install -e .[macos]` or `uv sync --group macos`
-- For Linux: `pip install -e .[linux]` or `uv sync --group linux`
-- For Windows: `pip install -e .[windows]` or `uv sync --group windows`
+- `lookup_*` returns values from a published name table.
+- `estimate_*` combines evidence or runs a statistical model.
 
-### Documentation
-- Build documentation locally: `pip install -e .[docs]` then `cd docs && make html`
-- View built docs: Open `docs/build/html/index.html` in browser
-- Documentation is automatically deployed to GitHub Pages on pushes to main
-- Live documentation: https://appeler.github.io/ethnicolr/
-- Documentation configuration reads metadata from `pyproject.toml` automatically
+Required DataFrame and column arguments may be positional. Optional arguments
+are keyword-only. Use `data`, `surname_column`, and `first_name_column`; do not
+introduce abbreviated variants. There are no backward-compatibility aliases.
 
-## Package Architecture
+Every public result follows inference contract 1.0 in
+`docs/source/inference_contract.md`. Probabilities use the 0 to 1 scale.
+Unsupported inputs abstain instead of receiving a default distribution.
 
-### Core Modules
-- `ethnicolr/__init__.py` - Main package imports and public API
-- `ethnicolr/utils.py` - Common argument parsing utilities for CLI tools
-- `ethnicolr/census_ln.py` - Census data lookup by last name
-- `ethnicolr/pred_*.py` - Various prediction models:
-  - `pred_census_ln.py` - Census-based last name predictions
-  - `pred_wiki_*.py` - Wikipedia-based predictions (name/last name)
-  - `pred_fl_reg_*.py` - Florida voter registration based predictions
-  - `pred_nc_reg_name.py` - North Carolina voter registration predictions
+## Package architecture
 
-### Data and Models
-- `ethnicolr/data/` - Training datasets (census, Wikipedia, voter registration)
-- `ethnicolr/models/` - Pre-trained PyTorch LSTM models stored as .pt state dicts with vocabulary/race CSV files
-- Models are organized by source: `census/`, `wiki/`, `fl_voter_reg/`, `nc_voter_reg/`
+- `ethnicolr/api.py` exposes dictionary and hybrid estimators.
+- `ethnicolr/neural_name_model.py` owns shared neural inference.
+- `ethnicolr/inference.py` validates options and adds result metadata.
+- `ethnicolr/model_artifacts.py` resolves immutable model bundles.
+- `ethnicolr/model_metadata.py` validates ordered JSON vocabularies and labels.
+- `ethnicolr/runtime_tables.py` validates typed Parquet lookup tables.
+- Source-specific modules define the public Census, Florida, North Carolina,
+  and Wikipedia estimators.
 
-### Command Line Interface
-The package provides CLI commands defined in pyproject.toml:
-- `census_ln` - Append census race probabilities by last name
-- `pred_census_ln` - Predict race using census LSTM model
-- `pred_wiki_name` / `pred_wiki_ln` - Wikipedia-based predictions
-- `pred_fl_reg_name` / `pred_fl_reg_ln` - Florida voter registration predictions
-- `pred_fl_reg_*_five_cat` - 5-category Florida models
-- `pred_nc_reg_name` - North Carolina predictions
+Use descriptive snake-case names for files, functions, parameters, and local
+variables. Use singular nouns for one object and plural nouns for collections.
+Match established terms within a module. Do not encode type, position, or an
+implementation accident in a name.
 
-### Testing Structure
-- Tests are in `tests/` with descriptive numeric prefixes
-- Each major module has corresponding test files
-- Tests use unittest framework with pandas DataFrame fixtures
+## Model artifacts
 
-## Key Dependencies
+Neural weights are stored in `gojiberries/ethnicolr` on Hugging Face. The
+package pins a full commit SHA and downloads only the requested weight through
+the Hugging Face cache. `ETHNICOLR_MODEL_CACHE` selects a cache directory;
+`ETHNICOLR_MODEL_DIR` selects a local mirror.
 
-- **PyTorch**: For LSTM model inference (torch>=2.0)
-- **pandas**: Data manipulation and CSV I/O
-- **numpy**: Numerical operations
-- Models work with standard PyTorch installations across all platforms (Windows, macOS, Linux)
-- Inference runs on CPU by default (CUDA auto-selected when available); set `ETHNICOLR_DEVICE` to override. MPS is never auto-selected because virtualized Apple Silicon environments (e.g. GitHub Actions macOS runners) return incorrect LSTM output on it.
+The wheel includes schema-validated JSON vocabularies, labels, calibration
+statistics, training manifests, and typed Parquet runtime tables. It does not
+include model weights, CSV metadata, or raw training data.
 
-## Important Notes
+## Training and evaluation
 
-- Models work best with clean alphabetic names (remove titles, punctuation, non-ASCII)
-- The package supports confidence intervals and uncertainty estimation via Monte Carlo sampling
-- Different models predict at different granularities (4-category vs 13-category ethnicity)
-- Census models predict: white, black, Asian, Hispanic
-- Wikipedia models predict detailed ethnic categories
-- Florida/NC models include regional variations
+`scripts/model-training/train_name_lstm.py` trains the Florida, North Carolina,
+and Wikipedia models. Census has its source-specific trainer under
+`scripts/model-training/census/`. `scripts/model-training/calibrate_model.py`
+fits temperature scaling and conformal prediction sets.
 
-## Recent Improvements (2024)
-
-### Enhanced Name Processing
-- **Wikipedia models now preserve all input names** - no more silent dropping of problematic names
-- Added normalization tracking columns: `name_normalized`, `name_normalized_clean`, `processing_status`
-- Better handling of accented characters, punctuation, and special characters
-- Improved logging shows exactly which names are skipped and why
-- Expected improvement from 60-80% to 85-95% success rates for diverse name datasets
-
-### New Output Columns
-- `processing_status`: Shows if name was "processed", "skipped_empty_original", or "skipped_empty_after_normalization"
-- `__name`: Full name used for processing
-- Normalization tracking helps debug problematic names
-
-This addresses issues with Canadian/international datasets containing accented names, titles, and special characters.
-
-## Model File Locations
-
-Pre-trained models are stored in `ethnicolr/models/*/lstm/` directories:
-- `.pt` files contain PyTorch state dicts for the shared `NameLSTM` architecture
-- `*_vocab_pt.csv` files contain n-gram vocabularies (quoted, since n-grams may end in spaces)
-- `*_race_pt.csv` files list the output classes in logit order
-- Models are loaded dynamically based on the prediction function used
-- Retrain any model with `scripts/model-training/train_name_lstm.py` (census: `scripts/model-training/census/train_census_lstm_pytorch.py`)
+Split source rows before balancing or augmentation. Learn vocabulary only from
+training rows. Keep calibration fitting and conformal evaluation disjoint.
+Report the evaluation unit and weighting with every metric.
