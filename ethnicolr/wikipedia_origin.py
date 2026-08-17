@@ -45,14 +45,12 @@ class WikipediaOriginModel(NeuralNameModel):
             uncertainty_level=uncertainty_level,
             target="country-origin",
             input_scope="full-name",
+            label_column="origin",
             target_prior=target_prior,
             conformal_coverage=conformal_coverage,
         )
         result.drop(columns=[full_name_column], inplace=True)
-        renamed_columns = {"race": "origin"}
-        if "race_set" in result.columns:
-            renamed_columns["race_set"] = "origin_set"
-        return result.rename(columns=renamed_columns)
+        return result
 
 
 def estimate_wikipedia_origin(

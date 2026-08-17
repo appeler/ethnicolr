@@ -42,6 +42,7 @@ class WikipediaSurnameModel(NeuralNameModel):
             uncertainty_level=uncertainty_level,
             target="race-ethnicity",
             input_scope="last-name",
+            label_column="race",
             target_prior=target_prior,
             conformal_coverage=conformal_coverage,
         )

@@ -11,6 +11,10 @@ other name-inference packages. Each package retains its target-specific
 probability columns; the common columns make results interpretable and testable
 across packages.
 
+If an input column uses a name reserved for estimator output, Ethnicolr preserves
+the input under `input_<name>`. It adds a numeric suffix when that name already
+exists.
+
 ## Common columns
 
 | Column | Meaning |

@@ -79,3 +79,12 @@ class TestWikiOrigin:
     def test_missing_column_raises(self, origin_names):
         with pytest.raises(ValueError, match="does not exist"):
             estimate_wikipedia_origin(origin_names, "nope", "first")
+
+    def test_output_column_collision_preserves_input_values(self, origin_names):
+        data = origin_names.head(2).copy()
+        data["origin"] = ["observed-a", "observed-b"]
+
+        result = estimate_wikipedia_origin(data, "last", "first")
+
+        assert result.columns.is_unique
+        assert result["input_origin"].tolist() == data["origin"].tolist()

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 from importlib.metadata import version
 from typing import Any, cast
 
@@ -13,6 +13,53 @@ from .torch_utils import name_support_reason
 
 ESTIMATE_TYPE = "name-pattern estimate"
 INFERENCE_CONTRACT_VERSION = "1.0"
+INFERENCE_METADATA_COLUMNS = frozenset(
+    {
+        "inference_contract_version",
+        "estimate_type",
+        "target",
+        "input_scope",
+        "predicted_label",
+        "predicted_probability",
+        "scored",
+        "script_supported",
+        "abstained",
+        "abstention_reason",
+        "model_id",
+        "model_version",
+        "model_revision",
+        "reference_population",
+        "calibration_reference",
+        "calibration_status",
+        "uncertainty_method",
+        "uncertainty_level",
+    }
+)
+
+
+def rename_conflicting_input_columns(
+    data: pd.DataFrame, output_columns: Collection[str]
+) -> pd.DataFrame:
+    """Give input columns distinct names when an estimator owns their names."""
+    reserved_columns = set(output_columns) | INFERENCE_METADATA_COLUMNS
+    result = data.copy()
+    renamed_columns = list(result.columns)
+    occupied_columns = set(renamed_columns) | reserved_columns
+
+    for position, column in enumerate(result.columns):
+        if column not in reserved_columns:
+            continue
+        base_name = f"input_{column}"
+        candidate_name = base_name
+        suffix = 2
+        while candidate_name in occupied_columns:
+            candidate_name = f"{base_name}_{suffix}"
+            suffix += 1
+        renamed_columns[position] = candidate_name
+        occupied_columns.add(candidate_name)
+
+    result.columns = renamed_columns
+    return result
 
 
 def prepare_full_name_data(

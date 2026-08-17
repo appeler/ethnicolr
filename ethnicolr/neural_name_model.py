@@ -9,7 +9,11 @@ import numpy as np
 import pandas as pd
 import torch
 
-from .inference import add_inference_metadata, validate_inference_options
+from .inference import (
+    add_inference_metadata,
+    rename_conflicting_input_columns,
+    validate_inference_options,
+)
 from .model_artifacts import resolve_model_bundle
 from .model_metadata import load_class_labels, load_vocabulary
 from .torch_utils import (
@@ -162,6 +166,7 @@ class NeuralNameModel:
         uncertainty_level: float | None,
         target: str,
         input_scope: str,
+        label_column: str,
         target_prior: dict[str, float] | None = None,
         conformal_coverage: float | None = None,
     ) -> pd.DataFrame:
@@ -178,6 +183,7 @@ class NeuralNameModel:
             mc_iterations: Number of Monte Carlo iterations for MC-dropout ranges.
             uncertainty_level: Optional MC-dropout range level. ``None`` returns
                 point estimates.
+            label_column: Name of the returned predicted-label column.
 
         Returns:
             DataFrame with original data plus prediction columns:
@@ -190,6 +196,11 @@ class NeuralNameModel:
             ValueError: If required columns are missing.
         """
         data = cls.validate_name_column(data, name_column)
+        validate_inference_options(
+            uncertainty_level=uncertainty_level,
+            target_prior=target_prior,
+            conformal_coverage=conformal_coverage,
+        )
         validate_mc_dropout(uncertainty_level, mc_iterations)
 
         data[name_column] = (
@@ -203,11 +214,6 @@ class NeuralNameModel:
         temperature = model_resources["temperature"]
         calibration_status = model_resources["calibration_status"]
 
-        validate_inference_options(
-            uncertainty_level=uncertainty_level,
-            target_prior=target_prior,
-            conformal_coverage=conformal_coverage,
-        )
         if (
             target_prior is not None or conformal_coverage is not None
         ) and model_statistics is None:
@@ -252,6 +258,20 @@ class NeuralNameModel:
         input_tensor = torch.from_numpy(padded_name_sequences[scored_rows]).to(
             model_resources["device"]
         )
+        output_columns = set(class_labels) | {label_column}
+        if conformal_coverage is not None:
+            output_columns.add(f"{label_column}_set")
+        if uncertainty_level is not None:
+            for class_label in class_labels:
+                output_columns.update(
+                    {
+                        f"{class_label}_mc_mean",
+                        f"{class_label}_mc_std",
+                        f"{class_label}_mc_lower",
+                        f"{class_label}_mc_upper",
+                    }
+                )
+        result_input = rename_conflicting_input_columns(data, output_columns)
 
         if uncertainty_level is None:
             probabilities = np.full((len(data), len(class_labels)), np.nan, dtype=float)
@@ -271,10 +291,10 @@ class NeuralNameModel:
                     )
                 probabilities[scored_rows] = scored_probabilities
             probability_frame = pd.DataFrame(probabilities, columns=class_labels)
-            probability_frame["race"] = pd.Series(
+            probability_frame[label_column] = pd.Series(
                 None, index=probability_frame.index, dtype="object"
             )
-            probability_frame.loc[scored_rows, "race"] = probability_frame.loc[
+            probability_frame.loc[scored_rows, label_column] = probability_frame.loc[
                 scored_rows, class_labels
             ].idxmax(axis=1)
             if conformal_coverage is not None:
@@ -287,9 +307,9 @@ class NeuralNameModel:
                 prediction_sets.loc[scored_rows] = build_conformal_prediction_sets(
                     probabilities[scored_rows], class_labels, conformal_quantile
                 )
-                probability_frame["race_set"] = prediction_sets
+                probability_frame[f"{label_column}_set"] = prediction_sets
             probability_frame.index = data.index
-            result = pd.concat([data, probability_frame], axis=1)
+            result = pd.concat([result_input, probability_frame], axis=1)
 
         else:
             lower_percentile = (0.5 - uncertainty_level / 2) * 100
@@ -307,7 +327,7 @@ class NeuralNameModel:
                 uncertainty_summary[f"{class_label}_mc_lower"] = np.nan
                 uncertainty_summary[f"{class_label}_mc_upper"] = np.nan
                 uncertainty_summary[class_label] = np.nan
-            uncertainty_summary["race"] = pd.Series(
+            uncertainty_summary[label_column] = pd.Series(
                 None, index=data.index, dtype="object"
             )
             if scored_rows.any():
@@ -352,12 +372,12 @@ class NeuralNameModel:
                     uncertainty_summary.loc[scored_rows, class_label] = (
                         mean_probabilities[:, class_index]
                     )
-                uncertainty_summary.loc[scored_rows, "race"] = (
+                uncertainty_summary.loc[scored_rows, label_column] = (
                     pd.DataFrame(mean_probabilities, columns=class_labels)
                     .idxmax(axis=1)
                     .to_numpy()
                 )
-            result = pd.concat([data, uncertainty_summary], axis=1)
+            result = pd.concat([result_input, uncertainty_summary], axis=1)
 
         abstention_reasons = support_reasons.copy()
         abstention_reasons[script_supported & ~has_known_features] = "out-of-vocabulary"
@@ -381,7 +401,7 @@ class NeuralNameModel:
             target=target,
             input_scope=input_scope,
             scored=scored_rows,
-            label_column="race",
+            label_column=label_column,
         )
 
         return result

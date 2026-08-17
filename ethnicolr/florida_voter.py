@@ -44,6 +44,7 @@ class FloridaVoterSurnameModel(NeuralNameModel):
             uncertainty_level=uncertainty_level,
             target="race-ethnicity",
             input_scope="last-name",
+            label_column="race",
             target_prior=target_prior,
             conformal_coverage=conformal_coverage,
         )
@@ -56,7 +57,7 @@ class FloridaVoterFullNameModel(NeuralNameModel):
     VOCABULARY_FILE = "models/fl_voter_reg/lstm/fl_name_five_cat_2022_vocab_pt.json"
     LABELS_FILE = "models/fl_voter_reg/lstm/fl_name_five_cat_2022_labels_pt.json"
     NGRAM_SIZE = 2
-    MAX_SEQUENCE_LENGTH = 20
+    MAX_SEQUENCE_LENGTH = 25
 
     @classmethod
     def estimate(
@@ -87,6 +88,7 @@ class FloridaVoterFullNameModel(NeuralNameModel):
             uncertainty_level=uncertainty_level,
             target="race-ethnicity",
             input_scope="full-name",
+            label_column="race",
             target_prior=target_prior,
             conformal_coverage=conformal_coverage,
         )
