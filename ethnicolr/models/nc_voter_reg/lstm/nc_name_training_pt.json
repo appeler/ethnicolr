@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "model": "north_carolina_voter_full_name",
+  "seed": 42,
+  "epochs": 15,
+  "batch_size": 256,
+  "learning_rate": 0.001,
+  "requested_source_rows": 1000000,
+  "training_device": "mps",
+  "training_data": {
+    "file": "nc_voter_name_race.csv.gz",
+    "sha256": "f4d274ef8ad8c59291186f8bab23c373f0ad7d8d99a81b7983af9170d8b45f84"
+  },
+  "split": {
+    "training_rows": 699996,
+    "training_source_rows": 177327,
+    "validation_rows": 100000,
+    "validation_source_rows": 100000,
+    "test_rows": 200000,
+    "test_source_rows": 200000,
+    "source_overlap_rows": 0,
+    "split_before_balancing": true,
+    "vocabulary_from_training_only": true,
+    "training_balanced": true
+  },
+  "features": {
+    "input_scope": "full-name",
+    "ngram_size": 2,
+    "sequence_length": 25,
+    "vocabulary_size": 1204,
+    "classes": [
+      "HL+A",
+      "HL+B",
+      "HL+I",
+      "HL+M",
+      "HL+O",
+      "HL+W",
+      "NL+A",
+      "NL+B",
+      "NL+I",
+      "NL+M",
+      "NL+O",
+      "NL+W"
+    ]
+  },
+  "evaluation": {
+    "selected_epoch": 11,
+    "validation_loss": 1.5717222523117065,
+    "validation_accuracy": 0.44285,
+    "loss": 1.578419273109436,
+    "accuracy": 0.440215,
+    "top_2_accuracy": 0.74084,
+    "top_3_accuracy": 0.884865
+  }
+}

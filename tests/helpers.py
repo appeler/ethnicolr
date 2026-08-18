@@ -120,18 +120,16 @@ def validate_probability_ranges(df: pd.DataFrame, race_columns: list[str]) -> bo
     return np.all((values >= 0) & (values <= 1))
 
 
-def validate_confidence_interval_columns(
-    df: pd.DataFrame, mean_columns: list[str]
-) -> bool:
+def validate_mc_dropout_columns(df: pd.DataFrame, mean_columns: list[str]) -> bool:
     """
-    Validate that confidence interval mean columns are present and valid.
+    Validate that Monte Carlo dropout mean columns are present and valid.
 
     Args:
         df: DataFrame to check
-        mean_columns: List of expected mean column names (e.g., ['white_mean', 'black_mean'])
+        mean_columns: Expected mean columns (for example, ``white_mc_mean``).
 
     Returns:
-        True if confidence interval columns are present and valid
+        True if Monte Carlo dropout columns are present and valid.
     """
     if not validate_prediction_columns(df, mean_columns):
         return False
@@ -192,9 +190,9 @@ def get_race_columns_for_model(model_type: str) -> list[str]:
         raise ValueError(f"Unknown model type: {model_type}")
 
 
-def get_mean_columns_for_model(model_type: str) -> list[str]:
+def get_mc_mean_columns_for_model(model_type: str) -> list[str]:
     """
-    Get the expected confidence interval mean columns for different model types.
+    Get the expected Monte Carlo dropout mean columns for a model type.
 
     Args:
         model_type: Type of model
@@ -203,11 +201,11 @@ def get_mean_columns_for_model(model_type: str) -> list[str]:
         List of expected mean column names
     """
     base_columns = get_race_columns_for_model(model_type)
-    return [col + "_mean" for col in base_columns]
+    return [col + "_mc_mean" for col in base_columns]
 
 
 def validate_basic_prediction_output(
-    df: pd.DataFrame, model_type: str, with_confidence: bool = False
+    df: pd.DataFrame, model_type: str, with_uncertainty: bool = False
 ) -> dict:
     """
     Comprehensive validation of prediction output for any model type.
@@ -215,7 +213,7 @@ def validate_basic_prediction_output(
     Args:
         df: DataFrame with prediction results
         model_type: Type of model being tested
-        with_confidence: Whether confidence intervals are expected
+        with_uncertainty: Whether MC-dropout uncertainty summaries are expected
 
     Returns:
         Dictionary with validation results
@@ -229,18 +227,16 @@ def validate_basic_prediction_output(
         "has_race_column": "race" in df.columns,
     }
 
-    if with_confidence:
-        mean_columns = get_mean_columns_for_model(model_type)
+    if with_uncertainty:
+        mean_columns = get_mc_mean_columns_for_model(model_type)
         results.update(
             {
-                "has_confidence_columns": validate_prediction_columns(df, mean_columns),
-                "confidence_probabilities_sum_to_one": validate_probabilities_sum_to_one(
+                "has_mc_dropout_columns": validate_prediction_columns(df, mean_columns),
+                "mc_probabilities_sum_to_one": validate_probabilities_sum_to_one(
                     df, mean_columns
                 ),
-                "confidence_no_nan": validate_no_nan_in_predictions(df, mean_columns),
-                "confidence_valid_ranges": validate_probability_ranges(
-                    df, mean_columns
-                ),
+                "mc_no_nan": validate_no_nan_in_predictions(df, mean_columns),
+                "mc_valid_ranges": validate_probability_ranges(df, mean_columns),
             }
         )
 
@@ -249,7 +245,7 @@ def validate_basic_prediction_output(
 
 
 def assert_prediction_quality(
-    df: pd.DataFrame, model_type: str, with_confidence: bool = False
+    df: pd.DataFrame, model_type: str, with_uncertainty: bool = False
 ):
     """
     Assert that prediction output meets quality standards.
@@ -257,12 +253,12 @@ def assert_prediction_quality(
     Args:
         df: DataFrame with prediction results
         model_type: Type of model being tested
-        with_confidence: Whether confidence intervals are expected
+        with_uncertainty: Whether MC-dropout uncertainty summaries are expected
 
     Raises:
         AssertionError: If any validation fails
     """
-    results = validate_basic_prediction_output(df, model_type, with_confidence)
+    results = validate_basic_prediction_output(df, model_type, with_uncertainty)
 
     assert results["has_expected_columns"], (
         f"Missing expected columns for {model_type} model"
@@ -274,15 +270,13 @@ def assert_prediction_quality(
     )
     assert results["has_race_column"], "Missing 'race' column with predicted race"
 
-    if with_confidence:
-        assert results["has_confidence_columns"], "Missing confidence interval columns"
-        assert results["confidence_probabilities_sum_to_one"], (
-            "Confidence probabilities do not sum to 1.0"
+    if with_uncertainty:
+        assert results["has_mc_dropout_columns"], "Missing MC-dropout columns"
+        assert results["mc_probabilities_sum_to_one"], (
+            "MC-dropout mean probabilities do not sum to 1.0"
         )
-        assert results["confidence_no_nan"], "Found NaN values in confidence columns"
-        assert results["confidence_valid_ranges"], (
-            "Found confidence values outside [0,1] range"
-        )
+        assert results["mc_no_nan"], "Found NaN values in MC-dropout columns"
+        assert results["mc_valid_ranges"], "Found MC-dropout values outside [0,1] range"
 
 
 def create_test_summary(
@@ -290,7 +284,7 @@ def create_test_summary(
     input_df: pd.DataFrame,
     output_df: pd.DataFrame,
     model_type: str,
-    with_confidence: bool = False,
+    with_uncertainty: bool = False,
 ) -> str:
     """
     Create a summary of test results for debugging.
@@ -300,13 +294,13 @@ def create_test_summary(
         input_df: Input DataFrame
         output_df: Output DataFrame with predictions
         model_type: Type of model tested
-        with_confidence: Whether confidence intervals were used
+        with_uncertainty: Whether MC-dropout uncertainty summaries were used
 
     Returns:
         String summary of the test
     """
     validation_results = validate_basic_prediction_output(
-        output_df, model_type, with_confidence
+        output_df, model_type, with_uncertainty
     )
 
     summary = f"""
@@ -314,7 +308,7 @@ Test: {test_name}
 Model Type: {model_type}
 Input rows: {len(input_df)}
 Output rows: {len(output_df)}
-With confidence intervals: {with_confidence}
+With MC-dropout uncertainty summaries: {with_uncertainty}
 
 Validation Results:
 """

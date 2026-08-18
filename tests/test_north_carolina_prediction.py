@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ethnicolr.pred_nc_reg_name import pred_nc_reg_name
+from ethnicolr import estimate_north_carolina_voter_full_name
 
 from .helpers import assert_prediction_quality, validate_race_prediction_consistency
 
@@ -16,7 +16,9 @@ class TestNorthCarolinaPrediction:
 
     def test_basic_nc_prediction(self, sample_nc_names):
         """Test basic North Carolina name prediction."""
-        result = pred_nc_reg_name(sample_nc_names, "last", "first")
+        result = estimate_north_carolina_voter_full_name(
+            sample_nc_names, "last", "first"
+        )
 
         # Validate prediction quality
         assert_prediction_quality(result, "nc")
@@ -27,12 +29,14 @@ class TestNorthCarolinaPrediction:
         # Should preserve original data
         assert len(result) == len(sample_nc_names)
 
-    def test_nc_prediction_with_confidence(self, sample_nc_names):
-        """Test North Carolina prediction with confidence intervals."""
-        result = pred_nc_reg_name(sample_nc_names, "last", "first", conf_int=0.9)
+    def test_nc_prediction_with_uncertainty(self, sample_nc_names):
+        """Test North Carolina prediction with MC-dropout uncertainty summaries."""
+        result = estimate_north_carolina_voter_full_name(
+            sample_nc_names, "last", "first", uncertainty_level=0.9
+        )
 
-        # Validate prediction quality including confidence intervals
-        assert_prediction_quality(result, "nc", with_confidence=True)
+        # Validate prediction quality including MC-dropout uncertainty summaries
+        assert_prediction_quality(result, "nc", with_uncertainty=True)
 
         # Check that predictions match expected races for test data
         assert validate_race_prediction_consistency(result, model_type="nc")
@@ -66,7 +70,7 @@ class TestNorthCarolinaPrediction:
             )
 
         nc_df = pd.DataFrame(nc_test_data)
-        result = pred_nc_reg_name(nc_df, "last", "first")
+        result = estimate_north_carolina_voter_full_name(nc_df, "last", "first")
 
         # Validate prediction quality
         assert_prediction_quality(result, "nc")
@@ -102,7 +106,9 @@ class TestNorthCarolinaPrediction:
 
     def test_nc_race_categories_comprehensive(self, sample_nc_names):
         """Test that NC model produces all expected race categories."""
-        result = pred_nc_reg_name(sample_nc_names, "last", "first")
+        result = estimate_north_carolina_voter_full_name(
+            sample_nc_names, "last", "first"
+        )
 
         # Should have all 12 NC race categories as columns
         expected_categories = [
@@ -128,14 +134,16 @@ class TestNorthCarolinaPrediction:
 
     @pytest.mark.parametrize("conf_level", [0.8, 0.9, 0.95])
     def test_nc_confidence_levels(self, sample_nc_names, conf_level):
-        """Test different confidence interval levels for NC model."""
-        result = pred_nc_reg_name(sample_nc_names, "last", "first", conf_int=conf_level)
+        """Test different MC-dropout uncertainty summary levels for NC model."""
+        result = estimate_north_carolina_voter_full_name(
+            sample_nc_names, "last", "first", uncertainty_level=conf_level
+        )
 
-        # Validate prediction quality including confidence intervals
-        assert_prediction_quality(result, "nc", with_confidence=True)
+        # Validate prediction quality including MC-dropout uncertainty summaries
+        assert_prediction_quality(result, "nc", with_uncertainty=True)
 
         # Should have 12 mean columns (one for each race category)
-        mean_cols = [col for col in result.columns if col.endswith("_mean")]
+        mean_cols = [col for col in result.columns if col.endswith("_mc_mean")]
         assert len(mean_cols) == 12
 
         # All mean columns should sum to approximately 1.0
@@ -154,7 +162,7 @@ class TestNorthCarolinaPrediction:
             ]
         )
 
-        result = pred_nc_reg_name(test_names, "last", "first")
+        result = estimate_north_carolina_voter_full_name(test_names, "last", "first")
         assert_prediction_quality(result, "nc")
 
         # Check that Hispanic/Non-Hispanic distinction shows some pattern (flexible test)
@@ -179,17 +187,21 @@ class TestNorthCarolinaErrorHandling:
     def test_nc_missing_columns(self, sample_nc_names):
         """Test error handling for missing columns."""
         with pytest.raises((KeyError, ValueError)):
-            pred_nc_reg_name(sample_nc_names, "nonexistent_last", "first")
+            estimate_north_carolina_voter_full_name(
+                sample_nc_names, "nonexistent_last", "first"
+            )
 
         with pytest.raises((KeyError, ValueError)):
-            pred_nc_reg_name(sample_nc_names, "last", "nonexistent_first")
+            estimate_north_carolina_voter_full_name(
+                sample_nc_names, "last", "nonexistent_first"
+            )
 
     def test_nc_empty_dataframe(self):
         """Test handling of empty DataFrames."""
         empty_df = pd.DataFrame(columns=["last", "first"])
 
         # Should handle gracefully
-        result = pred_nc_reg_name(empty_df, "last", "first")
+        result = estimate_north_carolina_voter_full_name(empty_df, "last", "first")
         assert len(result) == 0
 
         # Should still have expected columns
@@ -214,13 +226,15 @@ class TestNorthCarolinaErrorHandling:
         """Test handling of single-row DataFrames."""
         single_df = pd.DataFrame([{"last": "smith", "first": "john"}])
 
-        result = pred_nc_reg_name(single_df, "last", "first")
+        result = estimate_north_carolina_voter_full_name(single_df, "last", "first")
         assert len(result) == 1
         assert_prediction_quality(result, "nc")
 
     def test_nc_special_characters(self, edge_case_names):
         """Test NC model with special characters in names."""
-        result = pred_nc_reg_name(edge_case_names, "last", "first")
+        result = estimate_north_carolina_voter_full_name(
+            edge_case_names, "last", "first"
+        )
 
         # Should handle without crashing
         assert len(result) == len(edge_case_names)
@@ -239,7 +253,9 @@ class TestNorthCarolinaErrorHandling:
         )
 
         # Should not crash
-        result = pred_nc_reg_name(problematic_df, "last", "first")
+        result = estimate_north_carolina_voter_full_name(
+            problematic_df, "last", "first"
+        )
         assert len(result) == len(problematic_df)
 
 
@@ -248,8 +264,12 @@ class TestNorthCarolinaPerformance:
 
     def test_nc_deterministic_results(self, sample_nc_names):
         """Test that NC model produces deterministic results."""
-        result1 = pred_nc_reg_name(sample_nc_names, "last", "first")
-        result2 = pred_nc_reg_name(sample_nc_names, "last", "first")
+        result1 = estimate_north_carolina_voter_full_name(
+            sample_nc_names, "last", "first"
+        )
+        result2 = estimate_north_carolina_voter_full_name(
+            sample_nc_names, "last", "first"
+        )
 
         # Results should be identical
         pd.testing.assert_frame_equal(result1, result2)
@@ -261,7 +281,7 @@ class TestNorthCarolinaPerformance:
         test_df["id"] = range(len(test_df))
         test_df["notes"] = "test_data"
 
-        result = pred_nc_reg_name(test_df, "last", "first")
+        result = estimate_north_carolina_voter_full_name(test_df, "last", "first")
 
         # Original columns should be preserved
         assert "id" in result.columns
@@ -270,9 +290,13 @@ class TestNorthCarolinaPerformance:
         assert all(result["notes"] == test_df["notes"])
 
     def test_nc_confidence_vs_regular_consistency(self, sample_nc_names):
-        """Test consistency between regular and confidence interval predictions."""
-        regular = pred_nc_reg_name(sample_nc_names, "last", "first")
-        with_conf = pred_nc_reg_name(sample_nc_names, "last", "first", conf_int=0.9)
+        """Test consistency between regular and MC-dropout uncertainty summary predictions."""
+        regular = estimate_north_carolina_voter_full_name(
+            sample_nc_names, "last", "first"
+        )
+        with_conf = estimate_north_carolina_voter_full_name(
+            sample_nc_names, "last", "first", uncertainty_level=0.9
+        )
 
         # Both should have same basic structure
         assert len(regular) == len(with_conf)
@@ -329,7 +353,7 @@ class TestNorthCarolinaUniqueFeatures:
             ]
         )
 
-        result = pred_nc_reg_name(diverse_names, "last", "first")
+        result = estimate_north_carolina_voter_full_name(diverse_names, "last", "first")
         assert_prediction_quality(result, "nc")
 
         # Should predict at least several different categories
@@ -351,7 +375,9 @@ class TestNorthCarolinaUniqueFeatures:
 
     def test_nc_probability_distribution_sanity(self, sample_nc_names):
         """Test that probability distributions make intuitive sense."""
-        result = pred_nc_reg_name(sample_nc_names, "last", "first")
+        result = estimate_north_carolina_voter_full_name(
+            sample_nc_names, "last", "first"
+        )
 
         # For each prediction, the highest probability should correspond to predicted race
         race_cols = [

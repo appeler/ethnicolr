@@ -1,346 +1,208 @@
-"""
-Tests for Florida voter registration-based race prediction functionality.
-"""
+"""Tests for the 2022 Florida voter name-pattern estimators."""
+
+import inspect
+import json
+from pathlib import Path
 
 import pandas as pd
 import pytest
 
-from ethnicolr.pred_fl_reg_ln import pred_fl_reg_ln
-from ethnicolr.pred_fl_reg_ln_five_cat import pred_fl_reg_ln_five_cat
-from ethnicolr.pred_fl_reg_name import pred_fl_reg_name
-from ethnicolr.pred_fl_reg_name_five_cat import pred_fl_reg_name_five_cat
+from ethnicolr import (
+    estimate_florida_voter_full_name,
+    estimate_florida_voter_surname,
+)
+from ethnicolr.florida_voter import (
+    FloridaVoterFullNameModel,
+    FloridaVoterSurnameModel,
+)
+from ethnicolr.neural_name_model import NeuralNameModel
 
-from .helpers import assert_prediction_quality, validate_race_prediction_consistency
+from .helpers import assert_prediction_quality
 
-
-class TestFloridaLastNamePrediction:
-    """Test Florida voter registration-based last name prediction models."""
-
-    def test_four_category_lastname_prediction(self, sample_florida_names):
-        """Test 4-category last name prediction model."""
-        result = pred_fl_reg_ln(sample_florida_names, "last")
-
-        # Validate prediction quality
-        assert_prediction_quality(result, "florida_4cat")
-
-        # Check that predictions match expected races for test data
-        assert validate_race_prediction_consistency(result)
-
-        # Should preserve original data
-        assert len(result) == len(sample_florida_names)
-
-    def test_five_category_lastname_prediction(self, sample_florida_names):
-        """Test 5-category last name prediction model."""
-        result = pred_fl_reg_ln_five_cat(sample_florida_names, "last")
-
-        # Validate prediction quality
-        assert_prediction_quality(result, "florida_5cat")
-
-        # Should preserve original data
-        assert len(result) == len(sample_florida_names)
-
-        # Should include 'other' category
-        assert "other" in result.columns
-
-    def test_five_category_year_variants_not_cached_together(
-        self, sample_florida_names
-    ):
-        """The 2022 and 2017 model variants must produce different outputs.
-
-        Regression test: the old engine cached one model per class, so after
-        predicting with one year the other year silently reused it.
-        """
-        result_2022 = pred_fl_reg_ln_five_cat(
-            sample_florida_names.copy(), "last", year=2022
-        )
-        result_2017 = pred_fl_reg_ln_five_cat(
-            sample_florida_names.copy(), "last", year=2017
-        )
-
-        prob_cols = ["asian", "hispanic", "nh_black", "nh_white", "other"]
-        assert not result_2022[prob_cols].equals(result_2017[prob_cols])
-
-    def test_four_category_with_confidence(self, sample_florida_names):
-        """Test 4-category last name prediction with confidence intervals."""
-        result = pred_fl_reg_ln(sample_florida_names, "last", conf_int=0.9)
-
-        # Validate prediction quality including confidence intervals
-        assert_prediction_quality(result, "florida_4cat", with_confidence=True)
-
-        # Check that predictions match expected races for test data
-        assert validate_race_prediction_consistency(result)
-
-    def test_five_category_with_confidence(self, sample_florida_names):
-        """Test 5-category last name prediction with confidence intervals."""
-        result = pred_fl_reg_ln_five_cat(sample_florida_names, "last", conf_int=0.9)
-
-        # Validate prediction quality including confidence intervals
-        assert_prediction_quality(result, "florida_5cat", with_confidence=True)
+FLORIDA_CATEGORIES = ["asian", "hispanic", "nh_black", "nh_white", "other"]
 
 
-class TestFloridaFullNamePrediction:
-    """Test Florida voter registration-based full name prediction models."""
-
-    def test_four_category_fullname_prediction(self, sample_florida_names):
-        """Test 4-category full name prediction model."""
-        result = pred_fl_reg_name(sample_florida_names, "last", "first")
-
-        # Validate prediction quality
-        assert_prediction_quality(result, "florida_4cat")
-
-        # Check that predictions match expected races for test data
-        assert validate_race_prediction_consistency(result)
-
-        # Should preserve original data
-        assert len(result) == len(sample_florida_names)
-
-    def test_five_category_fullname_prediction(self, sample_florida_names):
-        """Test 5-category full name prediction model."""
-        result = pred_fl_reg_name_five_cat(sample_florida_names, "last", "first")
-
-        # Validate prediction quality
-        assert_prediction_quality(result, "florida_5cat")
-
-        # Should preserve original data
-        assert len(result) == len(sample_florida_names)
-
-        # Should include 'other' category
-        assert "other" in result.columns
-
-    def test_four_category_fullname_with_confidence(self, sample_florida_names):
-        """Test 4-category full name prediction with confidence intervals."""
-        result = pred_fl_reg_name(sample_florida_names, "last", "first", conf_int=0.9)
-
-        # Validate prediction quality including confidence intervals
-        assert_prediction_quality(result, "florida_4cat", with_confidence=True)
-
-        # Check that predictions match expected races for test data
-        assert validate_race_prediction_consistency(result)
-
-    def test_five_category_fullname_with_confidence(self, sample_florida_names):
-        """Test 5-category full name prediction with confidence intervals."""
-        result = pred_fl_reg_name_five_cat(
-            sample_florida_names, "last", "first", conf_int=0.9
-        )
-
-        # Validate prediction quality including confidence intervals
-        assert_prediction_quality(result, "florida_5cat", with_confidence=True)
-
-
-class TestFloridaModelComparison:
-    """Test comparisons between different Florida prediction models."""
-
-    def test_lastname_vs_fullname_four_category(self, sample_florida_names):
-        """Compare 4-category last name vs full name models."""
-        ln_result = pred_fl_reg_ln(sample_florida_names, "last")
-        name_result = pred_fl_reg_name(sample_florida_names, "last", "first")
-
-        # Both should have same number of rows and structure
-        assert len(ln_result) == len(name_result)
-
-        # Both should pass quality checks
-        assert_prediction_quality(ln_result, "florida_4cat")
-        assert_prediction_quality(name_result, "florida_4cat")
-
-        # Should have same race categories
-        race_cols_ln = [
-            col
-            for col in ln_result.columns
-            if col in ["asian", "hispanic", "nh_black", "nh_white"]
-        ]
-        race_cols_name = [
-            col
-            for col in name_result.columns
-            if col in ["asian", "hispanic", "nh_black", "nh_white"]
-        ]
-        assert set(race_cols_ln) == set(race_cols_name)
-
-    def test_lastname_vs_fullname_five_category(self, sample_florida_names):
-        """Compare 5-category last name vs full name models."""
-        ln_result = pred_fl_reg_ln_five_cat(sample_florida_names, "last")
-        name_result = pred_fl_reg_name_five_cat(sample_florida_names, "last", "first")
-
-        # Both should have same number of rows and structure
-        assert len(ln_result) == len(name_result)
-
-        # Both should pass quality checks
-        assert_prediction_quality(ln_result, "florida_5cat")
-        assert_prediction_quality(name_result, "florida_5cat")
-
-        # Should have same race categories including 'other'
-        expected_cols = ["asian", "hispanic", "nh_black", "nh_white", "other"]
-        race_cols_ln = [col for col in ln_result.columns if col in expected_cols]
-        race_cols_name = [col for col in name_result.columns if col in expected_cols]
-        assert set(race_cols_ln) == set(race_cols_name)
-        assert len(race_cols_ln) == 5
-
-    def test_four_vs_five_category_consistency(self, sample_florida_names):
-        """Compare 4-category vs 5-category models for consistency."""
-        four_cat = pred_fl_reg_ln(sample_florida_names, "last")
-        five_cat = pred_fl_reg_ln_five_cat(sample_florida_names, "last")
-
-        # Both should pass their respective quality checks
-        assert_prediction_quality(four_cat, "florida_4cat")
-        assert_prediction_quality(five_cat, "florida_5cat")
-
-        # 4-category columns should be subset of 5-category
-        four_cat_cols = ["asian", "hispanic", "nh_black", "nh_white"]
-        for col in four_cat_cols:
-            assert col in four_cat.columns
-            assert col in five_cat.columns
-
-        # 5-category should have additional 'other' column
-        assert "other" in five_cat.columns
-        assert "other" not in four_cat.columns
-
-
-class TestFloridaExtensiveValidation:
-    """Test Florida models on extensive datasets."""
-
-    def test_extensive_four_category_accuracy(self, extensive_names):
-        """Test 4-category model accuracy on extensive dataset."""
-        # Map expected races to Florida categories
-        fl_mapping = {
-            "white": "nh_white",
-            "black": "nh_black",
-            "hispanic": "hispanic",
-            "asian": "asian",
-        }
-
-        test_df = extensive_names.copy()
-        test_df["expected_fl"] = test_df["expected_major"].map(fl_mapping)
-
-        result = pred_fl_reg_ln(test_df, "last")
-        assert_prediction_quality(result, "florida_4cat")
-
-        # Test accuracy for major groups
-        for expected_race, fl_race in fl_mapping.items():
-            subset_mask = test_df["expected_major"] == expected_race
-            if subset_mask.any():
-                subset_results = result[subset_mask]
-                accuracy = (subset_results["race"] == fl_race).mean()
-                assert accuracy >= 0.25, (
-                    f"{expected_race} -> {fl_race} accuracy too low: {accuracy}"
-                )
-
-    def test_extensive_five_category_other_usage(self, extensive_names):
-        """Test that 5-category model appropriately uses 'other' category."""
-        result = pred_fl_reg_ln_five_cat(extensive_names, "last")
-        assert_prediction_quality(result, "florida_5cat")
-
-        # Should make some 'other' predictions (though maybe not many for common names)
-        race_counts = result["race"].value_counts()
-        assert len(race_counts) >= 4  # Should use at least 4 categories
-
-        # 'Other' category should exist even if not frequently predicted
-        assert "other" in result.columns
-        other_prob_sum = result["other"].sum()
-        assert other_prob_sum >= 0  # Should be non-negative
-
-
-class TestFloridaConfidenceIntervals:
-    """Test confidence interval functionality across Florida models."""
-
-    @pytest.mark.parametrize(
-        "model_func,model_type",
-        [
-            (pred_fl_reg_ln, "florida_4cat"),
-            (pred_fl_reg_ln_five_cat, "florida_5cat"),
-        ],
+@pytest.mark.parametrize(
+    ("model_class", "training_manifest"),
+    [
+        (
+            FloridaVoterSurnameModel,
+            "fl_ln_five_cat_2022_training_pt.json",
+        ),
+        (
+            FloridaVoterFullNameModel,
+            "fl_name_five_cat_2022_training_pt.json",
+        ),
+    ],
+)
+def test_runtime_sequence_length_matches_training_manifest(
+    model_class, training_manifest
+):
+    manifest_path = (
+        Path(__file__).parents[1]
+        / "ethnicolr/models/fl_voter_reg/lstm"
+        / training_manifest
     )
-    @pytest.mark.parametrize("conf_level", [0.8, 0.9, 0.95])
-    def test_lastname_confidence_levels(
-        self, sample_florida_names, model_func, model_type, conf_level
-    ):
-        """Test different confidence levels for last name models."""
-        result = model_func(sample_florida_names, "last", conf_int=conf_level)
-        assert_prediction_quality(result, model_type, with_confidence=True)
+    manifest = json.loads(manifest_path.read_text())
 
-        # Should have appropriate number of mean columns
-        mean_cols = [col for col in result.columns if col.endswith("_mean")]
-        expected_count = 4 if model_type == "florida_4cat" else 5
-        assert len(mean_cols) == expected_count
+    assert model_class.MAX_SEQUENCE_LENGTH == manifest["features"]["sequence_length"]
 
-    @pytest.mark.parametrize(
-        "model_func,model_type",
-        [
-            (pred_fl_reg_name, "florida_4cat"),
-            (pred_fl_reg_name_five_cat, "florida_5cat"),
-        ],
+
+def test_florida_api_has_no_historical_model_selector():
+    """The public API exposes the current model, not an artifact menu."""
+    assert "model" not in inspect.signature(estimate_florida_voter_surname).parameters
+    assert "model" not in inspect.signature(estimate_florida_voter_full_name).parameters
+
+
+def test_surname_estimate(sample_florida_names):
+    result = estimate_florida_voter_surname(sample_florida_names, "last")
+
+    assert_prediction_quality(result, "florida_5cat")
+    assert len(result) == len(sample_florida_names)
+    assert set(FLORIDA_CATEGORIES).issubset(result.columns)
+    assert result["model_id"].eq("florida-voter-surname").all()
+
+
+def test_full_name_estimate(sample_florida_names):
+    result = estimate_florida_voter_full_name(sample_florida_names, "last", "first")
+
+    assert_prediction_quality(result, "florida_5cat")
+    assert len(result) == len(sample_florida_names)
+    assert set(FLORIDA_CATEGORIES).issubset(result.columns)
+    assert "__ethnicolr_full_name" not in result.columns
+    assert result["model_id"].eq("florida-voter-full-name").all()
+
+
+@pytest.mark.parametrize("uncertainty_level", [0.8, 0.9, 0.95])
+def test_surname_uncertainty_levels(sample_florida_names, uncertainty_level):
+    result = estimate_florida_voter_surname(
+        sample_florida_names,
+        "last",
+        uncertainty_level=uncertainty_level,
+        mc_iterations=20,
     )
-    @pytest.mark.parametrize("conf_level", [0.8, 0.9, 0.95])
-    def test_fullname_confidence_levels(
-        self, sample_florida_names, model_func, model_type, conf_level
-    ):
-        """Test different confidence levels for full name models."""
-        result = model_func(sample_florida_names, "last", "first", conf_int=conf_level)
-        assert_prediction_quality(result, model_type, with_confidence=True)
 
-        # Should have appropriate number of mean columns
-        mean_cols = [col for col in result.columns if col.endswith("_mean")]
-        expected_count = 4 if model_type == "florida_4cat" else 5
-        assert len(mean_cols) == expected_count
+    assert_prediction_quality(result, "florida_5cat", with_uncertainty=True)
+    assert len([column for column in result if column.endswith("_mc_mean")]) == 5
 
 
-class TestFloridaErrorHandling:
-    """Test error handling for Florida models."""
+@pytest.mark.parametrize("uncertainty_level", [0.8, 0.9, 0.95])
+def test_full_name_uncertainty_levels(sample_florida_names, uncertainty_level):
+    result = estimate_florida_voter_full_name(
+        sample_florida_names,
+        "last",
+        "first",
+        uncertainty_level=uncertainty_level,
+        mc_iterations=20,
+    )
 
-    def test_missing_columns(self, sample_florida_names):
-        """Test appropriate error handling for missing columns."""
-        with pytest.raises((KeyError, ValueError)):
-            pred_fl_reg_ln(sample_florida_names, "nonexistent_column")
-
-        with pytest.raises((KeyError, ValueError)):
-            pred_fl_reg_name(sample_florida_names, "last", "nonexistent_column")
-
-    def test_empty_dataframe(self):
-        """Test handling of empty DataFrames."""
-        empty_df = pd.DataFrame(columns=["last", "first"])
-
-        # Should handle gracefully
-        result = pred_fl_reg_ln(empty_df, "last")
-        assert len(result) == 0
-        assert "asian" in result.columns  # Should still have expected columns
-
-    def test_single_row(self):
-        """Test handling of single-row DataFrames."""
-        single_df = pd.DataFrame([{"last": "smith", "first": "john"}])
-
-        result = pred_fl_reg_ln(single_df, "last")
-        assert len(result) == 1
-        assert_prediction_quality(result, "florida_4cat")
-
-        result_name = pred_fl_reg_name(single_df, "last", "first")
-        assert len(result_name) == 1
-        assert_prediction_quality(result_name, "florida_4cat")
+    assert_prediction_quality(result, "florida_5cat", with_uncertainty=True)
+    assert len([column for column in result if column.endswith("_mc_mean")]) == 5
 
 
-class TestFloridaPerformance:
-    """Test performance characteristics of Florida models."""
+def test_surname_and_full_name_share_categories(sample_florida_names):
+    surname_result = estimate_florida_voter_surname(sample_florida_names, "last")
+    full_name_result = estimate_florida_voter_full_name(
+        sample_florida_names, "last", "first"
+    )
 
-    def test_deterministic_results(self, sample_florida_names):
-        """Test that Florida models produce deterministic results."""
-        # Run same prediction multiple times
-        result1 = pred_fl_reg_ln(sample_florida_names, "last")
-        result2 = pred_fl_reg_ln(sample_florida_names, "last")
-        result3 = pred_fl_reg_name(sample_florida_names, "last", "first")
-        result4 = pred_fl_reg_name(sample_florida_names, "last", "first")
+    assert (
+        surname_result[FLORIDA_CATEGORIES].shape
+        == full_name_result[FLORIDA_CATEGORIES].shape
+    )
 
-        # Results should be identical
-        pd.testing.assert_frame_equal(result1, result2)
-        pd.testing.assert_frame_equal(result3, result4)
 
-    def test_column_preservation(self, sample_florida_names):
-        """Test that original columns are preserved in predictions."""
-        # Add extra columns to test data
-        test_df = sample_florida_names.copy()
-        test_df["id"] = range(len(test_df))
-        test_df["extra_info"] = "preserved"
+def test_extensive_surname_estimate_uses_multiple_categories(extensive_names):
+    result = estimate_florida_voter_surname(extensive_names, "last")
 
-        result = pred_fl_reg_ln(test_df, "last")
+    assert_prediction_quality(result, "florida_5cat")
+    assert result["race"].nunique() >= 4
+    assert result["other"].ge(0).all()
 
-        # Original columns should be preserved
-        assert "id" in result.columns
-        assert "extra_info" in result.columns
-        assert all(result["id"] == test_df["id"])
-        assert all(result["extra_info"] == test_df["extra_info"])
+
+def test_missing_columns_raise(sample_florida_names):
+    with pytest.raises(ValueError, match="Surname column"):
+        estimate_florida_voter_surname(sample_florida_names, "missing")
+
+    with pytest.raises(ValueError, match="First-name column"):
+        estimate_florida_voter_full_name(sample_florida_names, "last", "missing")
+
+
+def test_empty_data_returns_expected_columns():
+    empty_data = pd.DataFrame(columns=["last", "first"])
+    result = estimate_florida_voter_surname(empty_data, "last")
+
+    assert result.empty
+    assert set(FLORIDA_CATEGORIES).issubset(result.columns)
+
+
+def test_single_row(sample_florida_names):
+    one_name = sample_florida_names.head(1)
+
+    surname_result = estimate_florida_voter_surname(one_name, "last")
+    full_name_result = estimate_florida_voter_full_name(one_name, "last", "first")
+
+    assert len(surname_result) == 1
+    assert len(full_name_result) == 1
+
+
+def test_results_are_deterministic(sample_florida_names):
+    first_surname_result = estimate_florida_voter_surname(sample_florida_names, "last")
+    second_surname_result = estimate_florida_voter_surname(sample_florida_names, "last")
+    first_full_name_result = estimate_florida_voter_full_name(
+        sample_florida_names, "last", "first"
+    )
+    second_full_name_result = estimate_florida_voter_full_name(
+        sample_florida_names, "last", "first"
+    )
+
+    pd.testing.assert_frame_equal(first_surname_result, second_surname_result)
+    pd.testing.assert_frame_equal(first_full_name_result, second_full_name_result)
+
+
+def test_input_columns_are_preserved(sample_florida_names):
+    data = sample_florida_names.copy()
+    data["record_id"] = range(len(data))
+
+    result = estimate_florida_voter_surname(data, "last")
+
+    pd.testing.assert_series_equal(result["record_id"], data["record_id"])
+
+
+def test_invalid_option_combination_does_not_load_model(
+    sample_florida_names, monkeypatch
+):
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError("model resources must not load for invalid options")
+
+    monkeypatch.setattr(
+        NeuralNameModel,
+        "_load_resources",
+        classmethod(fail_if_called),
+    )
+
+    with pytest.raises(ValueError, match="cannot be used together"):
+        estimate_florida_voter_surname(
+            sample_florida_names,
+            "last",
+            target_prior={"asian": 0.2},
+            conformal_coverage=0.9,
+        )
+
+
+def test_output_column_collisions_preserve_input_values(sample_florida_names):
+    data = sample_florida_names.head(2).copy()
+    data["race"] = ["observed-a", "observed-b"]
+    data["input_race"] = ["existing-a", "existing-b"]
+    data["asian"] = [10, 20]
+    data["model_id"] = ["source-a", "source-b"]
+
+    result = estimate_florida_voter_surname(data, "last")
+
+    assert result.columns.is_unique
+    assert result["input_race_2"].tolist() == data["race"].tolist()
+    assert result["input_race"].tolist() == data["input_race"].tolist()
+    assert result["input_asian"].tolist() == data["asian"].tolist()
+    assert result["input_model_id"].tolist() == data["model_id"].tolist()
+    assert result["asian"].between(0, 1).all()
+    assert result["model_id"].eq("florida-voter-surname").all()
