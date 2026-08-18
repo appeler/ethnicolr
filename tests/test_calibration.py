@@ -185,6 +185,8 @@ class TestPredictionAPI:
         )
         assert result["calibration_status"].eq("validated-source-disjoint").all()
         assert result["race_set"].map(list).map(len).ge(1).all()
+        assert result["uncertainty_method"].eq("split-conformal").all()
+        assert result["uncertainty_level"].eq(0.9).all()
 
     def test_wiki_balanced_prior_runs(self, sample_wiki_names):
         model_statistics = json.loads(

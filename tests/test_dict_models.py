@@ -124,6 +124,17 @@ class TestCensusFullNameEstimate:
             == "surname-model-and-first-name-dictionary"
         )
 
+    def test_partial_neural_fallback_abstains(self):
+        data = pd.DataFrame({"last": ["xqzwv"], "first": ["james"]})
+
+        result = estimate_census_full_name(data, "last", "first")
+
+        assert not result.loc[0, "scored"]
+        assert result.loc[0, "abstained"]
+        assert result.loc[0, "abstention_reason"] == "insufficient-evidence"
+        assert pd.isna(result.loc[0, "race"])
+        assert result.loc[0, CENSUS_CATEGORIES].isna().any()
+
     def test_probabilities_sum_to_one(self, names_data):
         result = estimate_census_full_name(names_data, "last", "first")
         full = result[

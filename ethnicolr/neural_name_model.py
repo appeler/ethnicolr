@@ -384,6 +384,15 @@ class NeuralNameModel:
         reference_population = (
             model_statistics["calibration_weighting"] if model_statistics else pd.NA
         )
+        if uncertainty_level is not None:
+            uncertainty_method = "mc-dropout"
+            reported_uncertainty_level = uncertainty_level
+        elif conformal_coverage is not None:
+            uncertainty_method = "split-conformal"
+            reported_uncertainty_level = conformal_coverage
+        else:
+            uncertainty_method = None
+            reported_uncertainty_level = None
         add_inference_metadata(
             result,
             script_supported=script_supported,
@@ -396,8 +405,8 @@ class NeuralNameModel:
             reference_population=reference_population,
             calibration_reference=reference_population,
             calibration_status=calibration_status,
-            uncertainty_method="mc-dropout" if uncertainty_level is not None else None,
-            uncertainty_level=uncertainty_level,
+            uncertainty_method=uncertainty_method,
+            uncertainty_level=reported_uncertainty_level,
             target=target,
             input_scope=input_scope,
             scored=scored_rows,

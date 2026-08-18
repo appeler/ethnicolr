@@ -443,7 +443,8 @@ def estimate_census_full_name(
         )
 
     if target_prior is not None:
-        uses_six_category_distribution = ~np.isnan(category_probabilities).any(axis=1)
+        finite_probabilities = np.isfinite(category_probabilities)
+        uses_six_category_distribution = finite_probabilities.all(axis=1)
         if uses_six_category_distribution.any():
             category_probabilities[uses_six_category_distribution] = (
                 adjust_probabilities_for_prior(
@@ -453,7 +454,9 @@ def estimate_census_full_name(
                     dict(zip(CENSUS_CATEGORIES, census_population_prior, strict=True)),
                 )
             )
-        uses_four_category_distribution = ~uses_six_category_distribution
+        uses_four_category_distribution = (
+            finite_probabilities.any(axis=1) & ~uses_six_category_distribution
+        )
         if uses_four_category_distribution.any():
             neural_category_positions = np.array(
                 [
@@ -495,8 +498,14 @@ def estimate_census_full_name(
 
     category_probabilities[~script_supported] = np.nan
     evidence_basis[~script_supported] = "none"
-    scored_rows = script_supported & np.isfinite(category_probabilities).any(axis=1)
-    abstention_reasons[script_supported & ~scored_rows] = "out-of-vocabulary"
+    finite_probabilities = np.isfinite(category_probabilities)
+    has_any_probability = finite_probabilities.any(axis=1)
+    has_complete_distribution = finite_probabilities.all(axis=1)
+    scored_rows = script_supported & has_complete_distribution
+    abstention_reasons[script_supported & ~has_any_probability] = "out-of-vocabulary"
+    abstention_reasons[
+        script_supported & has_any_probability & ~has_complete_distribution
+    ] = "insufficient-evidence"
 
     for category_index, category in enumerate(CENSUS_CATEGORIES):
         result[category] = category_probabilities[:, category_index]
