@@ -413,6 +413,7 @@ test = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-xdist" },
+    { name = "scikit-learn" },
 ]
 training = [
     { name = "openpyxl" },
@@ -451,6 +452,7 @@ test = [
     { name = "pytest", specifier = ">=7.0" },
     { name = "pytest-cov", specifier = ">=4.0" },
     { name = "pytest-xdist", specifier = ">=3.0" },
+    { name = "scikit-learn", specifier = ">=1.4" },
 ]
 training = [
     { name = "openpyxl", specifier = ">=3.1" },

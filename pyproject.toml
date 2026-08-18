@@ -79,6 +79,7 @@ test = [
   "pytest>=7.0",
   "pytest-cov>=4.0",
   "pytest-xdist>=3.0",
+  "scikit-learn>=1.4",
 ]
 training = [
   "scikit-learn>=1.4",
