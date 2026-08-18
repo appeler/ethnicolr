@@ -11,7 +11,11 @@ from typing import cast
 import numpy as np
 import pandas as pd
 
-from .inference import add_inference_metadata, combined_name_support
+from .inference import (
+    add_inference_metadata,
+    combined_name_support,
+    rename_conflicting_input_columns,
+)
 from .neural_name_model import NeuralNameModel
 from .runtime_tables import CENSUS_SURNAME_SCHEMA, read_runtime_table
 from .torch_utils import artifact_revision
@@ -63,9 +67,17 @@ def lookup_census_surname(
     )
     surname_table = _load_census_surname_table(year)
     matched_names = surname_table.reindex(normalized_surnames)
+    script_supported, abstention_reasons = combined_name_support(
+        cast(pd.Series, data[surname_column])
+    )
 
-    result = data.copy()
-    result["__census_count"] = matched_names["count"].to_numpy()
+    output_columns = set(CENSUS_PERCENTAGE_COLUMNS) | {"race"}
+    if uncertainty_level is not None:
+        for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
+            output_columns.update(
+                {f"{percentage_column}_lower", f"{percentage_column}_upper"}
+            )
+    result = rename_conflicting_input_columns(data, output_columns)
     for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
         result[percentage_column] = matched_names[percentage_column].to_numpy()
 
@@ -74,7 +86,7 @@ def lookup_census_surname(
             raise ValueError("uncertainty_level must be strictly between 0 and 1")
         from .name_dictionaries import wilson_interval
 
-        sample_sizes = result["__census_count"].to_numpy(dtype=float)
+        sample_sizes = matched_names["count"].to_numpy(dtype=float)
         for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
             proportions = result[percentage_column].to_numpy(dtype=float) / 100
             lower_bound, upper_bound = wilson_interval(
@@ -84,8 +96,6 @@ def lookup_census_surname(
             )
             result[f"{percentage_column}_lower"] = (lower_bound * 100).round(2)
             result[f"{percentage_column}_upper"] = (upper_bound * 100).round(2)
-    result.drop(columns=["__census_count"], inplace=True)
-
     matched_rows = np.isfinite(
         result[CENSUS_PERCENTAGE_COLUMNS].to_numpy(dtype=float)
     ).any(axis=1)
@@ -100,9 +110,6 @@ def lookup_census_surname(
         ]
     result["race"] = predicted_categories
 
-    script_supported, abstention_reasons = combined_name_support(
-        cast(pd.Series, result[surname_column])
-    )
     scored_rows = script_supported & matched_rows
     abstention_reasons[script_supported & ~matched_rows] = "out-of-dictionary"
     add_inference_metadata(

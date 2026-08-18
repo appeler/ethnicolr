@@ -31,7 +31,11 @@ import numpy as np
 import pandas as pd
 
 from .census_surname import CENSUS_SURNAME_FILES
-from .inference import add_inference_metadata, combined_name_support
+from .inference import (
+    add_inference_metadata,
+    combined_name_support,
+    rename_conflicting_input_columns,
+)
 from .model_artifacts import resolve_model_bundle
 from .neural_name_model import NeuralNameModel
 from .runtime_tables import (
@@ -201,8 +205,17 @@ def lookup_census_first_name(
     first_name_table = _NameTables.census_first_name_table()
     normalized_first_names = _normalize_names(cast(pd.Series, data[first_name_column]))
     matched_names = first_name_table.reindex(normalized_first_names)
+    script_supported, abstention_reasons = combined_name_support(
+        cast(pd.Series, data[first_name_column])
+    )
 
-    result = data.copy()
+    output_columns = set(CENSUS_PERCENTAGE_COLUMNS) | {"race"}
+    if uncertainty_level is not None:
+        for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
+            output_columns.update(
+                {f"{percentage_column}_lower", f"{percentage_column}_upper"}
+            )
+    result = rename_conflicting_input_columns(data, output_columns)
     for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
         result[percentage_column] = matched_names[percentage_column].to_numpy()
 
@@ -236,9 +249,6 @@ def lookup_census_first_name(
     result["race"] = predicted_categories
     matched_count = int(matched_rows.sum())
     logger.info(f"Matched {matched_count} of {len(result)} first names")
-    script_supported, abstention_reasons = combined_name_support(
-        cast(pd.Series, result[first_name_column])
-    )
     scored_rows = script_supported & matched_rows
     abstention_reasons[script_supported & ~matched_rows] = "out-of-dictionary"
     add_inference_metadata(
@@ -507,6 +517,9 @@ def estimate_census_full_name(
         script_supported & has_any_probability & ~has_complete_distribution
     ] = "insufficient-evidence"
 
+    result = rename_conflicting_input_columns(
+        result, {*CENSUS_CATEGORIES, "race", "evidence_basis"}
+    )
     for category_index, category in enumerate(CENSUS_CATEGORIES):
         result[category] = category_probabilities[:, category_index]
     predicted_categories = np.full(row_count, None, dtype=object)
@@ -663,6 +676,9 @@ def estimate_voter_file_full_name(
     scored_rows = script_supported & (surname_in_dictionary | first_name_in_dictionary)
     abstention_reasons[script_supported & ~scored_rows] = "out-of-dictionary"
 
+    result = rename_conflicting_input_columns(
+        result, {*VOTER_FILE_CATEGORIES, "race", "evidence_basis"}
+    )
     for category_index, category in enumerate(VOTER_FILE_CATEGORIES):
         result[category] = category_probabilities[:, category_index]
     predicted_categories = np.full(row_count, None, dtype=object)

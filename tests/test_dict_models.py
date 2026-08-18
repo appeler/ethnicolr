@@ -55,6 +55,23 @@ class TestCensusFirstNameLookup:
         with pytest.raises(ValueError, match="between 0 and 1"):
             lookup_census_first_name(names_data, "first", uncertainty_level=95)
 
+    def test_conflicting_input_columns_are_preserved(self):
+        data = pd.DataFrame(
+            {
+                "pctwhite": ["james"],
+                "race": ["observed"],
+                "model_id": ["source-model"],
+            }
+        )
+
+        result = lookup_census_first_name(data, "pctwhite")
+
+        assert result.columns.is_unique
+        assert result.loc[0, "input_pctwhite"] == "james"
+        assert result.loc[0, "input_race"] == "observed"
+        assert result.loc[0, "input_model_id"] == "source-model"
+        assert result.loc[0, "scored"]
+
 
 class TestWilsonInterval:
     def test_analytic_case(self):
@@ -84,6 +101,23 @@ class TestCensusSurnameWilsonBounds:
         row = result.iloc[0]
         assert row["pctwhite_lower"] <= row["pctwhite"] <= row["pctwhite_upper"]
         assert row["pctwhite_upper"] - row["pctwhite_lower"] < 0.5
+
+    def test_conflicting_input_columns_are_preserved(self):
+        data = pd.DataFrame(
+            {
+                "pctwhite": ["smith"],
+                "race": ["observed"],
+                "model_id": ["source-model"],
+            }
+        )
+
+        result = lookup_census_surname(data, "pctwhite", year=2020)
+
+        assert result.columns.is_unique
+        assert result.loc[0, "input_pctwhite"] == "smith"
+        assert result.loc[0, "input_race"] == "observed"
+        assert result.loc[0, "input_model_id"] == "source-model"
+        assert result.loc[0, "scored"]
 
 
 class TestCensusFullNameEstimate:
@@ -176,6 +210,24 @@ class TestCensusFullNameEstimate:
             names_data
         )
 
+    def test_conflicting_input_columns_are_preserved(self):
+        data = pd.DataFrame(
+            {
+                "last": ["smith"],
+                "first": ["james"],
+                "race": ["observed"],
+                "white": [99.0],
+                "evidence_basis": ["source"],
+            }
+        )
+
+        result = estimate_census_full_name(data, "last", "first")
+
+        assert result.columns.is_unique
+        assert result.loc[0, "input_race"] == "observed"
+        assert result.loc[0, "input_white"] == 99.0
+        assert result.loc[0, "input_evidence_basis"] == "source"
+
 
 class TestVoterFileFullNameEstimate:
     def test_known_predictions(self, names_data):
@@ -224,3 +276,21 @@ class TestVoterFileFullNameEstimate:
             adjusted.loc[scored_rows, "hispanic"].to_numpy()
             >= base.loc[scored_rows, "hispanic"].to_numpy()
         ).all()
+
+    def test_conflicting_input_columns_are_preserved(self):
+        data = pd.DataFrame(
+            {
+                "last": ["smith"],
+                "first": ["james"],
+                "race": ["observed"],
+                "white": [99.0],
+                "model_id": ["source-model"],
+            }
+        )
+
+        result = estimate_voter_file_full_name(data, "last", "first")
+
+        assert result.columns.is_unique
+        assert result.loc[0, "input_race"] == "observed"
+        assert result.loc[0, "input_white"] == 99.0
+        assert result.loc[0, "input_model_id"] == "source-model"
