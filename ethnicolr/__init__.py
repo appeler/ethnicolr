@@ -1,37 +1,31 @@
-"""
-ethnicolr: Predict Race/Ethnicity Based on Names
-
-A Python package for predicting race and ethnicity based on names using
-machine learning models trained on Census, Wikipedia, and voter registration data.
-"""
+"""Name-pattern estimates of race, ethnicity, and national origin."""
 
 from __future__ import annotations
 
-# Direct imports - no lazy loading needed
-from .census_ln import census_ln
-from .dict_models import census_fn, pred_census_name, pred_voter_name
-from .pred_census_ln import pred_census_ln
-from .pred_fl_reg_ln import pred_fl_reg_ln
-from .pred_fl_reg_ln_five_cat import pred_fl_reg_ln_five_cat
-from .pred_fl_reg_name import pred_fl_reg_name
-from .pred_fl_reg_name_five_cat import pred_fl_reg_name_five_cat
-from .pred_nc_reg_name import pred_nc_reg_name
-from .pred_wiki_ln import pred_wiki_ln
-from .pred_wiki_name import pred_wiki_name
-from .pred_wiki_origin import pred_wiki_origin
+from .api import (
+    estimate_census_full_name,
+    estimate_census_surname,
+    estimate_florida_voter_full_name,
+    estimate_florida_voter_surname,
+    estimate_north_carolina_voter_full_name,
+    estimate_voter_file_full_name,
+    estimate_wikipedia_full_name,
+    estimate_wikipedia_origin,
+    estimate_wikipedia_surname,
+    lookup_census_first_name,
+    lookup_census_surname,
+)
 
 __all__ = [
-    "census_ln",
-    "census_fn",
-    "pred_census_name",
-    "pred_voter_name",
-    "pred_census_ln",
-    "pred_wiki_ln",
-    "pred_wiki_name",
-    "pred_wiki_origin",
-    "pred_fl_reg_ln",
-    "pred_fl_reg_name",
-    "pred_nc_reg_name",
-    "pred_fl_reg_ln_five_cat",
-    "pred_fl_reg_name_five_cat",
+    "estimate_census_full_name",
+    "estimate_census_surname",
+    "estimate_florida_voter_full_name",
+    "estimate_florida_voter_surname",
+    "estimate_north_carolina_voter_full_name",
+    "estimate_voter_file_full_name",
+    "estimate_wikipedia_full_name",
+    "estimate_wikipedia_origin",
+    "estimate_wikipedia_surname",
+    "lookup_census_first_name",
+    "lookup_census_surname",
 ]

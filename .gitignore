@@ -1,6 +1,7 @@
 .*
 !.gitignore
 !.gitattributes
+!.pre-commit-config.yaml
 !.travis.yml
 !.pep8speaks.yml
 !.github
@@ -13,11 +14,13 @@ venv/
 dist/
 ethnicolr.egg-info/
 dev/
-docs/build
-docs/source/_build
+docs/build/
 /testenv
 /testenv311
 coverage.xml
+htmlcov/
+_site/
+_doctest/
 
 # Raw voter registration data (restricted; downloaded locally for training)
 scripts/data-acquisition/raw/

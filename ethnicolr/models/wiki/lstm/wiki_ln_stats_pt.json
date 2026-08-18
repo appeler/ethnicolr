@@ -1,5 +1,5 @@
 {
-  "model": "wiki_ln",
+  "model": "wikipedia-surname",
   "temperature": 1.0150196552276611,
   "train_class_distribution": {
     "Asian,GreaterEastAsian,EastAsian": 0.09231037949590534,

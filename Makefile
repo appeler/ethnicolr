@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format clean docs build
+.PHONY: help install dev test lint format clean docs build ci
 
 help:
 	@echo "Available commands:"
@@ -10,24 +10,26 @@ help:
 	@echo "  clean      Remove build artifacts and cache files"
 	@echo "  docs       Build documentation"
 	@echo "  build      Build distribution packages"
+	@echo "  ci         Run the local release checks"
 
 install:
 	uv pip install .
 
 dev:
-	uv pip install -e ".[dev,test,docs]"
+	uv sync --all-groups
 	pre-commit install
 
 test:
-	pytest tests/ -v --cov=ethnicolr
+	uv run pytest
 
 lint:
-	ruff check .
-	mypy ethnicolr --ignore-missing-imports
+	uv run ruff check .
+	uv run ruff format --check .
+	uv run pyright
 
 format:
-	ruff format .
-	ruff check --fix .
+	uv run ruff format .
+	uv run ruff check --fix .
 
 clean:
 	rm -rf build/
@@ -45,7 +47,9 @@ clean:
 
 docs:
 	cd docs && make clean && make html
-	@echo "Documentation built at docs/_build/html/index.html"
+	@echo "Documentation built at docs/build/html/index.html"
 
 build: clean
 	uv build
+
+ci: lint test docs build

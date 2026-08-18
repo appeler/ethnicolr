@@ -2,7 +2,7 @@
 """
 Modern CLI for ethnicolr using Click framework.
 
-Provides user-friendly commands for race/ethnicity prediction with improved
+Provides user-friendly commands for race/ethnicity estimation with improved
 help, progress indicators, and better error handling.
 """
 
@@ -11,10 +11,35 @@ from pathlib import Path
 import click
 import pandas as pd
 
-from .model_base import ModelRegistry
-from .pred_census_ln import CensusLnModel
-from .pred_fl_reg_ln import FloridaRegLnModel
-from .pred_wiki_ln import WikiLnModel
+from .api import (
+    estimate_census_surname,
+    estimate_florida_voter_surname,
+    estimate_wikipedia_surname,
+)
+
+CLI_MODEL_CATALOG = {
+    "census-surname": {
+        "estimator": "estimate_census_surname",
+        "source": "U.S. Census surname tables",
+        "input": "surname",
+        "target": "race/ethnicity",
+        "variants": "2000, 2010, 2020",
+    },
+    "florida-voter-surname": {
+        "estimator": "estimate_florida_voter_surname",
+        "source": "Florida voter registration records",
+        "input": "surname",
+        "target": "race/ethnicity",
+        "variants": "2022 five-category model",
+    },
+    "wikipedia-surname": {
+        "estimator": "estimate_wikipedia_surname",
+        "source": "Wikipedia biographies",
+        "input": "surname",
+        "target": "race/ethnicity",
+        "variants": "bundled model",
+    },
+}
 
 # ASCII symbols for cross-platform compatibility
 CHECK = "[OK]"
@@ -58,10 +83,10 @@ class OutputPath(click.Path):
 @click.pass_context
 def cli(ctx: click.Context, verbose: bool, debug: bool):
     """
-    Ethnicolr: Predict race/ethnicity from names using machine learning.
+    Ethnicolr: Estimate race/ethnicity from names using machine learning.
 
     This tool provides multiple models trained on different datasets
-    for predicting race and ethnicity from first and last names.
+    for estimating race and ethnicity from first and last names.
     """
     # Ensure ctx.obj exists
     ctx.ensure_object(dict)
@@ -78,12 +103,12 @@ def cli(ctx: click.Context, verbose: bool, debug: bool):
 
 
 @cli.group()
-def predict():
-    """Predict race/ethnicity from names using various models."""
+def estimate():
+    """Estimate race/ethnicity from name patterns using supported models."""
     pass
 
 
-@predict.command("census")
+@estimate.command("census-surname")
 @click.argument("input_file", type=CSVFile())
 @click.option(
     "-l",
@@ -96,46 +121,46 @@ def predict():
     "-o",
     "--output",
     type=OutputPath(),
-    help="Output CSV file (default: census-predictions.csv)",
+    help="Output CSV file (default: census-estimates.csv)",
 )
 @click.option(
     "-y",
     "--year",
-    type=click.Choice(["2000", "2010"]),
-    default="2010",
+    type=click.Choice(["2000", "2010", "2020"]),
+    default="2020",
     show_default=True,
     help="Census year for model",
 )
 @click.option(
-    "-c",
-    "--confidence",
-    type=click.FloatRange(0.0, 1.0),
-    default=1.0,
+    "-u",
+    "--uncertainty-level",
+    type=click.FloatRange(0.0, 1.0, min_open=True, max_open=True),
+    default=None,
     show_default=True,
-    help="Confidence interval level (0.0-1.0)",
+    help="MC-dropout range level (0.0-1.0)",
 )
 @click.option(
-    "-i",
-    "--iterations",
+    "-m",
+    "--mc-iterations",
     type=click.IntRange(10, 1000),
     default=100,
     show_default=True,
-    help="Monte Carlo iterations for confidence intervals",
+    help="Monte Carlo iterations for MC-dropout ranges",
 )
 @click.option("--overwrite", is_flag=True, help="Overwrite output file if it exists")
 @click.pass_context
-def predict_census(
+def estimate_census_surname_command(
     ctx: click.Context,
     input_file: Path,
     last_col: str,
     output: Path | None,
     year: str,
-    confidence: float,
-    iterations: int,
+    uncertainty_level: float | None,
+    mc_iterations: int,
     overwrite: bool,
 ):
     """
-    Predict race/ethnicity using Census LSTM model.
+    Estimate race/ethnicity using Census LSTM model.
 
     Uses LSTM neural networks trained on U.S. Census data to predict
     race/ethnicity probabilities from last names.
@@ -143,20 +168,20 @@ def predict_census(
     Examples:
 
     \b
-        # Basic prediction
-        ethnicolr predict census data.csv -l surname
+        # Basic estimate
+        ethnicolr estimate census-surname data.csv -l surname
 
-        # With confidence intervals
-        ethnicolr predict census data.csv -l surname -c 0.95 -i 200
+        # With MC-dropout ranges
+        ethnicolr estimate census-surname data.csv -l surname -u 0.95 -m 200
 
         # Specify output file and Census year
-        ethnicolr predict census data.csv -l surname -o results.csv -y 2000
+        ethnicolr estimate census-surname data.csv -l surname -o results.csv -y 2000
     """
     verbose = ctx.obj.get("verbose", False)
 
     # Default output filename
     if output is None:
-        output = Path("census-predictions.csv")
+        output = Path("census-estimates.csv")
 
     # Check if output file exists
     if output.exists() and not overwrite:
@@ -166,20 +191,25 @@ def predict_census(
         with click.progressbar(length=4, label="Loading data") as bar:
             # Load input data
             click.echo(f"Reading input file: {input_file}")
-            df = pd.read_csv(input_file, dtype=str, keep_default_na=False)
+            input_data = pd.read_csv(input_file, dtype=str, keep_default_na=False)
             bar.update(1)
 
             # Validate column exists
-            if last_col not in df.columns:
+            if last_col not in input_data.columns:
                 raise click.ClickException(
-                    f"Column '{last_col}' not found. Available columns: {', '.join(df.columns)}"
+                    f"Column '{last_col}' not found. Available columns: "
+                    f"{', '.join(input_data.columns)}"
                 )
             bar.update(1)
 
-            # Run prediction
-            click.echo(f"Running Census {year} prediction on {len(df)} rows...")
-            result = CensusLnModel.predict_with_confidence(  # type: ignore
-                df, last_col, year=int(year), conf_int=confidence, num_iter=iterations
+            # Run estimate
+            click.echo(f"Running Census {year} estimate on {len(input_data)} rows...")
+            result = estimate_census_surname(
+                input_data,
+                last_col,
+                year=int(year),
+                uncertainty_level=uncertainty_level,
+                mc_iterations=mc_iterations,
             )
             bar.update(1)
 
@@ -189,19 +219,17 @@ def predict_census(
             bar.update(1)
 
         # Success message
-        predicted_count = result.dropna(subset=["race"]).shape[0]
-        success_rate = predicted_count / len(result) * 100
+        estimated_count = result.dropna(subset=["race"]).shape[0]
+        success_rate = estimated_count / len(result) * 100
 
-        click.echo(
-            click.style(f"{CHECK} Prediction completed successfully!", fg="green")
-        )
+        click.echo(click.style(f"{CHECK} Estimate completed successfully!", fg="green"))
         click.echo(f"  Processed: {len(result)} rows")
-        click.echo(f"  Predicted: {predicted_count} rows ({success_rate:.1f}%)")
+        click.echo(f"  Estimated: {estimated_count} rows ({success_rate:.1f}%)")
         click.echo(f"  Output: {output}")
 
-        # Show sample predictions
+        # Show sample estimates
         if verbose and len(result) > 0:
-            click.echo("\nSample predictions:")
+            click.echo("\nSample estimates:")
             sample = result.head(3)[
                 [last_col, "race"]
                 + [
@@ -215,10 +243,10 @@ def predict_census(
     except FileNotFoundError as e:
         raise click.ClickException(f"Model files not found: {e}") from e
     except Exception as e:
-        raise click.ClickException(f"Prediction failed: {e}") from e
+        raise click.ClickException(f"Estimate failed: {e}") from e
 
 
-@predict.command("florida")
+@estimate.command("florida-voter-surname")
 @click.argument("input_file", type=CSVFile())
 @click.option(
     "-l",
@@ -231,59 +259,59 @@ def predict_census(
     "-o",
     "--output",
     type=OutputPath(),
-    help="Output CSV file (default: florida-predictions.csv)",
+    help="Output CSV file (default: florida-estimates.csv)",
 )
 @click.option(
-    "-c",
-    "--confidence",
-    type=click.FloatRange(0.0, 1.0),
-    default=1.0,
+    "-u",
+    "--uncertainty-level",
+    type=click.FloatRange(0.0, 1.0, min_open=True, max_open=True),
+    default=None,
     show_default=True,
-    help="Confidence interval level (0.0-1.0)",
+    help="MC-dropout range level (0.0-1.0)",
 )
 @click.option(
-    "-i",
-    "--iterations",
+    "-m",
+    "--mc-iterations",
     type=click.IntRange(10, 1000),
     default=100,
     show_default=True,
-    help="Monte Carlo iterations for confidence intervals",
+    help="Monte Carlo iterations for MC-dropout ranges",
 )
 @click.option("--overwrite", is_flag=True, help="Overwrite output file if it exists")
 @click.pass_context
-def predict_florida(
+def estimate_florida_voter_surname_command(
     ctx: click.Context,
     input_file: Path,
     last_col: str,
     output: Path | None,
-    confidence: float,
-    iterations: int,
+    uncertainty_level: float | None,
+    mc_iterations: int,
     overwrite: bool,
 ):
     """
-    Predict race/ethnicity using Florida voter registration LSTM model.
+    Estimate race/ethnicity using Florida voter registration LSTM model.
 
     Uses LSTM neural networks trained on Florida voter registration data
-    to predict race/ethnicity probabilities from last names. Predicts
+    to predict race/ethnicity probabilities from last names. Estimates
     5 categories: asian, hispanic, nh_black, nh_white, other.
 
     Examples:
 
     \\b
-        # Basic prediction
-        ethnicolr predict florida data.csv -l surname
+        # Basic estimate
+        ethnicolr estimate florida-voter-surname data.csv -l surname
 
-        # With confidence intervals
-        ethnicolr predict florida data.csv -l surname -c 0.95 -i 200
+        # With MC-dropout ranges
+        ethnicolr estimate florida-voter-surname data.csv -l surname -u 0.95 -m 200
 
         # Specify output file
-        ethnicolr predict florida data.csv -l surname -o results.csv
+        ethnicolr estimate florida-voter-surname data.csv -l surname -o results.csv
     """
     verbose = ctx.obj.get("verbose", False)
 
     # Default output filename
     if output is None:
-        output = Path("florida-predictions.csv")
+        output = Path("florida-estimates.csv")
 
     # Check if output file exists
     if output.exists() and not overwrite:
@@ -293,20 +321,24 @@ def predict_florida(
         with click.progressbar(length=4, label="Loading data") as bar:
             # Load input data
             click.echo(f"Reading input file: {input_file}")
-            df = pd.read_csv(input_file, dtype=str, keep_default_na=False)
+            input_data = pd.read_csv(input_file, dtype=str, keep_default_na=False)
             bar.update(1)
 
             # Validate column exists
-            if last_col not in df.columns:
+            if last_col not in input_data.columns:
                 raise click.ClickException(
-                    f"Column '{last_col}' not found. Available columns: {', '.join(df.columns)}"
+                    f"Column '{last_col}' not found. Available columns: "
+                    f"{', '.join(input_data.columns)}"
                 )
             bar.update(1)
 
-            # Run prediction
-            click.echo(f"Running Florida prediction on {len(df)} rows...")
-            result = FloridaRegLnModel.predict_with_confidence(  # type: ignore
-                df, last_col, conf_int=confidence, num_iter=iterations
+            # Run estimate
+            click.echo(f"Running Florida estimate on {len(input_data)} rows...")
+            result = estimate_florida_voter_surname(
+                input_data,
+                last_col,
+                uncertainty_level=uncertainty_level,
+                mc_iterations=mc_iterations,
             )
             bar.update(1)
 
@@ -316,19 +348,17 @@ def predict_florida(
             bar.update(1)
 
         # Success message
-        predicted_count = result.dropna(subset=["race"]).shape[0]
-        success_rate = predicted_count / len(result) * 100
+        estimated_count = result.dropna(subset=["race"]).shape[0]
+        success_rate = estimated_count / len(result) * 100
 
-        click.echo(
-            click.style(f"{CHECK} Prediction completed successfully!", fg="green")
-        )
+        click.echo(click.style(f"{CHECK} Estimate completed successfully!", fg="green"))
         click.echo(f"  Processed: {len(result)} rows")
-        click.echo(f"  Predicted: {predicted_count} rows ({success_rate:.1f}%)")
+        click.echo(f"  Estimated: {estimated_count} rows ({success_rate:.1f}%)")
         click.echo(f"  Output: {output}")
 
-        # Show sample predictions
+        # Show sample estimates
         if verbose and len(result) > 0:
-            click.echo("\nSample predictions:")
+            click.echo("\nSample estimates:")
             sample = result.head(3)[
                 [last_col, "race"]
                 + [
@@ -342,10 +372,10 @@ def predict_florida(
     except FileNotFoundError as e:
         raise click.ClickException(f"Model files not found: {e}") from e
     except Exception as e:
-        raise click.ClickException(f"Prediction failed: {e}") from e
+        raise click.ClickException(f"Estimate failed: {e}") from e
 
 
-@predict.command("wiki")
+@estimate.command("wikipedia-surname")
 @click.argument("input_file", type=CSVFile())
 @click.option(
     "-l",
@@ -358,37 +388,37 @@ def predict_florida(
     "-o",
     "--output",
     type=OutputPath(),
-    help="Output CSV file (default: wiki-predictions.csv)",
+    help="Output CSV file (default: wiki-estimates.csv)",
 )
 @click.option(
-    "-c",
-    "--confidence",
-    type=click.FloatRange(0.0, 1.0),
-    default=1.0,
+    "-u",
+    "--uncertainty-level",
+    type=click.FloatRange(0.0, 1.0, min_open=True, max_open=True),
+    default=None,
     show_default=True,
-    help="Confidence interval level (0.0-1.0)",
+    help="MC-dropout range level (0.0-1.0)",
 )
 @click.option(
-    "-i",
-    "--iterations",
+    "-m",
+    "--mc-iterations",
     type=click.IntRange(10, 1000),
     default=100,
     show_default=True,
-    help="Monte Carlo iterations for confidence intervals",
+    help="Monte Carlo iterations for MC-dropout ranges",
 )
 @click.option("--overwrite", is_flag=True, help="Overwrite output file if it exists")
 @click.pass_context
-def predict_wiki(
+def estimate_wikipedia_surname_command(
     ctx: click.Context,
     input_file: Path,
     last_col: str,
     output: Path | None,
-    confidence: float,
-    iterations: int,
+    uncertainty_level: float | None,
+    mc_iterations: int,
     overwrite: bool,
 ):
     """
-    Predict race/ethnicity using Wikipedia LSTM model.
+    Estimate race/ethnicity using Wikipedia LSTM model.
 
     Uses LSTM neural networks trained on Wikipedia person data to predict
     detailed ethnic categories from last names. Provides 13 ethnic categories
@@ -397,20 +427,20 @@ def predict_wiki(
     Examples:
 
     \\b
-        # Basic prediction
-        ethnicolr predict wiki data.csv -l surname
+        # Basic estimate
+        ethnicolr estimate wikipedia-surname data.csv -l surname
 
-        # With confidence intervals
-        ethnicolr predict wiki data.csv -l surname -c 0.95 -i 200
+        # With MC-dropout ranges
+        ethnicolr estimate wikipedia-surname data.csv -l surname -u 0.95 -m 200
 
         # Specify output file
-        ethnicolr predict wiki data.csv -l surname -o results.csv
+        ethnicolr estimate wikipedia-surname data.csv -l surname -o results.csv
     """
     verbose = ctx.obj.get("verbose", False)
 
     # Default output filename
     if output is None:
-        output = Path("wiki-predictions.csv")
+        output = Path("wiki-estimates.csv")
 
     # Check if output file exists
     if output.exists() and not overwrite:
@@ -420,20 +450,24 @@ def predict_wiki(
         with click.progressbar(length=4, label="Loading data") as bar:
             # Load input data
             click.echo(f"Reading input file: {input_file}")
-            df = pd.read_csv(input_file, dtype=str, keep_default_na=False)
+            input_data = pd.read_csv(input_file, dtype=str, keep_default_na=False)
             bar.update(1)
 
             # Validate column exists
-            if last_col not in df.columns:
+            if last_col not in input_data.columns:
                 raise click.ClickException(
-                    f"Column '{last_col}' not found. Available columns: {', '.join(df.columns)}"
+                    f"Column '{last_col}' not found. Available columns: "
+                    f"{', '.join(input_data.columns)}"
                 )
             bar.update(1)
 
-            # Run prediction
-            click.echo(f"Running Wikipedia prediction on {len(df)} rows...")
-            result = WikiLnModel.predict_with_confidence(  # type: ignore
-                df, last_col, conf_int=confidence, num_iter=iterations
+            # Run estimate
+            click.echo(f"Running Wikipedia estimate on {len(input_data)} rows...")
+            result = estimate_wikipedia_surname(
+                input_data,
+                last_col,
+                uncertainty_level=uncertainty_level,
+                mc_iterations=mc_iterations,
             )
             bar.update(1)
 
@@ -443,19 +477,17 @@ def predict_wiki(
             bar.update(1)
 
         # Success message
-        predicted_count = result.dropna(subset=["race"]).shape[0]
-        success_rate = predicted_count / len(result) * 100
+        estimated_count = result.dropna(subset=["race"]).shape[0]
+        success_rate = estimated_count / len(result) * 100
 
-        click.echo(
-            click.style(f"{CHECK} Prediction completed successfully!", fg="green")
-        )
+        click.echo(click.style(f"{CHECK} Estimate completed successfully!", fg="green"))
         click.echo(f"  Processed: {len(result)} rows")
-        click.echo(f"  Predicted: {predicted_count} rows ({success_rate:.1f}%)")
+        click.echo(f"  Estimated: {estimated_count} rows ({success_rate:.1f}%)")
         click.echo(f"  Output: {output}")
 
-        # Show sample predictions
+        # Show sample estimates
         if verbose and len(result) > 0:
-            click.echo("\nSample predictions:")
+            click.echo("\nSample estimates:")
             # Show just the main race column for readability since wiki has very detailed categories
             sample = result.head(3)[[last_col, "race"]]
             click.echo(sample.to_string(index=False))
@@ -463,170 +495,110 @@ def predict_wiki(
     except FileNotFoundError as e:
         raise click.ClickException(f"Model files not found: {e}") from e
     except Exception as e:
-        raise click.ClickException(f"Prediction failed: {e}") from e
+        raise click.ClickException(f"Estimate failed: {e}") from e
 
 
 @cli.group()
 def models():
-    """Inspect bundled prediction models (list, info)."""
+    """Inspect bundled estimate models (list, info)."""
     pass
 
 
 @models.command("list")
 @click.option("--detailed", "-d", is_flag=True, help="Show detailed information")
 def list_models(detailed: bool):
-    """List available prediction models."""
-    click.echo(click.style("Available Prediction Models", bold=True))
+    """List models available through the command-line interface."""
+    click.echo(click.style("Available CLI Estimate Models", bold=True))
     click.echo("=" * 40)
-
-    # Get registered models
-    available_models = ModelRegistry.get_available_models()
-
-    if not available_models:
-        click.echo("No models registered. Try importing model modules first.")
-        return
-
-    for model_type, model_class in available_models.items():
-        click.echo(f"\n{click.style(model_type.value.upper(), fg='blue', bold=True)}")
-        click.echo(f"  Class: {model_class.__name__}")
-
+    for model_name, details in CLI_MODEL_CATALOG.items():
+        click.echo(f"\n{click.style(model_name, fg='blue', bold=True)}")
+        click.echo(f"  Estimator: {details['estimator']}")
         if detailed:
-            # Show supported categories
-            try:
-                categories = model_class.get_supported_categories()
-                click.echo(f"  Categories: {', '.join(categories)}")
-            except Exception:
-                click.echo("  Categories: Unknown")
-
-            # Show model documentation
-            if model_class.__doc__:
-                doc_lines = model_class.__doc__.strip().split("\n")
-                click.echo(f"  Description: {doc_lines[0]}")
+            for field in ("source", "input", "target", "variants"):
+                click.echo(f"  {field.title()}: {details[field]}")
 
 
 @models.command("info")
-@click.argument("model_type", type=click.Choice(["census", "wiki", "florida", "nc"]))
+@click.argument(
+    "model_type",
+    type=click.Choice(sorted(CLI_MODEL_CATALOG)),
+)
 def model_info(model_type: str):
     """Show detailed information about a specific model type."""
     click.echo(f"Information for {model_type.upper()} model:")
 
-    # Model-specific information
-    info_map = {
-        "census": {
-            "name": "U.S. Census LSTM Model",
-            "description": "LSTM trained on U.S. Census surname data",
-            "categories": ["white", "black", "api", "hispanic"],
-            "years": ["2000", "2010"],
-            "input": "Last names only",
-            "accuracy": "75-85% on census-representative data",
-        },
-        "wiki": {
-            "name": "Wikipedia LSTM Model",
-            "description": "LSTM trained on Wikipedia person names",
-            "categories": ["13 detailed ethnic categories"],
-            "years": ["2017"],
-            "input": "First and last names",
-            "accuracy": "60-75% on diverse international names",
-        },
-        "florida": {
-            "name": "Florida Voter Registration Model",
-            "description": "LSTM trained on Florida voter registration data",
-            "categories": ["asian", "hispanic", "nh_black", "nh_white", "other"],
-            "years": ["2017", "2022"],
-            "input": "First and/or last names",
-            "accuracy": "70-80% on Florida-representative data",
-        },
-        "nc": {
-            "name": "North Carolina Voter Registration Model",
-            "description": "LSTM trained on NC voter registration data",
-            "categories": ["12 Hispanic/Latino + race combinations"],
-            "years": ["2017"],
-            "input": "First and last names",
-            "accuracy": "65-75% on NC-representative data",
-        },
-    }
-
-    info = info_map.get(model_type, {})
-
-    for key, value in info.items():
-        if isinstance(value, list):
-            value = ", ".join(value)
-        click.echo(f"  {key.title()}: {value}")
+    for field, value in CLI_MODEL_CATALOG[model_type].items():
+        click.echo(f"  {field.title()}: {value}")
 
 
 @cli.command()
 @click.argument("input_file", type=CSVFile())
 @click.option("-l", "--last-column", "last_col", required=True)
-@click.option(
-    "-f",
-    "--first-column",
-    "first_col",
-    help="Column name for first names (if available)",
-)
 @click.option("-o", "--output", type=OutputPath())
 @click.option(
     "--model",
-    type=click.Choice(["census", "wiki", "florida", "nc"]),
-    default="census",
+    type=click.Choice(sorted(CLI_MODEL_CATALOG)),
+    default="census-surname",
     show_default=True,
 )
 @click.pass_context
-def quick_predict(
+def quick_estimate(
     ctx: click.Context,
     input_file: Path,
     last_col: str,
-    first_col: str | None,
     output: Path | None,
     model: str,
 ):
     """
-    Quick prediction using the best available model.
+    Quick estimate using the best available model.
 
     Automatically selects appropriate model based on available data
-    and provides fast predictions with minimal configuration.
+    and provides fast estimates with minimal configuration.
     """
     # Default output
     if output is None:
-        output = Path(f"{input_file.stem}-predictions.csv")
+        output = Path(f"{input_file.stem}-estimates.csv")
 
-    click.echo(f"Running quick prediction with {model} model...")
+    click.echo(f"Running quick estimate with {model} model...")
 
     # Delegate to specific model command
-    if model == "census":
+    if model == "census-surname":
         ctx.invoke(
-            predict_census,
+            estimate_census_surname_command,
             input_file=input_file,
             last_col=last_col,
             output=output,
-            year="2010",
-            confidence=1.0,
-            iterations=100,
+            year="2020",
+            uncertainty_level=None,
+            mc_iterations=100,
             overwrite=True,
         )
-    elif model == "florida":
+    elif model == "florida-voter-surname":
         ctx.invoke(
-            predict_florida,
+            estimate_florida_voter_surname_command,
             input_file=input_file,
             last_col=last_col,
             output=output,
-            confidence=1.0,
-            iterations=100,
+            uncertainty_level=None,
+            mc_iterations=100,
             overwrite=True,
         )
-    elif model == "wiki":
+    elif model == "wikipedia-surname":
         ctx.invoke(
-            predict_wiki,
+            estimate_wikipedia_surname_command,
             input_file=input_file,
             last_col=last_col,
             output=output,
-            confidence=1.0,
-            iterations=100,
+            uncertainty_level=None,
+            mc_iterations=100,
             overwrite=True,
         )
     else:
-        click.echo(f"Quick predict for {model} model not yet implemented")
+        click.echo(f"Quick estimate for {model} model not yet implemented")
         click.echo(
-            "Available: ethnicolr predict census, ethnicolr predict florida, ethnicolr predict wiki"
+            "Available: ethnicolr estimate census-surname, "
+            "ethnicolr estimate florida-voter-surname, "
+            "ethnicolr estimate wikipedia-surname"
         )
 
 

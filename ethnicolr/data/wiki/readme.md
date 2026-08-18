@@ -26,15 +26,15 @@ cd scripts/data-acquisition/wiki
 python fetch_wikidata_people.py            # ~100 country files + P172 file (~1 GB)
 python prepare_wiki_data.py                # -> ../raw/wiki_name_race_2026.csv.gz
 cd ../../model-training
-python train_name_lstm.py wiki_ln
-python train_name_lstm.py wiki_name
+python train_name_lstm.py wikipedia_surname
+python train_name_lstm.py wikipedia_full_name
 ```
 
 Labeling policy: an explicit Wikidata ethnic-group statement (P172), mapped via
 `scripts/data-acquisition/wiki/mappings/ethnic_group_to_category.csv`, takes
 precedence; otherwise citizenship (P27) is mapped via
 `mappings/country_to_category.csv`. Citizenship in melting-pot countries
-(US, Canada, Australia, NZ, Brazil, ...) is treated as no signal — such people
+(US, Canada, Australia, NZ, Brazil, ...) is treated as no signal. Such people
 are only included when they carry a mapped P172 statement. People whose
 signals map to conflicting categories are dropped. The mapping tables are the
 auditable core of the pipeline; edit them and re-run to change policy.
