@@ -22,6 +22,8 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
 
+from ethnicolr.model_metadata import write_class_labels, write_vocabulary
+
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR.parent.parent.parent / "ethnicolr" / "data" / "census"
 MODEL_DIR = SCRIPT_DIR.parent.parent.parent / "ethnicolr" / "models" / "census" / "lstm"
@@ -239,17 +241,13 @@ def save_model_for_ethnicolr(
     torch.save(model.state_dict(), model_path)
     print(f"Saved model to {model_path}")
 
-    # Save vocabulary
-    vocab_path = output_dir / f"census{year}_ln_vocab_pytorch.csv"
-    vocab_df = pd.DataFrame(words_list, columns=["vocab"])
-    vocab_df.to_csv(vocab_path, index=False, encoding="utf-8")
+    vocab_path = output_dir / f"census{year}_ln_vocab_pytorch.json"
+    write_vocabulary(vocab_path, words_list)
     print(f"Saved vocabulary to {vocab_path}")
 
-    # Save race labels
-    race_path = output_dir / f"census{year}_race_pytorch.csv"
-    race_df = pd.DataFrame({"race": RACES})
-    race_df.to_csv(race_path, index=False)
-    print(f"Saved race labels to {race_path}")
+    labels_path = output_dir / f"census{year}_labels_pytorch.json"
+    write_class_labels(labels_path, RACES)
+    print(f"Saved class labels to {labels_path}")
 
 
 def export_to_onnx(

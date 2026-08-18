@@ -1,5 +1,5 @@
 {
-  "model": "wiki_origin",
+  "model": "wikipedia-origin",
   "temperature": 0.991831362247467,
   "train_class_distribution": {
     "Albania": 0.002744018911429275,

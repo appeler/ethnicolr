@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "artifact_type": "class-labels",
+  "labels": [
+    "asian",
+    "hispanic",
+    "nh_black",
+    "nh_white",
+    "other"
+  ]
+}

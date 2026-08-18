@@ -1,5 +1,5 @@
 {
-  "model": "census_2000",
+  "model": "census-surname-2000",
   "temperature": 1.0485161542892456,
   "train_class_distribution": {
     "api": 0.067,

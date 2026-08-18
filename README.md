@@ -1,973 +1,275 @@
-## ethnicolr: Predict Race and Ethnicity From Name
+# ethnicolr
 
 [![CI](https://github.com/appeler/ethnicolr/actions/workflows/ci.yml/badge.svg)](https://github.com/appeler/ethnicolr/actions/workflows/ci.yml)
-[![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.python.org/pypi/ethnicolr)
+[![PyPI version](https://img.shields.io/pypi/v/ethnicolr.svg)](https://pypi.org/project/ethnicolr/)
 [![Documentation](https://img.shields.io/badge/docs-github.io-blue)](https://appeler.github.io/ethnicolr/)
-[![PePy Downloads](https://static.pepy.tech/badge/ethnicolr)](https://www.pepy.tech/projects/ethnicolr)
+[![PePy downloads](https://static.pepy.tech/badge/ethnicolr)](https://www.pepy.tech/projects/ethnicolr)
 
-We exploit the US census data, the Florida voting registration data, and
-Wikipedia/Wikidata data to predict race and ethnicity based on first and
-last name or just the last name. The granularity at which we predict the
-race depends on the dataset. For instance, the Wikipedia/Wikidata models
-predict at the ethnic-group level (13 categories), while the census
-models (the raw data has additional categories of Native Americans and
-Bi-racial) categorize between Non-Hispanic Whites, Non-Hispanic Blacks,
-Asians, and Hispanics.
+Ethnicolr estimates race, ethnicity, or country-of-origin patterns associated
+with names. It provides exact lookups from published name tables, dictionary
+estimators that combine first and last names, and PyTorch models trained on
+U.S. Census, voter-registration, and Wikipedia/Wikidata data.
 
-### What's new in 1.0
+Every result is a name-pattern estimate tied to a stated reference population.
+It is not evidence of a person's identity, ancestry, citizenship, race, or
+ethnicity. Do not use Ethnicolr for individual profiling or decisions about
+employment, education, credit, housing, policing, health care, eligibility, or
+access to services.
 
-- **Pure PyTorch.** TensorFlow is gone; the package installs and runs with
-  just `torch`, `pandas`, `numpy`, and `click`, on Python 3.11–3.13.
-- **All nine models retrained** from their original data sources with a
-  single reproducible trainer (`scripts/model-training/train_name_lstm.py`).
-- **Wikipedia models trained on 25× more data.** A new scripted pipeline
-  (`scripts/data-acquisition/wiki/`) extends the 2009-era Wikipedia dataset
-  with ~3.5M fresh Wikidata-derived names (3.69M rows total). Held-out
-  accuracy on 13 classes improved from 0.67→0.78 (last name) and
-  0.71→0.86 (full name); for ~91–95% of names the true category is in the
-  model's top 3 predictions.
-- **Honest uncertainty.** Every prediction returns the full class
-  probability distribution, and Monte Carlo dropout confidence intervals
-  work for all models.
+## Install
 
-#### Model accuracy (held-out test sets)
-
-| Model | Classes | Accuracy | Top-3 |
-|---|---|---|---|
-| `pred_census_ln` (2000/2010/2020) | 4 | ~0.79 | — |
-| `pred_wiki_ln` | 13 | 0.78 | 0.91 |
-| `pred_wiki_name` | 13 | 0.86 | 0.95 |
-| `pred_fl_reg_ln` | 4 | 0.81 | — |
-| `pred_fl_reg_name` | 4 | 0.84 | — |
-| `pred_fl_reg_ln_five_cat` | 5 (balanced) | 0.59 | — |
-| `pred_fl_reg_name_five_cat` | 5 (balanced) | 0.63 | — |
-| `pred_nc_reg_name` | 12 (balanced) | 0.57 | — |
-
-Balanced-class numbers are measured against a uniform class distribution
-(chance = 1/n classes), so they are not comparable to the unbalanced
-4-category numbers.
-
-### First names, dictionary estimators, and exact intervals
-
-The census models now use first names too. Three dictionary estimators expose
-exact conditional frequencies from public tables — no neural net where the
-name is in-dictionary:
-
-```python
-from ethnicolr import census_fn, pred_census_name, pred_voter_name
-
-# First-name lookup (Census 2020, first release since 1990), with exact
-# Wilson intervals from the published counts
-census_fn(df, "first", conf_int=0.95)
-
-# First+last posterior over six census categories (naive Bayes across the
-# census tables; LSTM fallback for out-of-dictionary surnames — see `basis`)
-pred_census_name(df, "last", "first")
-
-# Five-category posterior from the Rosenman-Olivella-Imai voter-file
-# dictionaries (338k surnames, 136k first names; CC0)
-pred_voter_name(df, "last", "first")
-```
-
-First names matter: "Smith" alone is majority-white, but "Tyrone Smith" is
-~90% Black under the census tables. `census_ln(..., conf_int=0.95)` also
-gains exact Wilson bounds.
-
-**Global name origin.** `pred_wiki_origin` predicts likely country of origin
-over ~90 countries (62% top-1, 81% top-3; chance ≈ 1%), trained on Wikidata:
-
-```python
-from ethnicolr import pred_wiki_origin
-
-pred_wiki_origin(
-    df, "last", "first"
-)  # adds an `origin` column + per-country probabilities
-# Tanaka Yuki → Japan, Kowalski Piotr → Poland, Nguyen Minh → Vietnam
-```
-
-### Calibrated probabilities, priors, and prediction sets
-
-Every model ships with measured calibration and conformal statistics
-([model cards](https://appeler.github.io/ethnicolr/model_cards.html),
-[statistical principles](https://appeler.github.io/ethnicolr/statistical_principles.html)):
-
-- **Calibrated probabilities.** Outputs are temperature-scaled on held-out
-  data, and per-model reliability diagrams, ECE, and Brier scores are
-  published — so `hispanic = 0.83` is a checkable claim, not a raw score.
-- **`prior=`** reweights predictions to your population's demographics
-  (essential for the class-balanced FL five-category and NC models, and the
-  name-likelihood step of BISG-style pipelines à la Imai & Khanna's wru or
-  surgeo):
-
-  ```python
-  pred_fl_reg_ln_five_cat(
-      df,
-      "last",
-      prior={
-          "asian": 0.03,
-          "hispanic": 0.27,
-          "nh_black": 0.15,
-          "nh_white": 0.50,
-          "other": 0.05,
-      },
-  )
-  ```
-
-- **`coverage=`** returns conformal prediction sets — the smallest set of
-  classes guaranteed to contain the true class at the requested rate
-  (0.80/0.90/0.95), verified empirically on held-out data:
-
-  ```python
-  pred_wiki_name(df, "last", "first", coverage=0.90)  # adds a race_set column
-  ```
-
-### Performance and device selection
-
-Inference runs on CPU by default and auto-selects CUDA when available. Set
-`ETHNICOLR_DEVICE=cpu|cuda|mps` to override. MPS (Apple Silicon GPU) is
-opt-in only because some virtualized macOS environments advertise MPS but
-compute incorrect LSTM results on it.
-
-### Streamlit App
-
-[https://ethnicolr.streamlit.app/](https://ethnicolr.streamlit.app/)
-
-### Caveats and Notes
-
-If you picked a person at random with the last name \'Smith\' in the US
-in 2010 and asked us to guess this person\'s race (as measured by the
-census), the best guess would be based on what is available from the
-aggregated Census file. It is the Bayes Optimal Solution. So what good
-are last-name-only predictive models for? A few things\-\--if you want
-to impute race and ethnicity for last names that are not in the census
-file, infer the race and ethnicity in different years than when the
-census was conducted (if some assumptions hold), infer the race of
-people in different countries (if some assumptions hold), etc. The
-biggest benefit comes in cases where both the first name and last name
-are known.
-
-### Install
-
-We strongly recommend installing ethnicolr inside a Python virtual
-environment (see [venv
-documentation](https://docs.python.org/3/library/venv.html#creating-virtual-environments))
+Ethnicolr supports Python 3.11 through 3.14.
 
 ```bash
 pip install ethnicolr
 ```
 
-Notes:
+Neural model weights live in
+[`gojiberries/ethnicolr`](https://huggingface.co/gojiberries/ethnicolr), not in
+the Python wheel. The first use of a neural estimator downloads only its weight
+file from a full, package-pinned Hugging Face commit. Later calls use the local
+Hugging Face cache. Set `ETHNICOLR_MODEL_CACHE` to choose the cache directory,
+or `ETHNICOLR_MODEL_DIR` to use a local mirror of the model repository. Exact
+Census and voter-file lookup tables remain in the wheel.
 
-> - Models run on PyTorch and are verified on Python 3.11 through 3.13.
-> - All model files ship with the package; no separate download step is
->   needed.
+## Quick start
 
-### Jupyter Quickstart
+```python
+import pandas as pd
 
-```bash
-pip install ethnicolr jupyter
-jupyter notebook ethnicolr/examples
+from ethnicolr import estimate_census_full_name
+
+names = pd.DataFrame(
+    {
+        "surname": ["Smith", "Garcia", "Zhang"],
+        "first_name": ["Tyrone", "Maria", "Wei"],
+    }
+)
+
+estimates = estimate_census_full_name(
+    names,
+    surname_column="surname",
+    first_name_column="first_name",
+    year=2020,
+)
+
+print(
+    estimates[
+        [
+            "surname",
+            "first_name",
+            "predicted_label",
+            "predicted_probability",
+            "abstained",
+            "model_revision",
+        ]
+    ]
+)
 ```
 
-Open one of the example notebooks and run the cells to see the package in
-action.
+The returned data retains the input columns, adds the full target-specific
+probability distribution, and appends the shared inference fields described
+below.
 
-## Modern CLI
+## Public API
 
-Ethnicolr now provides a modern, user-friendly command-line interface using Click. The CLI offers intuitive commands with helpful progress indicators, better error messages, and comprehensive help.
+Use `lookup_*` when a function returns published table values. Use
+`estimate_*` when a function combines evidence or runs a statistical model.
 
-### Quick Start
+| Function | Input | Source and target |
+| --- | --- | --- |
+| `lookup_census_surname` | surname | Census race/ethnicity proportions |
+| `lookup_census_first_name` | first name | Census 2020 race/ethnicity proportions |
+| `estimate_census_surname` | surname | Census-trained race/ethnicity model |
+| `estimate_census_full_name` | full name | Census tables with model fallback |
+| `estimate_voter_file_full_name` | full name | Six-state voter-file race/ethnicity frequencies |
+| `estimate_florida_voter_surname` | surname | Florida voter-file race/ethnicity model |
+| `estimate_florida_voter_full_name` | full name | Florida voter-file race/ethnicity model |
+| `estimate_north_carolina_voter_full_name` | full name | North Carolina voter-file race/ethnicity model |
+| `estimate_wikipedia_surname` | surname | Wikipedia/Wikidata race/ethnicity model |
+| `estimate_wikipedia_full_name` | full name | Wikipedia/Wikidata race/ethnicity model |
+| `estimate_wikipedia_origin` | full name | Wikipedia/Wikidata country-of-origin model |
+
+Required data and column arguments may be positional or named. Optional
+arguments are keyword-only. The main optional arguments are:
+
+- `uncertainty_level`: a value strictly between 0 and 1. Census lookups add
+  Wilson bounds. Neural models add Monte Carlo dropout summaries.
+- `mc_iterations`: number of Monte Carlo dropout draws when
+  `uncertainty_level` is set.
+- `target_prior`: target-population class proportions used to reweight model
+  probabilities.
+- `conformal_coverage`: requested marginal coverage for a conformal prediction
+  set. Supported levels depend on the model artifact.
+
+`target_prior` and `conformal_coverage` cannot be used together. Neither can be
+combined with `uncertainty_level`. Ethnicolr reports the exact conflicting
+arguments and the remedy.
+
+## Result contract
+
+All public functions implement inference contract version 1.0. Results include:
+
+| Column | Meaning |
+| --- | --- |
+| `estimate_type` | `name-pattern estimate` |
+| `target` | Quantity estimated, such as `race-ethnicity` or `country-origin` |
+| `input_scope` | `first-name`, `last-name`, or `full-name` |
+| `predicted_label` | Highest-probability label, or missing after abstention |
+| `predicted_probability` | Probability of `predicted_label` on a 0 to 1 scale |
+| `scored` | Whether the function produced a usable probability distribution |
+| `script_supported` | Whether the estimator supports the input script |
+| `abstained` | Whether Ethnicolr declined to return a label |
+| `abstention_reason` | Machine-readable explanation for abstention |
+| `model_id` | Stable model or table identifier |
+| `model_version` | Ethnicolr package version |
+| `model_revision` | SHA-256 revision of the complete runtime artifact bundle |
+| `reference_population` | Population represented by the source data |
+| `calibration_status` | Status of probability calibration validation |
+| `uncertainty_method` | Requested uncertainty method, when present |
+| `uncertainty_level` | Requested uncertainty level, when present |
+
+Blank names, unsupported scripts, dictionary misses without a fallback, and
+inputs with no learned features abstain. Their target probabilities and labels
+remain missing. Ethnicolr does not silently map unsupported inputs to a default
+class distribution.
+
+See the [inference contract](docs/source/inference_contract.md) for invariants
+and the shared abstention vocabulary.
+
+## Uncertainty and calibration
+
+Ethnicolr distinguishes three different operations:
+
+1. Wilson bounds quantify sampling uncertainty in published Census lookup
+   proportions.
+2. Monte Carlo dropout summaries describe variation under repeated stochastic
+   model passes. They are not confidence intervals.
+3. Conformal prediction sets target marginal coverage for names exchangeable
+   with a model's calibration data.
+
+The [statistical principles](docs/source/statistical_principles.md) explain
+calibration, target-prior adjustment, conformal sets, evaluation weighting,
+and the first-name/last-name independence assumption. The
+[model cards](docs/source/model_cards.md) report model-specific evidence.
+
+## Current model evidence
+
+The current neural models have the following held-out results. The model cards
+define each evaluation population and report calibration metrics.
+
+| Model | Classes | Accuracy | Top-3 accuracy |
+| --- | ---: | ---: | ---: |
+| Census 2000 surname | 4 | 0.833 | 0.993 |
+| Census 2010 surname | 4 | 0.808 | 0.984 |
+| Census 2020 surname | 4 | 0.807 | 0.988 |
+| Florida voter surname | 5 | 0.588 | 0.947 |
+| Florida voter full name | 5 | 0.677 | 0.948 |
+| North Carolina voter full name | 12 | 0.425 | 0.896 |
+| Wikipedia/Wikidata surname | 13 | 0.775 | 0.907 |
+| Wikipedia/Wikidata full name | 13 | 0.863 | 0.954 |
+| Wikipedia/Wikidata origin | 90 | 0.626 | 0.809 |
+
+Florida and North Carolina use source-disjoint splits. Their earlier metrics
+were invalid because balancing before splitting allowed source rows to cross
+partitions. The 2.0 artifacts replace those models and their calibration data.
+
+## Command line
+
+The `ethnicolr` command exposes the supported surname estimators.
 
 ```bash
-# List bundled models
-python -m ethnicolr.cli models list
+# List command-line models and their sources
+ethnicolr models list --detailed
 
-# Run predictions
-python -m ethnicolr.cli predict census data.csv -l surname -o results.csv
+# Estimate from Census 2020 surnames
+ethnicolr estimate census-surname names.csv \
+  --last-column surname \
+  --output census-estimates.csv
+
+# Request Monte Carlo dropout summaries
+ethnicolr estimate wikipedia-surname names.csv \
+  --last-column surname \
+  --uncertainty-level 0.90 \
+  --mc-iterations 200 \
+  --output wikipedia-estimates.csv
+
+# Use the default quick estimator
+ethnicolr quick-estimate names.csv --last-column surname
 ```
 
-### Main Commands
+Run `ethnicolr --help` or `ethnicolr estimate --help` for the current command
+surface. Removed per-model scripts are not compatibility aliases in 2.0.
 
-#### Prediction Commands
+## Name handling
+
+Pass names as recorded unless you have a documented normalization rule for your
+application. Ethnicolr trims surrounding whitespace and performs the model's
+required normalization. It preserves the original rows and reports whether the
+script is supported. Do not delete diacritics or coerce unsupported scripts into
+Latin text merely to force a score.
+
+## Runtime device
+
+Inference uses CUDA when available and otherwise uses CPU. Set
+`ETHNICOLR_DEVICE` to `cpu`, `cuda`, or `mps` to override device selection. MPS
+is opt-in because some virtualized Apple Silicon environments advertise MPS but
+return incorrect LSTM output.
+
+## Data
+
+Ethnicolr uses:
+
+- U.S. Census surname tables for 2000, 2010, and 2020
+- the U.S. Census 2020 first-name table
+- Florida voter-registration records from 2022
+- North Carolina voter-registration records
+- six-state voter-file name frequencies from Alabama, Florida, Georgia,
+  Louisiana, North Carolina, and South Carolina
+- Wikipedia/Wikidata person records produced by the repository's reproducible
+  acquisition pipeline
+
+Each estimator reports its reference population. Sources, licenses, acquisition
+steps, and known limitations are documented in the data directories and model
+cards.
+
+## Development
 
 ```bash
-# Census-based prediction (most common)
-python -m ethnicolr.cli predict census data.csv -l surname
-
-# With specific census year and confidence intervals
-python -m ethnicolr.cli predict census data.csv -l surname -y 2010 -c 0.95 -i 200
-
-# Florida voter registration model
-python -m ethnicolr.cli predict florida data.csv -l surname
-
-# Wikipedia model (detailed ethnic categories)
-python -m ethnicolr.cli predict wiki data.csv -l surname
+uv sync --all-groups
+make lint
+make test
+make docs
+make build
 ```
 
-#### Model Management
+`make ci` runs the local release checks. The project also uses the reusable
+`py-canon` CI workflow and `preen` for package auditing.
 
-```bash
-# List available prediction models
-python -m ethnicolr.cli models list --detailed
+## Documentation
 
-# Get information about a model
-python -m ethnicolr.cli models info census
-```
+The full documentation includes:
 
-#### Quick Prediction
+- [inference result contract](docs/source/inference_contract.md)
+- [statistical principles](docs/source/statistical_principles.md)
+- [model cards and reliability diagrams](docs/source/model_cards.md)
 
-```bash
-# Fast prediction with minimal setup
-python -m ethnicolr.cli quick-predict data.csv -l surname --model census
+The Sphinx site includes this README directly so installation and API examples
+have one maintained source.
 
-# Auto-selects best model based on available data
-python -m ethnicolr.cli quick-predict data.csv -l surname -f firstname
-```
+## Authors and conduct
 
-### CLI Options
-
-All prediction commands support these common options:
-
-- `-l, --last-column`: Column containing last names (required)
-- `-f, --first-column`: Column containing first names (when supported)
-- `-o, --output`: Output file path (auto-generated if not specified)
-- `-c, --confidence`: Confidence interval level (0.0-1.0)
-- `-i, --iterations`: Monte Carlo iterations for confidence intervals
-- `--overwrite`: Overwrite existing output files
-- `-v, --verbose`: Enable detailed progress information
-
-### Legacy CLI
-
-The original command-line tools are still available for backward compatibility:
-
-```bash
-census_ln --help
-pred_census_ln --help
-pred_wiki_name --help
-# ... etc
-```
-
-### Cleaning Names
-
-The prediction models work best when first and last names contain only
-alphabetic characters. Before calling the CLI or Python APIs, strip out
-titles (e.g., *Dr*, *Hon.*), middle names, suffixes, punctuation and
-non\-ASCII characters. The `pred_wiki_name` command automatically
-normalizes names by removing diacritics and extraneous characters. If
-the tool still skips entries, check that the first and last name columns
-are not empty after cleaning.
-
-## Examples
-
-To append census data from 2010 to a [sample file with column header in the
-first row](examples/input-with-header.csv),
-specify the column name carrying last names using the [`-l`] option, keeping the rest the same:
-
-```bash
-# Download the sample file first:
-curl -O https://raw.githubusercontent.com/appeler/ethnicolr/refs/heads/master/examples/input-with-header.csv
-
-# Then run census lookup:
-census_ln -y 2010 -o output-census2010.csv -l last_name input-with-header.csv
-```
-
-To predict race/ethnicity using Wikipedia full name model, specify the column name of last name and first name by using
-[`-l`] and [`-f`] flags respectively.
-
-```bash
-pred_wiki_name -o output-wiki-pred-race.csv -l last_name -f first_name input-with-header.csv
-```
-
-## Functions
-
-We expose several functions, each of which either takes a pandas DataFrame
-or a CSV.
-
-- **census_ln(df, lname_col, year=2000)**
-  - What it does:
-    - Removes extra space
-    - For names in the [census file](ethnicolr/data/census), it appends relevant data of what probability the name
-      provided is of a certain race/ethnicity
-
-> -----------------------------------------------------------------------------
->   Parameters    
->   ------------ ----------------------------------------------------------------
->                **df** : *{DataFrame, csv}* Pandas dataframe of CSV file
->                contains the names of the individual to be inferred
->
->                **lname_col** : *{string}* name of the column containing the
->                last name
->
->                **Year** : *{2000, 2010, 2020}, default=2000* year of census to use
->   -----------------------------------------------------------------------------
-
-- Output: Appends the following columns to the pandas DataFrame or CSV:
-  pctwhite, pctblack, pctapi, pctaian, pct2prace, pcthispanic. See
-  [here](https://github.com/appeler/ethnicolr/blob/main/ethnicolr/data/census/census_2000.pdf) for what the column names mean.
-
-  ``` literal-block
-  >>> import pandas as pd
-
-  >>> from ethnicolr import census_ln, pred_census_ln
-
-  >>> names = [{'name': 'smith'},
-  ...         {'name': 'zhang'},
-  ...         {'name': 'jackson'}]
-
-  >>> df = pd.DataFrame(names)
-
-  >>> df
-        name
-  0    smith
-  1    zhang
-  2  jackson
-
-  >>> census_ln(df, 'name')
-        name pctwhite pctblack pctapi pctaian pct2prace pcthispanic
-  0    smith    73.35    22.22   0.40    0.85      1.63        1.56
-  1    zhang     0.61     0.09  98.16    0.02      0.96        0.16
-  2  jackson    41.93    53.02   0.31    1.04      2.18        1.53
-  ```
-
-- **pred_census_ln(df, lname_col, year=2020, num_iter=100,
-  conf_int=1.0)**
-
-  - What it does:
-    - Removes extra space.
-    - Uses PyTorch LSTM models trained on Census surname data to predict race and ethnicity.
-
-    ----------------------------------------------------------------------------
-    Parameters    
-    ------------ ---------------------------------------------------------------
-                 **df** : *{DataFrame, csv}* Pandas dataframe of CSV file
-                 contains the names of the individual to be inferred
-
-                 **namecol** : *{string}* name of the column containing the last
-                 name
-
-                 **year** : *{2000, 2010, 2020}, default=2020* year of census to use
-
-                 **num_iter** : *int, default=100* number of iterations to
-                 calculate uncertainty in model
-
-                 **conf_int** : *float, default=1.0* confidence interval in
-                 predicted class
-    ----------------------------------------------------------------------------
-
-  - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race (white, black, asian, or hispanic), api (percentage chance
-    asian), black, hispanic, white. For each race it will provide the
-    mean, standard error, lower & upper bound of confidence interval
-
-  *(Using the same dataframe from example above)*
-
-  ```python
-  >>> census_ln(df, 'name')
-        name pctwhite pctblack pctapi pctaian pct2prace pcthispanic
-  0    smith    73.35    22.22   0.40    0.85      1.63        1.56
-  1    zhang     0.61     0.09  98.16    0.02      0.96        0.16
-  2  jackson    41.93    53.02   0.31    1.04      2.18        1.53
-
-  >>> census_ln(df, 'name', 2010)
-        name   race pctwhite pctblack pctapi pctaian pct2prace pcthispanic
-  0    smith  white     70.9    23.11    0.5    0.89      2.19         2.4
-  1    zhang    api     0.99     0.16  98.06    0.02      0.62        0.15
-  2  jackson  black    39.89    53.04   0.39    1.06      3.12         2.5
-
-  >>> pred_census_ln(df, 'name')
-        name   race       api     black  hispanic     white
-  0    smith  white  0.002019  0.247235  0.014485  0.736260
-  1    zhang    api  0.997807  0.000149  0.000470  0.001574
-  2  jackson  black  0.002797  0.528193  0.014605  0.454405
-  ```
-
-- **pred_wiki_ln( df, lname_col, num_iter=100, conf_int=1.0)**
-
-  - What it does:
-    - Removes extra space.
-    - Uses the [last name wiki
-      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
-
-    ----------------------------------------------------------------------------
-    Parameters    
-    ------------ ---------------------------------------------------------------
-                 **df** : *{DataFrame, csv}* Pandas dataframe of CSV file
-                 contains the names of the individual to be inferred
-
-                 **lname_col** : *{string}* name of the column containing the
-                 last name
-
-                 **num_iter** : *int, default=100* number of iterations to
-                 calculate uncertainty in model
-
-                 **conf_int** : *float, default=1.0* confidence interval in
-                 predicted class
-    ----------------------------------------------------------------------------
-
-  - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race (categorical variable \-\-- category with the highest
-    probability). For each race it will provide the mean, standard
-    error, lower & upper bound of confidence interval
-
-  ``` literal-block
-  "Asian,GreaterEastAsian,EastAsian",
-  "Asian,GreaterEastAsian,Japanese", "Asian,IndianSubContinent",
-  "GreaterAfrican,Africans", "GreaterAfrican,Muslim",
-  "GreaterEuropean,British","GreaterEuropean,EastEuropean",
-  "GreaterEuropean,Jewish","GreaterEuropean,WestEuropean,French",
-  "GreaterEuropean,WestEuropean,Germanic","GreaterEuropean,WestEuropean,Hispanic",
-  "GreaterEuropean,WestEuropean,Italian","GreaterEuropean,WestEuropean,Nordic".
-  ```
-
-  ```python
-  >>> import pandas as pd
-
-  >>> names = [
-  ...             {"last": "smith", "first": "john", "true_race": "GreaterEuropean,British"},
-  ...             {
-  ...                 "last": "zhang",
-  ...                 "first": "simon",
-  ...                 "true_race": "Asian,GreaterEastAsian,EastAsian",
-  ...             },
-  ...         ]
-  >>> df = pd.DataFrame(names)
-
-  >>> from ethnicolr import pred_wiki_ln, pred_wiki_name
-
-  >>> odf = pred_wiki_ln(df,'last', conf_int=0.9)
-  ['Asian,GreaterEastAsian,EastAsian', 'Asian,GreaterEastAsian,Japanese', 'Asian,IndianSubContinent', 'GreaterAfrican,Africans', 'GreaterAfrican,Muslim', 'GreaterEuropean,British', 'GreaterEuropean,EastEuropean', 'GreaterEuropean,Jewish', 'GreaterEuropean,WestEuropean,French', 'GreaterEuropean,WestEuropean,Germanic', 'GreaterEuropean,WestEuropean,Hispanic', 'GreaterEuropean,WestEuropean,Italian', 'GreaterEuropean,WestEuropean,Nordic']
-
-  >>> odf
-     last  first                         true_race  ...  GreaterEuropean,WestEuropean,Nordic_lb  GreaterEuropean,WestEuropean,Nordic_ub                              race
-  0  Smith   john           GreaterEuropean,British                               0.016103  ...                                 0.014135                                0.007382                                0.048828           GreaterEuropean,British
-  1  Zhang  simon  Asian,GreaterEastAsian,EastAsian                               0.863391  ...                                 0.017452                                0.001844                                0.027252  Asian,GreaterEastAsian,EastAsian
-
-  [2 rows x 56 columns]
-
-  >>> odf.iloc[0, :8]
-  last                                                       Smith
-  first                                                       john
-  true_race                                GreaterEuropean,British
-  Asian,GreaterEastAsian,EastAsian_mean                   0.016103
-  Asian,GreaterEastAsian,EastAsian_std                    0.009735
-  Asian,GreaterEastAsian,EastAsian_lb                     0.005873
-  Asian,GreaterEastAsian,EastAsian_ub                     0.034637
-  Asian,GreaterEastAsian,Japanese_mean                    0.003814
-  Name: 0, dtype: object
-  ```
-
-- **pred_wiki_name(df, namecol, num_iter=100, conf_int=1.0)**
-
-  - What it does:
-    - Removes extra space.
-    - Uses the [full name wiki
-      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
-
-    ----------------------------------------------------------------------------
-    Parameters    
-    ------------ ---------------------------------------------------------------
-                 **df** : *{DataFrame, csv}* Pandas dataframe of CSV file
-                 contains the names of the individual to be inferred
-
-                 **namecol** : *{string}* name of the column containing the
-                 name.
-
-                 **num_iter** : *int, default=100* number of iterations to
-                 calculate uncertainty of predictions
-
-                 **conf_int** : *float, default=1.0* confidence interval
-    ----------------------------------------------------------------------------
-
-  - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race (categorical variable\-\--category with the highest
-    probability), \"Asian,GreaterEastAsian,EastAsian\",
-    \"Asian,GreaterEastAsian,Japanese\", \"Asian,IndianSubContinent\",
-    \"GreaterAfrican,Africans\", \"GreaterAfrican,Muslim\",
-    \"GreaterEuropean,British\",\"GreaterEuropean,EastEuropean\",
-    \"GreaterEuropean,Jewish\",\"GreaterEuropean,WestEuropean,French\",
-    \"GreaterEuropean,WestEuropean,Germanic\",\"GreaterEuropean,WestEuropean,Hispanic\",
-    \"GreaterEuropean,WestEuropean,Italian\",\"GreaterEuropean,WestEuropean,Nordic\".
-    For each race it will provide the mean, standard error, lower &
-    upper bound of confidence interval
-
-  *(Using the same dataframe from example above)*
-
-  ``` literal-block
-  >>> odf = pred_wiki_name(df,'last', 'first', conf_int=0.9)
-  ['Asian,GreaterEastAsian,EastAsian', 'Asian,GreaterEastAsian,Japanese', 'Asian,IndianSubContinent', 'GreaterAfrican,Africans', 'GreaterAfrican,Muslim', 'GreaterEuropean,British', 'GreaterEuropean,EastEuropean', 'GreaterEuropean,Jewish', 'GreaterEuropean,WestEuropean,French', 'GreaterEuropean,WestEuropean,Germanic', 'GreaterEuropean,WestEuropean,Hispanic', 'GreaterEuropean,WestEuropean,Italian', 'GreaterEuropean,WestEuropean,Nordic']
-
-  >>> odf
-     last  first                         true_race       __name  Asian,GreaterEastAsian,EastAsian_mean  ...  GreaterEuropean,WestEuropean,Nordic_mean  GreaterEuropean,WestEuropean,Nordic_std  GreaterEuropean,WestEuropean,Nordic_lb  GreaterEuropean,WestEuropean,Nordic_ub                              race
-  0  Smith   john           GreaterEuropean,British   Smith John                               0.004111  ...                                  0.006246                                 0.004760                                0.001048                                0.016288           GreaterEuropean,British
-  1  Zhang  simon  Asian,GreaterEastAsian,EastAsian  Zhang Simon                               0.944203  ...                                  0.000793                                 0.002557                                0.000019                                0.002470  Asian,GreaterEastAsian,EastAsian
-
-  [2 rows x 57 columns]
-
-  >>> odf.iloc[0,:8]
-  last                                                       Smith
-  first                                                       john
-  true_race                                GreaterEuropean,British
-  __name                                                Smith John
-  Asian,GreaterEastAsian,EastAsian_mean                   0.004111
-  Asian,GreaterEastAsian,EastAsian_std                    0.002929
-  Asian,GreaterEastAsian,EastAsian_lb                     0.001356
-  Asian,GreaterEastAsian,EastAsian_ub                     0.010571
-  Name: 0, dtype: object
-  ```
-
-- **pred_fl_reg_ln(df, lname_col, num_iter=100, conf_int=1.0)**
-
-  - What does it do?:
-    - Removes extra space, if there.
-    - Uses the [last name FL registration
-      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
-
-    ----------------------------------------------------------------------------
-    Parameters    
-    ------------ ---------------------------------------------------------------
-                 **df** : *{DataFrame, csv}* Pandas dataframe of CSV file
-                 contains the names of the individual to be inferred
-
-                 **lname_col** : *{string}* name of the column containing the
-                 last name
-
-                 **num_iter** : *int, default=100* number of iterations to
-                 calculate the uncertainty
-
-                 **conf_int** : *float, default=1.0* confidence interval
-    ----------------------------------------------------------------------------
-
-  - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race (white, black, asian, or Hispanic), asian (percentage
-    chance Asian), Hispanic, nh_black, nh_white. For each race, it will
-    provide the mean, standard error, lower & upper bound of confidence
-    interval
-
-  ```python
-  >>> import pandas as pd
-
-  >>> names = [
-  ...             {"last": "sawyer", "first": "john", "true_race": "nh_white"},
-  ...             {"last": "torres", "first": "raul", "true_race": "hispanic"},
-  ...         ]
-
-  >>> df = pd.DataFrame(names)
-
-  >>> from ethnicolr import pred_fl_reg_ln, pred_fl_reg_name, pred_fl_reg_ln_five_cat, pred_fl_reg_name_five_cat
-
-  >>> odf = pred_fl_reg_ln(df, 'last', conf_int=0.9)
-  ['asian', 'hispanic', 'nh_black', 'nh_white']
-
-  >>> odf
-     last first true_race  asian_mean  asian_std  asian_lb  asian_ub  hispanic_mean  hispanic_std  hispanic_lb  hispanic_ub  nh_black_mean  nh_black_std  nh_black_lb  nh_black_ub  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub      race
-  0  Sawyer  john  nh_white    0.009859   0.006819  0.005338  0.019673       0.021488      0.004602     0.014802     0.030148       0.180929      0.052784     0.105756     0.270238       0.787724      0.051082     0.705290     0.860286  nh_white
-  1  Torres  raul  hispanic    0.006463   0.001985  0.003915  0.010146       0.878119      0.021998     0.839274     0.909151       0.013118      0.005002     0.007364     0.021633       0.102300      0.017828     0.075911     0.130929  hispanic
-
-  [2 rows x 20 columns]
-
-  >>> odf.iloc[0]
-  last               Sawyer
-  first                john
-  true_race        nh_white
-  asian_mean       0.009859
-  asian_std        0.006819
-  asian_lb         0.005338
-  asian_ub         0.019673
-  hispanic_mean    0.021488
-  hispanic_std     0.004602
-  hispanic_lb      0.014802
-  hispanic_ub      0.030148
-  nh_black_mean    0.180929
-  nh_black_std     0.052784
-  nh_black_lb      0.105756
-  nh_black_ub      0.270238
-  nh_white_mean    0.787724
-  nh_white_std     0.051082
-  nh_white_lb       0.70529
-  nh_white_ub      0.860286
-  race             nh_white
-  Name: 0, dtype: object
-  ```
-
-- **pred_fl_reg_name(df, lname_col, num_iter=100, conf_int=1.0)**
-
-  - What it does:
-    - Removes extra space.
-    - Uses the [full name FL
-      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
-
-    ----------------------------------------------------------------------------
-    Parameters    
-    ------------ ---------------------------------------------------------------
-                 **df** : *{DataFrame, csv}* Pandas dataframe of CSV file
-                 contains the names of the individual to be inferred
-
-                 **namecol** : *{list}* name of the column containing the name.
-
-                 **num_iter** : *int, default=100* number of iterations to
-                 calculate the uncertainty
-
-                 **conf_int** : *float, default=1.0* confidence interval in
-                 predicted class
-    ----------------------------------------------------------------------------
-
-  - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race (white, black, asian, or Hispanic), asian (percentage
-    chance Asian), Hispanic, nh_black, nh_white. For each race, it will
-    provide the mean, standard error, lower & upper bound of confidence
-    interval
-
-  *(Using the same dataframe from example above)*
-
-  ``` literal-block
-  >>> odf = pred_fl_reg_name(df, 'last', 'first', conf_int=0.9)
-  ['asian', 'hispanic', 'nh_black', 'nh_white']
-
-  >>> odf
-     last first true_race  asian_mean  asian_std  asian_lb  asian_ub  hispanic_mean  hispanic_std  hispanic_lb  hispanic_ub  nh_black_mean  nh_black_std  nh_black_lb  nh_black_ub  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub      race
-  0  Sawyer  john  nh_white    0.001534   0.000850  0.000636  0.002691       0.006818      0.002557     0.003684     0.011660       0.028068      0.015095     0.011488     0.055149       0.963581      0.015738     0.935445     0.983224  nh_white
-  1  Torres  raul  hispanic    0.005791   0.002906  0.002446  0.011748       0.890561      0.029581     0.841328     0.937706       0.011397      0.004682     0.005829     0.020796       0.092251      0.026675     0.049868     0.139210  hispanic
-
-  >>> odf.iloc[1]
-  last               Torres
-  first                raul
-  true_race        hispanic
-  asian_mean       0.005791
-  asian_std        0.002906
-  asian_lb         0.002446
-  asian_ub         0.011748
-  hispanic_mean    0.890561
-  hispanic_std     0.029581
-  hispanic_lb      0.841328
-  hispanic_ub      0.937706
-  nh_black_mean    0.011397
-  nh_black_std     0.004682
-  nh_black_lb      0.005829
-  nh_black_ub      0.020796
-  nh_white_mean    0.092251
-  nh_white_std     0.026675
-  nh_white_lb      0.049868
-  nh_white_ub       0.13921
-  race             hispanic
-  Name: 1, dtype: object
-  ```
-
-- **pred_fl_reg_ln_five_cat(df, namecol, num_iter=100, conf_int=1.0)**
-
-  - What does it do?:
-    - Removes extra space, if there.
-    - Uses the [last name FL registration
-      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
-
-    ----------------------------------------------------------------------------
-    Parameters    
-    ------------ ---------------------------------------------------------------
-                 **df** : *{DataFrame, csv}* Pandas dataframe of CSV file
-                 contains the names of the individual to be inferred
-
-                 **lname_col** : *{string, list, int}* name of location of the
-                 column containing the last name
-
-                 **num_iter** : *int, default=100* number of iterations to
-                 calculate uncertainty
-
-                 **conf_int** : *float, default=1.0* confidence interval
-    ----------------------------------------------------------------------------
-
-  - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race (white, black, asian, Hispanic or other), asian
-    (percentage chance Asian), hispanic, nh_black, nh_white, other. For
-    each race, it will provide the mean, standard error, lower & upper
-    bound of confidence interval
-
-  *(Using the same dataframe from example above)*
-
-  ```python
-  >>> odf = pred_fl_reg_ln_five_cat(df,'last')
-  ['asian', 'hispanic', 'nh_black', 'nh_white', 'other']
-
-  >>> odf
-     last first true_race  asian_mean  asian_std  asian_lb  asian_ub  hispanic_mean  hispanic_std  ...  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub  other_mean  other_std  other_lb  other_ub      race
-  0  Sawyer  john  nh_white    0.100038   0.020539  0.073266  0.143334       0.044263      0.013077  ...       0.376639      0.048289     0.296989     0.452834    0.248466   0.021040  0.219721  0.283785  nh_white
-  1  Torres  raul  hispanic    0.062390   0.021863  0.033837  0.103737       0.774414      0.043238  ...       0.030393      0.009591     0.019713     0.046483    0.117761   0.019524  0.089418  0.150615  hispanic
-
-  [2 rows x 24 columns]
-
-  >>> odf.iloc[0]
-  last               Sawyer
-  first                john
-  true_race        nh_white
-  asian_mean       0.100038
-  asian_std        0.020539
-  asian_lb         0.073266
-  asian_ub         0.143334
-  hispanic_mean    0.044263
-  hispanic_std     0.013077
-  hispanic_lb       0.02476
-  hispanic_ub      0.067965
-  nh_black_mean    0.230593
-  nh_black_std     0.063948
-  nh_black_lb      0.130577
-  nh_black_ub      0.343513
-  nh_white_mean    0.376639
-  nh_white_std     0.048289
-  nh_white_lb      0.296989
-  nh_white_ub      0.452834
-  other_mean       0.248466
-  other_std         0.02104
-  other_lb         0.219721
-  other_ub         0.283785
-  race             nh_white
-  Name: 0, dtype: object
-  ```
-
-- **pred_fl_reg_name_five_cat(df, namecol, num_iter=100, conf_int=1.0)**
-
-  - What it does:
-    - Removes extra space.
-    - Uses the [full name FL
-      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
-
-    ----------------------------------------------------------------------------
-    Parameters    
-    ------------ ---------------------------------------------------------------
-                 **df** : *{DataFrame, csv}* Pandas dataframe of CSV file
-                 contains the names of the individual to be inferred
-
-                 **namecol** : *{string, list}* string or list of the name or
-                 location of the column containing the first name, last name.
-
-                 **num_iter** : *int, default=100* number of iterations to
-                 calculate uncertainty
-
-                 **conf_int** : *float, default=1.0* confidence interval
-    ----------------------------------------------------------------------------
-
-  - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race (white, black, asian, Hispanic, or other), asian
-    (percentage chance Asian), hispanic, nh_black, nh_white, other. For
-    each race, it will provide the mean, standard error, lower & upper
-    bound of confidence interval
-
-  *(Using the same dataframe from example above)*
-
-  ```python
-  >>> odf = pred_fl_reg_name_five_cat(df, 'last','first')
-  ['asian', 'hispanic', 'nh_black', 'nh_white', 'other']
-
-  >>> odf
-     last first true_race  asian_mean  asian_std  asian_lb  asian_ub  hispanic_mean  hispanic_std  ...  nh_white_mean  nh_white_std  nh_white_lb  nh_white_ub  other_mean  other_std  other_lb  other_ub      race
-  0  Sawyer  john  nh_white    0.039310   0.011657  0.025982  0.059719       0.019737      0.005813  ...       0.650306      0.059327     0.553913     0.733201    0.192242   0.021004  0.160185  0.226063  nh_white
-  1  Torres  raul  hispanic    0.020086   0.011765  0.008240  0.041741       0.899110      0.042237  ...       0.019073      0.009901     0.010166     0.040081    0.055774   0.017897  0.036245  0.088741  hispanic
-
-  [2 rows x 24 columns]
-
-  >>> odf.iloc[1]
-  last               Torres
-  first                raul
-  true_race        hispanic
-  asian_mean       0.020086
-  asian_std        0.011765
-  asian_lb          0.00824
-  asian_ub         0.041741
-  hispanic_mean     0.89911
-  hispanic_std     0.042237
-  hispanic_lb      0.823799
-  hispanic_ub      0.937612
-  nh_black_mean    0.005956
-  nh_black_std     0.006528
-  nh_black_lb      0.002686
-  nh_black_ub      0.010134
-  nh_white_mean    0.019073
-  nh_white_std     0.009901
-  nh_white_lb      0.010166
-  nh_white_ub      0.040081
-  other_mean       0.055774
-  other_std        0.017897
-  other_lb         0.036245
-  other_ub         0.088741
-  race             hispanic
-  Name: 1, dtype: object
-  ```
-
-- **pred_nc_reg_name(df, namecol, num_iter=100, conf_int=1.0)**
-
-  - What it does:
-    - Removes extra space.
-    - Uses the [full name NC
-      model](scripts/model-training/train_name_lstm.py) to predict the race and ethnicity.
-
-    ----------------------------------------------------------------------------
-    Parameters    
-    ------------ ---------------------------------------------------------------
-                 **df** : *{DataFrame, csv}* Pandas dataframe of CSV file
-                 contains the names of the individual to be inferred
-
-                 **namecol** : *{string, list}* string or list of the name or
-                 location of the column containing the first name and last name.
-
-                 **num_iter** : *int, default=100* number of iterations to
-                 calculate uncertainty
-
-                 **conf_int** : *float, default=1.0* confidence interval
-    ----------------------------------------------------------------------------
-
-  - Output: Appends the following columns to the pandas DataFrame or
-    CSV: race + ethnicity. The codebook is
-    [here](https://github.com/appeler/nc_race_ethnicity). For each race, it will provide the mean, standard error,
-    lower & upper bound of confidence interval
-
-  ```python
-  >>> import pandas as pd
-
-  >>> names = [
-  ...             {"last": "hernandez", "first": "hector", "true_race": "HL+O"},
-  ...             {"last": "zhang", "first": "simon", "true_race": "NL+A"},
-  ...         ]
-
-  >>> df = pd.DataFrame(names)
-
-  >>> from ethnicolr import pred_nc_reg_name
-
-  >>> odf = pred_nc_reg_name(df, 'last','first', conf_int=0.9)
-  ['HL+A', 'HL+B', 'HL+I', 'HL+M', 'HL+O', 'HL+W', 'NL+A', 'NL+B', 'NL+I', 'NL+M', 'NL+O', 'NL+W']
-
-  >>> odf
-        last   first true_race            __name     HL+A_mean  HL+A_std       HL+A_lb       HL+A_ub     HL+B_mean  HL+B_std       HL+B_lb       HL+B_ub  HL+I_mean  ...     NL+M_mean  NL+M_std       NL+M_lb       NL+M_ub  NL+O_mean  NL+O_std   NL+O_lb   NL+O_ub  NL+W_mean  NL+W_std   NL+W_lb   NL+W_ub  race
-  0  hernandez  hector      HL+O  Hernandez Hector  2.727371e-13       0.0  2.727372e-13  2.727372e-13  6.542178e-04       0.0  6.542183e-04  6.542183e-04   0.000032  ...  7.863581e-06       0.0  7.863589e-06  7.863589e-06   0.184513       0.0  0.184514  0.184514   0.001256       0.0  0.001256  0.001256  HL+O
-  1      zhang   simon      NL+A       Zhang Simon  1.985421e-06       0.0  1.985423e-06  1.985423e-06  8.708256e-09       0.0  8.708265e-09  8.708265e-09   0.000049  ...  1.446786e-07       0.0  1.446784e-07  1.446784e-07   0.003238       0.0  0.003238  0.003238   0.000154       0.0  0.000154  0.000154  NL+A
-
-  [2 rows x 53 columns]
-
-  >>> odf.iloc[0]
-  last                hernandez
-  first                  hector
-  true_race                HL+O
-  __name       Hernandez Hector
-  HL+A_mean                 0.0
-  HL+A_std                  0.0
-  HL+A_lb                   0.0
-  HL+A_ub                   0.0
-  HL+B_mean            0.000654
-  HL+B_std                  0.0
-  HL+B_lb              0.000654
-  HL+B_ub              0.000654
-  HL+I_mean            0.000032
-  HL+I_std                  0.0
-  HL+I_lb              0.000032
-  HL+I_ub              0.000032
-  HL+M_mean            0.000541
-  HL+M_std                  0.0
-  HL+M_lb              0.000541
-  HL+M_ub              0.000541
-  HL+O_mean             0.58944
-  HL+O_std                  0.0
-  HL+O_lb               0.58944
-  HL+O_ub               0.58944
-  HL+W_mean            0.221309
-  HL+W_std                  0.0
-  HL+W_lb              0.221309
-  HL+W_ub              0.221309
-  NL+A_mean            0.000044
-  NL+A_std                  0.0
-  NL+A_lb              0.000044
-  NL+A_ub              0.000044
-  NL+B_mean            0.002199
-  NL+B_std                  0.0
-  NL+B_lb              0.002199
-  NL+B_ub              0.002199
-  NL+I_mean            0.000004
-  NL+I_std                  0.0
-  NL+I_lb              0.000004
-  NL+I_ub              0.000004
-  NL+M_mean            0.000008
-  NL+M_std                  0.0
-  NL+M_lb              0.000008
-  NL+M_ub              0.000008
-  NL+O_mean            0.184513
-  NL+O_std                  0.0
-  NL+O_lb              0.184514
-  NL+O_ub              0.184514
-  NL+W_mean            0.001256
-  NL+W_std                  0.0
-  NL+W_lb              0.001256
-  NL+W_ub              0.001256
-  race                     HL+O
-  Name: 0, dtype: object
-  ```
-
-### Application
-
-To illustrate how the package can be used, we impute the race of the
-campaign contributors recorded by FEC for the years 2000 and 2010 and
-tally campaign contributions by race.
-
-- [Contrib 2000/2010 using
-  census_ln](ethnicolr/examples/ethnicolr_app_contrib20xx-census_ln.ipynb)
-- [Contrib 2000/2010 using
-  pred_census_ln](ethnicolr/examples/ethnicolr_app_contrib20xx.ipynb)
-- [Contrib 2000/2010 using
-  pred_fl_reg_name](ethnicolr/examples/ethnicolr_app_contrib20xx-fl_reg.ipynb)
-
-Data on race of all the people in the [DIME
-data](https://data.stanford.edu/dime) is posted
-[here](http://dx.doi.org/10.7910/DVN/M5K7VR). The
-underlying Python scripts are posted
-[here](https://github.com/appeler/dime_race)
-# Data
-
-In particular, we utilize the last-name\--race data from the [2000
-census](http://www.census.gov/topics/population/genealogy/data/2000_surnames.html), [2010
-census](http://www.census.gov/topics/population/genealogy/data/2010_surnames.html), and 2020 census;
-the [Wikipedia data](ethnicolr/data/wiki/) collected by Skiena and colleagues,
-extended with ~3.5M fresh names from
-[Wikidata](https://www.wikidata.org/) via a
-[reproducible pipeline](scripts/data-acquisition/wiki/) (3.69M rows total);
-the Florida voter registration data (2017 and 2022 extracts); and the North
-Carolina voter registration data.
-
-- [Census](ethnicolr/data/census/)
-- [The Wikipedia/Wikidata dataset](ethnicolr/data/wiki/)
-- [Florida voter registration
-  database](http://dx.doi.org/10.7910/DVN/UBIG3F)
-- [North Carolina voter registration
-  database](http://dx.doi.org/10.7910/DVN/NEFUBN)
-
-### Evaluation
-
-1.  SCAN Health Plan, a Medicare Advantage plan that serves over 200,000
-    members throughout California used the software to better assess
-    racial disparities of health among the people they serve. They only
-    had racial data on about 47% of their members, so they used it to learn
-    the race of the remaining 53%. On the data they had labels for, they
-    found .9 AUC and 83% accuracy for the last name model.
-
-3.  Evaluation on NC Data:
-    [https://github.com/appeler/nc_race_ethnicity](https://github.com/appeler/nc_race_ethnicity)
-
-### Authors
-
-Suriyan Laohaprapanon and Gaurav Sood
-
-### Contributor Code of Conduct
-
-The project welcomes contributions from everyone! In fact, it depends on
-it. To maintain this welcoming atmosphere and to collaborate in a fun
-and productive way, we expect contributors to the project to abide by
-the [Contributor Code of
-Conduct](http://contributor-covenant.org/version/1/0/0/)
-
+Ethnicolr was created by Suriyan Laohaprapanon and Gaurav Sood. Contributions
+are welcome. Participants must follow the
+[Contributor Covenant](https://www.contributor-covenant.org/version/3/0/).
 
 ## License
 
-The package is released under the [MIT
-License](https://opensource.org/licenses/MIT).
+Ethnicolr is released under the [MIT License](https://opensource.org/license/mit).
 
+## Related packages
 
-## 🔗 Adjacent Repositories
-
-- [appeler/ethnicolr2](https://github.com/appeler/ethnicolr2) — Ethnicolr implementation with new models in pytorch
-- [appeler/ethnicolor](https://github.com/appeler/ethnicolor) — Race and Ethnicity based on name using data from census, voter reg. files, etc.
-- [appeler/naampy](https://github.com/appeler/naampy) — Infer Sociodemographic Characteristics from Names Using Indian Electoral Rolls
-- [appeler/nc_race_ethnicity](https://github.com/appeler/nc_race_ethnicity) — Evaluation of some of the ethnicolr models on the NC Voter Registration Data + New Models Based on NC Voter Registration Data.
-- [appeler/parsernaam](https://github.com/appeler/parsernaam) — AI name parsing. Predict first or last name using a DL model.
+- [ethnicolr2](https://github.com/appeler/ethnicolr2)
+- [naampy](https://github.com/appeler/naampy)
+- [nc_race_ethnicity](https://github.com/appeler/nc_race_ethnicity)
+- [parsernaam](https://github.com/appeler/parsernaam)

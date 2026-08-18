@@ -59,20 +59,20 @@ class TestMainCLI:
         )
         assert result.returncode == 0
         assert "Ethnicolr" in result.stdout
-        assert "predict" in result.stdout
+        assert "estimate" in result.stdout
         assert "models" in result.stdout
 
-    def test_predict_help(self):
-        """Test predict subcommand help."""
+    def test_estimate_help(self):
+        """Test estimate subcommand help."""
         result = subprocess.run(
-            [sys.executable, "-m", "ethnicolr.cli", "predict", "--help"],
+            [sys.executable, "-m", "ethnicolr.cli", "estimate", "--help"],
             capture_output=True,
             text=True,
         )
         assert result.returncode == 0
-        assert "census" in result.stdout
-        assert "florida" in result.stdout
-        assert "wiki" in result.stdout
+        assert "census-surname" in result.stdout
+        assert "florida-voter-surname" in result.stdout
+        assert "wikipedia-surname" in result.stdout
 
     def test_models_help(self):
         """Test models subcommand help."""
@@ -86,19 +86,19 @@ class TestMainCLI:
         assert "info" in result.stdout
 
 
-class TestPredictCommands:
-    """Test prediction commands."""
+class TestEstimateCommands:
+    """Test estimate commands."""
 
-    def test_predict_census_basic(self, sample_input_file, temp_output_dir):
-        """Test basic census prediction."""
+    def test_estimate_census_basic(self, sample_input_file, temp_output_dir):
+        """Test basic census estimate."""
         output_file = os.path.join(temp_output_dir, "census_output.csv")
 
         cmd = [
             sys.executable,
             "-m",
             "ethnicolr.cli",
-            "predict",
-            "census",
+            "estimate",
+            "census-surname",
             sample_input_file,
             "-l",
             "last",
@@ -119,16 +119,16 @@ class TestPredictCommands:
         assert "race" in output_df.columns
         assert "white" in output_df.columns or "api" in output_df.columns
 
-    def test_predict_census_with_year(self, sample_input_file, temp_output_dir):
-        """Test census prediction with specific year."""
+    def test_estimate_census_with_year(self, sample_input_file, temp_output_dir):
+        """Test census estimate with specific year."""
         output_file = os.path.join(temp_output_dir, "census_2000.csv")
 
         cmd = [
             sys.executable,
             "-m",
             "ethnicolr.cli",
-            "predict",
-            "census",
+            "estimate",
+            "census-surname",
             sample_input_file,
             "-l",
             "last",
@@ -143,46 +143,47 @@ class TestPredictCommands:
         assert result.returncode == 0
         assert os.path.exists(output_file)
 
-    def test_predict_census_confidence(self, sample_input_file, temp_output_dir):
-        """Test census prediction with confidence intervals."""
-        output_file = os.path.join(temp_output_dir, "census_conf.csv")
+    def test_estimate_census_uncertainty(self, sample_input_file, temp_output_dir):
+        """Test census estimates with MC-dropout uncertainty summaries."""
+        output_file = os.path.join(temp_output_dir, "census_uncertainty.csv")
 
         cmd = [
             sys.executable,
             "-m",
             "ethnicolr.cli",
-            "predict",
-            "census",
+            "estimate",
+            "census-surname",
             sample_input_file,
             "-l",
             "last",
-            "-c",
+            "-u",
             "0.9",
-            "-i",
-            "20",  # Fewer iterations for speed
+            "-m",
+            "20",
             "-o",
             output_file,
             "--overwrite",
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-        if result.returncode == 0:
-            assert os.path.exists(output_file)
-            output_df = pd.read_csv(output_file)
-            # Should have confidence interval columns
-            mean_cols = [col for col in output_df.columns if col.endswith("_mean")]
-            assert len(mean_cols) > 0
+        assert result.returncode == 0, result.stderr
+        assert os.path.exists(output_file)
+        output_df = pd.read_csv(output_file)
+        mean_columns = [
+            column for column in output_df.columns if column.endswith("_mc_mean")
+        ]
+        assert mean_columns
 
-    def test_predict_florida_basic(self, sample_input_file, temp_output_dir):
-        """Test basic Florida prediction."""
+    def test_estimate_florida_basic(self, sample_input_file, temp_output_dir):
+        """Test basic Florida estimate."""
         output_file = os.path.join(temp_output_dir, "florida_output.csv")
 
         cmd = [
             sys.executable,
             "-m",
             "ethnicolr.cli",
-            "predict",
-            "florida",
+            "estimate",
+            "florida-voter-surname",
             sample_input_file,
             "-l",
             "last",
@@ -206,16 +207,16 @@ class TestPredictCommands:
             ]
             assert len(fl_cols) > 0
 
-    def test_predict_wiki_basic(self, sample_input_file, temp_output_dir):
-        """Test basic Wikipedia prediction."""
+    def test_estimate_wiki_basic(self, sample_input_file, temp_output_dir):
+        """Test basic Wikipedia estimate."""
         output_file = os.path.join(temp_output_dir, "wiki_output.csv")
 
         cmd = [
             sys.executable,
             "-m",
             "ethnicolr.cli",
-            "predict",
-            "wiki",
+            "estimate",
+            "wikipedia-surname",
             sample_input_file,
             "-l",
             "last",
@@ -245,7 +246,7 @@ class TestModelsCommands:
             text=True,
         )
         assert result.returncode == 0
-        assert "Available Prediction Models" in result.stdout
+        assert "Available CLI Estimate Models" in result.stdout
 
     def test_models_list_detailed(self):
         """Test models list with details."""
@@ -255,12 +256,12 @@ class TestModelsCommands:
             text=True,
         )
         assert result.returncode == 0
-        assert "Available Prediction Models" in result.stdout
+        assert "Available CLI Estimate Models" in result.stdout
 
     def test_models_info_census(self):
         """Test models info for census."""
         result = subprocess.run(
-            [sys.executable, "-m", "ethnicolr.cli", "models", "info", "census"],
+            [sys.executable, "-m", "ethnicolr.cli", "models", "info", "census-surname"],
             capture_output=True,
             text=True,
         )
@@ -268,33 +269,33 @@ class TestModelsCommands:
         assert "CENSUS" in result.stdout.upper()
 
 
-class TestQuickPredict:
-    """Test quick predict command."""
+class TestQuickEstimate:
+    """Test quick estimate command."""
 
-    def test_quick_predict_help(self):
-        """Test quick predict help."""
+    def test_quick_estimate_help(self):
+        """Test quick estimate help."""
         result = subprocess.run(
-            [sys.executable, "-m", "ethnicolr.cli", "quick-predict", "--help"],
+            [sys.executable, "-m", "ethnicolr.cli", "quick-estimate", "--help"],
             capture_output=True,
             text=True,
         )
         assert result.returncode == 0
-        assert "Quick prediction" in result.stdout
+        assert "Quick estimate" in result.stdout
 
-    def test_quick_predict_census(self, sample_input_file, temp_output_dir):
-        """Test quick predict with census model."""
+    def test_quick_estimate_census(self, sample_input_file, temp_output_dir):
+        """Test quick estimate with census model."""
         output_file = os.path.join(temp_output_dir, "quick_output.csv")
 
         cmd = [
             sys.executable,
             "-m",
             "ethnicolr.cli",
-            "quick-predict",
+            "quick-estimate",
             sample_input_file,
             "-l",
             "last",
             "--model",
-            "census",
+            "census-surname",
             "-o",
             output_file,
         ]
@@ -319,8 +320,8 @@ class TestCLIErrorHandling:
             sys.executable,
             "-m",
             "ethnicolr.cli",
-            "predict",
-            "census",
+            "estimate",
+            "census-surname",
             nonexistent_file,
             "-l",
             "last",
@@ -341,8 +342,8 @@ class TestCLIErrorHandling:
             sys.executable,
             "-m",
             "ethnicolr.cli",
-            "predict",
-            "census",
+            "estimate",
+            "census-surname",
             sample_input_file,
             "-l",
             "nonexistent_column",
@@ -355,20 +356,20 @@ class TestCLIErrorHandling:
         # Should mention column not found
         assert "not found" in result.stderr
 
-    def test_invalid_confidence_error(self, sample_input_file, temp_output_dir):
-        """Test error for invalid confidence interval."""
+    def test_invalid_uncertainty_level_error(self, sample_input_file, temp_output_dir):
+        """Test the error for an invalid uncertainty level."""
         output_file = os.path.join(temp_output_dir, "output.csv")
 
         cmd = [
             sys.executable,
             "-m",
             "ethnicolr.cli",
-            "predict",
-            "census",
+            "estimate",
+            "census-surname",
             sample_input_file,
             "-l",
             "last",
-            "-c",
+            "-u",
             "1.5",  # Invalid: > 1.0
             "-o",
             output_file,
@@ -381,8 +382,8 @@ class TestCLIErrorHandling:
 class TestCLIIntegration:
     """Test CLI integration scenarios."""
 
-    def test_models_then_predict_workflow(self, sample_input_file, temp_output_dir):
-        """Test workflow: list models, then predict."""
+    def test_models_then_estimate_workflow(self, sample_input_file, temp_output_dir):
+        """Test workflow: list models, then estimate."""
         # Step 1: List models
         status_result = subprocess.run(
             [sys.executable, "-m", "ethnicolr.cli", "models", "list"],
@@ -391,16 +392,16 @@ class TestCLIIntegration:
         )
         assert status_result.returncode == 0
 
-        # Step 2: Run prediction
+        # Step 2: Run estimate
         output_file = os.path.join(temp_output_dir, "workflow_output.csv")
 
-        pred_result = subprocess.run(
+        estimate_result = subprocess.run(
             [
                 sys.executable,
                 "-m",
                 "ethnicolr.cli",
-                "predict",
-                "census",
+                "estimate",
+                "census-surname",
                 sample_input_file,
                 "-l",
                 "last",
@@ -413,7 +414,7 @@ class TestCLIIntegration:
             timeout=60,
         )
 
-        if pred_result.returncode == 0:
+        if estimate_result.returncode == 0:
             assert os.path.exists(output_file)
             output_df = pd.read_csv(output_file)
             assert len(output_df) == 5
@@ -427,8 +428,8 @@ class TestCLIIntegration:
             "-m",
             "ethnicolr.cli",
             "--verbose",
-            "predict",
-            "census",
+            "estimate",
+            "census-surname",
             sample_input_file,
             "-l",
             "last",
@@ -442,5 +443,5 @@ class TestCLIIntegration:
         if result.returncode == 0:
             # In verbose mode, should show more detailed output
             assert (
-                "Sample predictions" in result.stdout or "Loading data" in result.stdout
+                "Sample estimates" in result.stdout or "Loading data" in result.stdout
             )

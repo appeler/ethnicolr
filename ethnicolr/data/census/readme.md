@@ -8,11 +8,13 @@ The 2020 census data provides raw counts instead of percentages, and does not us
 
 ## Files
 
-- `census_2000.csv`: Processed 2000 Census surname data with demographic percentages
-- `census_2010.csv`: Processed 2010 Census surname data with demographic percentages
-- `census_2020.csv`: Processed 2020 Census surname data with demographic percentages (156,619 surnames)
-- `census_hispanic_ln.csv`: List of 12,498 Hispanic surnames from Census Appendix E
+- `census_2000.parquet`: Processed 2000 Census surname data with demographic percentages
+- `census_2010.parquet`: Processed 2010 Census surname data with demographic percentages
+- `census_2020.parquet`: Processed 2020 Census surname data with demographic percentages (156,619 surnames)
+- `census_2020_first_names.parquet`: Processed 2020 Census first-name data
 
 ## Data Processing
 
-The raw census data and processing scripts have been moved to `../../scripts/data-acquisition/census/` to separate development tools from runtime package data.
+Raw Census data and processing scripts live under
+`scripts/data-acquisition/census/`; runtime tables use schema-versioned
+Parquet under the import package.

@@ -2,64 +2,21 @@ name: CI
 
 on:
   push:
-    branches: [master, main]
+    branches: [master]
   pull_request:
-    branches: [master, main]
-  workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  tests:
-    name: Tests (OS=${{ matrix.os }}, Python=${{ matrix.python-version }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.11", "3.12", "3.13"]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Install uv and set Python version
-        uses: astral-sh/setup-uv@v9.0.0
-        with:
-          python-version: ${{ matrix.python-version }}
-          enable-cache: true
-
-      - name: Install project dependencies
-        run: uv sync --all-extras --all-groups -v
-
-
-      - name: Verify installation
-        run: |
-          echo "Platform: ${{ matrix.os }}"
-          uv run python -c "import pandas; print('[OK] Pandas version:', pandas.__version__)"
-          uv run python -c "import numpy; print('[OK] NumPy version:', numpy.__version__)"
-          uv run python -c "import importlib.metadata; print('[OK] Click version:', importlib.metadata.version('click'))"
-          uv run python -c "import torch; print('[OK] PyTorch version:', torch.__version__)"
-          uv run python -c "from ethnicolr import cli; print('[OK] CLI module loads successfully')"
-
-      - name: Run test suite
-        run: uv run pytest
-
-  lint:
-    name: Lint (Linux, Python 3.11)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Install uv and set Python version
-        uses: astral-sh/setup-uv@v9.0.0
-        with:
-          python-version: "3.11"
-          enable-cache: true
-
-      - name: Install dev dependencies
-        run: uv sync --all-extras --all-groups
-
-
-      - name: Run linting
-        run: uv run ruff check .
+  ci:
+    uses: gojiplus/py-canon/.github/workflows/reusable-ci.yml@07c6621880b82afd28ab7230eab6e79f96d080e3 # v1
+    with:
+      wheel-import: ethnicolr
+      coverage-floor: 60
