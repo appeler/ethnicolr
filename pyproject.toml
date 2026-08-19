@@ -86,6 +86,8 @@ training = [
   "scikit-learn>=1.4",
   "openpyxl>=3.1",
   "pyreadr>=0.5",
+  # The 2009 Wikipedia name table shipped double-encoded text.
+  "ftfy>=6.3",
 ]
 
 [tool.uv]

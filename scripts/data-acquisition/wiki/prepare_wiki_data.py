@@ -26,6 +26,7 @@ import unicodedata
 from collections import Counter
 from pathlib import Path
 
+import ftfy
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
@@ -189,6 +190,14 @@ def main() -> None:
 
     old_df = pd.read_csv(OLD_DATA, dtype=str, keep_default_na=False)
     old_df = old_df[["name_last", "name_first", "race"]]
+    # The 2009 table holds text that was decoded as Latin-1 and re-encoded as
+    # UTF-8 somewhere upstream, so "birute" with an e-with-dot arrives as two
+    # wrong characters. The file is valid UTF-8 containing the wrong code
+    # points, which is why no read encoding recovers it and ftfy has to undo
+    # it. 1,584 of the 1,586 damaged rows in the prepared output come from
+    # here; the live Wikidata fetch contributes 2.
+    for column in ("name_last", "name_first"):
+        old_df[column] = old_df[column].map(ftfy.fix_text)
     old_df["source"] = "wiki2009"
 
     merged = pd.concat([old_df, new_df], ignore_index=True)
