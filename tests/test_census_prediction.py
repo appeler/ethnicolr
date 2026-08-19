@@ -73,7 +73,8 @@ class TestCensusLookup:
         # Values should be in reasonable ranges (0-100)
         for col in ["pctwhite", "pctblack", "pctapi", "pcthispanic"]:
             valid_2020 = result_2020[col].dropna()
-            assert (valid_2020 >= 0).all() and (valid_2020 <= 100).all()
+            assert (valid_2020 >= 0).all()
+            assert (valid_2020 <= 100).all()
 
     def test_census_lookup_with_missing_names(self):
         """Test census lookup with names not in census data."""
@@ -155,7 +156,8 @@ class TestCensusPrediction:
         for col in sample_census_names.columns:
             assert col in result.columns
 
-        # Original values should be unchanged (except last names are normalized to title case)
+        # Original values should be unchanged (except last names are
+        # normalized to title case)
         for col in sample_census_names.columns:
             if col == "last":
                 # Names are normalized to title case during prediction

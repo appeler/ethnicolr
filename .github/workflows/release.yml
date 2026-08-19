@@ -6,28 +6,39 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: Upload to PyPI when running from a version tag
+        description: >-
+          Upload to PyPI. Only takes effect when the run is started from a tag;
+          from a branch this is a build-and-check rehearsal.
         type: boolean
         default: false
 
 permissions:
   contents: read
 
+# A manual run and a tag push can otherwise race for the same ref: two builds,
+# and two `dist` artifacts uploaded under one name.
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   release:
-    uses: gojiplus/py-canon/.github/workflows/reusable-release.yml@07c6621880b82afd28ab7230eab6e79f96d080e3 # v1
+    uses: gojiplus/py-canon/.github/workflows/reusable-release.yml@v1
     permissions:
       contents: write
       id-token: write
     with:
+      # `gh release create` fails when the release already exists, so create it
+      # only on the original tag push — not on a manual re-run of a released tag.
       github-release: ${{ github.event_name == 'push' }}
 
+  # PyPI trusted publishing rejects reusable workflows (the OIDC claims
+  # must reference this repo's workflow file), so the publish step lives
+  # here rather than in py-canon's reusable-release.
   publish:
     needs: release
+    # A PyPI upload cannot be withdrawn, so publish only from a tag. The reusable
+    # build rejects the tag unless it matches the version in pyproject.toml.
     if: >-
       startsWith(github.ref, 'refs/tags/') &&
       (github.event_name == 'push' || inputs.publish)
@@ -41,8 +52,17 @@ jobs:
         with:
           name: dist
           path: dist/
-      - name: Publish
+      - name: Publish (trusted publishing, PEP 740 attestations)
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
         with:
           attestations: true
+          # The `if:` above decides *which builds may publish*. This decides what
+          # happens when one version is published twice, which that guard cannot
+          # see. The concurrency group serialises a manual dispatch and a tag
+          # push aimed at the same version, it does not deduplicate them, and
+          # cancel-in-progress is false -- so the queued run starts once the
+          # first finishes and uploads identical files. A completed run is not
+          # covered by concurrency at all, so a plain rerun does the same. PyPI
+          # answers with a 400 and the release goes red having already
+          # succeeded, which is the worst of both readings.
           skip-existing: true

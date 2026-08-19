@@ -6,10 +6,9 @@ import importlib.resources as resources
 import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
-import pandas as pd
 
 from .inference import (
     add_inference_metadata,
@@ -19,6 +18,9 @@ from .inference import (
 from .neural_name_model import NeuralNameModel
 from .runtime_tables import CENSUS_SURNAME_SCHEMA, read_runtime_table
 from .torch_utils import artifact_revision
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +46,7 @@ def _load_census_surname_table(year: int) -> pd.DataFrame:
         raise ValueError("year must be 2000, 2010, or 2020")
 
     census_file = CENSUS_SURNAME_FILES[year]
-    logger.info(f"Loading Census {year} surname data from {census_file}")
+    logger.info("Loading Census %s surname data from %s", year, census_file)
     table = read_runtime_table(
         census_file,
         CENSUS_SURNAME_SCHEMA,
@@ -68,7 +70,7 @@ def lookup_census_surname(
     surname_table = _load_census_surname_table(year)
     matched_names = surname_table.reindex(normalized_surnames)
     script_supported, abstention_reasons = combined_name_support(
-        cast(pd.Series, data[surname_column])
+        cast("pd.Series", data[surname_column])
     )
 
     output_columns = set(CENSUS_PERCENTAGE_COLUMNS) | {"race"}
@@ -134,5 +136,5 @@ def lookup_census_surname(
     )
 
     matched_count = int(scored_rows.sum())
-    logger.info(f"Matched {matched_count} of {len(result)} surnames")
+    logger.info("Matched %d of %d surnames", matched_count, len(result))
     return result

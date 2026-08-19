@@ -1,0 +1,1 @@
+"""Florida voter model metadata."""

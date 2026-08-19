@@ -1,9 +1,10 @@
-#!/usr/bin/env python
+"""Shared neural inference for the character n-gram name models."""
 
 import json
 import logging
 from itertools import chain
 from pathlib import Path
+from typing import ClassVar
 
 import numpy as np
 import pandas as pd
@@ -33,7 +34,7 @@ logger = logging.getLogger(__name__)
 class NeuralNameModel:
     """Shared loading, encoding, and inference for character n-gram models."""
 
-    _model_cache: dict[str, dict] = {}
+    _model_cache: ClassVar[dict[str, dict]] = {}
 
     @classmethod
     def _load_resources(
@@ -50,7 +51,7 @@ class NeuralNameModel:
             vocabulary = load_vocabulary(vocabulary_path)
             class_labels = load_class_labels(labels_path)
             device = select_inference_device()
-            logger.info(f"Loading model {model_file} on {device}")
+            logger.info("Loading model %s on %s", model_file, device)
             model = load_character_ngram_model(
                 model_path=model_path,
                 vocabulary_size=len(vocabulary),
@@ -100,7 +101,7 @@ class NeuralNameModel:
         null_rows = np.asarray(data[name_column].isna(), dtype=bool)
         null_count = int(null_rows.sum())
         if null_count > 0:
-            logger.info(f"Preserving {null_count} null rows in {name_column!r}")
+            logger.info("Preserving %d null rows in %r", null_count, name_column)
 
         if data.empty or null_rows.all():
             logger.warning("The name column has no usable values.")
@@ -108,7 +109,9 @@ class NeuralNameModel:
         duplicate_count = int(data.duplicated(subset=[name_column]).sum())
         if duplicate_count > 0:
             logger.info(
-                f"Preserving {duplicate_count} duplicate rows based on {name_column!r}"
+                "Preserving %d duplicate rows based on %r",
+                duplicate_count,
+                name_column,
             )
 
         return data.copy()
@@ -160,7 +163,7 @@ class NeuralNameModel:
         vocabulary_file: str,
         labels_file: str,
         model_file: str,
-        ngram_size,
+        ngram_size: int | tuple[int, int],
         max_sequence_length: int,
         mc_iterations: int,
         uncertainty_level: float | None,
@@ -183,7 +186,15 @@ class NeuralNameModel:
             mc_iterations: Number of Monte Carlo iterations for MC-dropout ranges.
             uncertainty_level: Optional MC-dropout range level. ``None`` returns
                 point estimates.
+            target: Estimated quantity recorded in the result metadata
+                (e.g. ``"race-ethnicity"``).
+            input_scope: Name evidence used, recorded in the result metadata
+                (e.g. ``"last-name"``).
             label_column: Name of the returned predicted-label column.
+            target_prior: Optional category-to-probability mapping used to
+                adjust probabilities toward a target population prior.
+            conformal_coverage: Optional coverage level for conformal
+                prediction sets. ``None`` skips set prediction.
 
         Returns:
             DataFrame with original data plus prediction columns:
@@ -192,8 +203,9 @@ class NeuralNameModel:
             - MC-dropout range bounds (if uncertainty_level is not None)
 
         Raises:
-            FileNotFoundError: If model files don't exist.
-            ValueError: If required columns are missing.
+            ValueError: If required columns are missing or the requested
+                options are unavailable for this model. Missing model files
+                surface as ``FileNotFoundError`` from artifact resolution.
         """
         data = cls.validate_name_column(data, name_column)
         validate_inference_options(
@@ -224,8 +236,9 @@ class NeuralNameModel:
         if conformal_coverage is not None:
             if calibration_status.startswith("invalid-"):
                 raise ValueError(
-                    "conformal_coverage is unavailable because this model's calibration "
-                    f"artifact is {calibration_status}; retrain and recalibrate it"
+                    "conformal_coverage is unavailable because this model's "
+                    f"calibration artifact is {calibration_status}; retrain "
+                    "and recalibrate it"
                 )
             available_coverages = (
                 model_statistics["conformal_quantiles"] if model_statistics else {}
@@ -238,7 +251,7 @@ class NeuralNameModel:
                 )
 
         # Vectorize input
-        logger.debug(f"Vectorizing {len(data)} names using {ngram_size}-grams")
+        logger.debug("Vectorizing %d names using %s-grams", len(data), ngram_size)
         encoded_names = [
             cls.encode_ngrams(model_resources["vocabulary_index"], name, ngram_size)
             for name in data[name_column]
@@ -316,8 +329,10 @@ class NeuralNameModel:
             upper_percentile = (0.5 + uncertainty_level / 2) * 100
 
             logger.info(
-                f"Generating {mc_iterations} MC-dropout samples "
-                f"[{lower_percentile:.1f}%, {upper_percentile:.1f}%]"
+                "Generating %d MC-dropout samples [%.1f%%, %.1f%%]",
+                mc_iterations,
+                lower_percentile,
+                upper_percentile,
             )
 
             uncertainty_summary = pd.DataFrame(index=data.index)

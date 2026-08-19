@@ -62,25 +62,28 @@ def _convert(source_path: Path, target_path: Path, schema: pa.Schema) -> None:
 
 
 def main() -> None:
-    census_directory = REPOSITORY_ROOT / "ethnicolr" / "data" / "census"
+    source_root = REPOSITORY_ROOT / "scripts" / "data-acquisition" / "source-tables"
+    package_data = REPOSITORY_ROOT / "ethnicolr" / "data"
+
     for year in (2000, 2010, 2020):
-        source_path = census_directory / f"census_{year}.csv"
         _convert(
-            source_path, source_path.with_suffix(".parquet"), CENSUS_SURNAME_SCHEMA
+            source_root / "census" / f"census_{year}.csv",
+            package_data / "census" / f"census_{year}.parquet",
+            CENSUS_SURNAME_SCHEMA,
         )
 
-    first_names_path = census_directory / "census_2020_first_names.csv"
     _convert(
-        first_names_path,
-        first_names_path.with_suffix(".parquet"),
+        source_root / "census" / "census_2020_first_names.csv",
+        package_data / "census" / "census_2020_first_names.parquet",
         CENSUS_FIRST_NAME_SCHEMA,
     )
 
-    rosenman_directory = REPOSITORY_ROOT / "ethnicolr" / "data" / "rosenman"
     for name_scope in ("first", "last"):
-        source_path = rosenman_directory / f"{name_scope}_name_race.csv.gz"
-        target_path = rosenman_directory / f"{name_scope}_name_race.parquet"
-        _convert(source_path, target_path, NAME_RACE_PROBABILITY_SCHEMA)
+        _convert(
+            source_root / "rosenman" / f"{name_scope}_name_race.csv.gz",
+            package_data / "rosenman" / f"{name_scope}_name_race.parquet",
+            NAME_RACE_PROBABILITY_SCHEMA,
+        )
 
 
 if __name__ == "__main__":

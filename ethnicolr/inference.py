@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Collection, Mapping
 from importlib.metadata import version
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 import pandas as pd
 
 from .torch_utils import name_support_reason
+
+if TYPE_CHECKING:
+    from collections.abc import Collection, Mapping
 
 ESTIMATE_TYPE = "name-pattern estimate"
 INFERENCE_CONTRACT_VERSION = "1.0"
@@ -167,7 +169,7 @@ def add_inference_metadata(
 
     if (result.columns == label_column).sum() != 1:
         raise ValueError(f"result must contain one {label_column!r} column")
-    label_values = cast(pd.Series, result[label_column])
+    label_values = cast("pd.Series", result[label_column])
     predicted_labels = pd.array(label_values, dtype="string")
     probability_columns = label_to_probability_column or {}
     predicted_probabilities = np.full(row_count, np.nan, dtype=float)
