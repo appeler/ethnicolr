@@ -424,7 +424,7 @@ training = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.0.0" },
-    { name = "huggingface-hub", specifier = ">=1.0.0" },
+    { name = "huggingface-hub", specifier = ">=1.27.0" },
     { name = "numpy", specifier = ">=1.26.0" },
     { name = "pandas", specifier = ">=2.2.0" },
     { name = "pyarrow", specifier = ">=25.0.0" },
