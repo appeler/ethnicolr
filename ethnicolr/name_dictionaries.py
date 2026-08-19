@@ -197,6 +197,10 @@ def lookup_census_first_name(
     Returns:
         DataFrame with original data plus pctwhite/pctblack/pctapi/pctaian/
         pct2prace/pcthispanic columns (NaN for names not in the file).
+
+    Raises:
+        ValueError: If ``year`` is not 2020 or ``uncertainty_level`` is not
+            between 0 and 1.
     """
     if year != 2020:
         raise ValueError("First-name data is only available for 2020")
@@ -320,6 +324,10 @@ def estimate_census_full_name(
     Returns:
         DataFrame with probability columns per category, ``race`` (argmax),
         and ``evidence_basis``.
+
+    Raises:
+        ValueError: If the name columns are missing or ``target_prior`` does
+            not cover the model categories.
     """
     from .census_surname_model import (
         estimate_census_surname,
@@ -611,6 +619,9 @@ def estimate_voter_file_full_name(
 
     Returns:
         DataFrame with the five probability columns, ``race``, and ``evidence_basis``.
+
+    Raises:
+        ValueError: If the name columns are missing from the DataFrame.
     """
     if surname_column not in data.columns or first_name_column not in data.columns:
         raise ValueError(

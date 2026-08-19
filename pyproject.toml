@@ -228,4 +228,7 @@ arg-type-hints-in-docstring = false
 check-return-types = false
 check-class-attributes = false
 allow-init-docstring = true
-exclude = '\.venv|tests|docs'
+# cli.py docstrings are click help text rendered to end users, not API
+# reference; documenting every click-injected parameter there would bloat
+# --help output.
+exclude = '\.venv|tests|docs|ethnicolr/cli\.py'

@@ -163,7 +163,7 @@ class NeuralNameModel:
         vocabulary_file: str,
         labels_file: str,
         model_file: str,
-        ngram_size,
+        ngram_size: int | tuple[int, int],
         max_sequence_length: int,
         mc_iterations: int,
         uncertainty_level: float | None,
@@ -203,8 +203,9 @@ class NeuralNameModel:
             - MC-dropout range bounds (if uncertainty_level is not None)
 
         Raises:
-            FileNotFoundError: If model files don't exist.
-            ValueError: If required columns are missing.
+            ValueError: If required columns are missing or the requested
+                options are unavailable for this model. Missing model files
+                surface as ``FileNotFoundError`` from artifact resolution.
         """
         data = cls.validate_name_column(data, name_column)
         validate_inference_options(
