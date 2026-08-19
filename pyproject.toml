@@ -221,6 +221,8 @@ link_ignore = [
   'dataverse\.harvard\.edu/api/access/datafile',
   'www\.wikidata\.org/prop/direct/',
   'qlever\.dev/api/wikidata',
+  # Alive, but census.gov's CDN intermittently answers 404 to CI runners.
+  'www\.census\.gov/topics/population/genealogy',
 ]
 
 [tool.pydoclint]
