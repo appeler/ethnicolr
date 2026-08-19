@@ -1221,8 +1221,8 @@ wheels = [
 
 [[package]]
 name = "py-canon"
-version = "1.0.0"
-source = { git = "https://github.com/gojiplus/py-canon?rev=v1#da62c13429ab81ce240a1c1a4bbabe50dde8ccfd" }
+version = "1.1.0"
+source = { git = "https://github.com/gojiplus/py-canon?rev=v1#f756be7a6e4dd0ea2a006c215e39ed2e1e29a412" }
 
 [[package]]
 name = "pyarrow"
