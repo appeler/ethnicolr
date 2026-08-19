@@ -144,14 +144,15 @@ def get_race_columns_for_model(model_type: str) -> list[str]:
     Get the expected race columns for different model types.
 
     Args:
-        model_type: Type of model ('census', 'wiki', 'florida_4cat', 'florida_5cat', 'nc')
+        model_type: Type of model ('census', 'wiki', 'florida_4cat',
+            'florida_5cat', 'nc')
 
     Returns:
         List of expected race column names
     """
     if model_type == "census":
         return ["api", "black", "hispanic", "white"]
-    elif model_type == "wiki":
+    if model_type == "wiki":
         return [
             "Asian,GreaterEastAsian,EastAsian",
             "Asian,GreaterEastAsian,Japanese",
@@ -167,11 +168,11 @@ def get_race_columns_for_model(model_type: str) -> list[str]:
             "GreaterEuropean,WestEuropean,Italian",
             "GreaterEuropean,WestEuropean,Nordic",
         ]
-    elif model_type == "florida_4cat":
+    if model_type == "florida_4cat":
         return ["asian", "hispanic", "nh_black", "nh_white"]
-    elif model_type == "florida_5cat":
+    if model_type == "florida_5cat":
         return ["asian", "hispanic", "nh_black", "nh_white", "other"]
-    elif model_type == "nc":
+    if model_type == "nc":
         return [
             "HL+A",
             "HL+B",
@@ -186,8 +187,7 @@ def get_race_columns_for_model(model_type: str) -> list[str]:
             "NL+O",
             "NL+W",
         ]
-    else:
-        raise ValueError(f"Unknown model type: {model_type}")
+    raise ValueError(f"Unknown model type: {model_type}")
 
 
 def get_mc_mean_columns_for_model(model_type: str) -> list[str]:

@@ -1,6 +1,6 @@
 ## Census Last Name Data
 
-The Census Bureau provides frequency of all surnames occurring 100 or more times for the [2000](http://www.census.gov/topics/population/genealogy/data/2000_surnames.html), [2010](http://www.census.gov/topics/population/genealogy/data/2010_surnames.html), and [2020](https://www.census.gov/topics/population/genealogy/data/2020_names.html) census. Technical details of how the data were collected can be found in the data acquisition scripts (`../../scripts/data-acquisition/census/`).
+The Census Bureau provides frequency of all surnames occurring 100 or more times for the [2000](https://www.census.gov/topics/population/genealogy/data/2000_surnames.html), [2010](https://www.census.gov/topics/population/genealogy/data/2010_surnames.html), and [2020](https://www.census.gov/topics/population/genealogy/data/2020_names.html) census. Technical details of how the data were collected can be found in the data acquisition scripts (`../../scripts/data-acquisition/census/`).
 
 In the 2000 and 2010 census data, for names with a count of 1--4, the counts are suppressed and replaced with '(S)'. We replaced '(S)' within a row by equally dividing the remaining percentage (100 minus the rest) across all the '(S).' For details, see the R script in the data acquisition directory.
 

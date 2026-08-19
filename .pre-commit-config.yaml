@@ -12,9 +12,7 @@ repos:
         exclude: >-
           (?x)^(
             ethnicolr/data/(census|rosenman)/.*\.parquet |
-            ethnicolr/data/census/census_.*\.csv |
-            ethnicolr/data/rosenman/.*\.csv\.gz |
-            ethnicolr/data/wiki/wiki_name_race\.csv |
+            scripts/data-acquisition/source-tables/.*\.csv(\.gz)? |
             scripts/data-acquisition/.*\.(xlsx|pdf|tar\.gz) |
             ethnicolr/models/.*\.pt
           )$

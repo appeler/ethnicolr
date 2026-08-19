@@ -304,8 +304,14 @@ class TestDataTypeEdgeCases:
 
         datetime_df = pd.DataFrame(
             [
-                {"last": datetime.datetime.now(), "first": "John"},
-                {"last": "Smith", "first": datetime.date.today()},
+                {
+                    "last": datetime.datetime.now(tz=datetime.UTC),
+                    "first": "John",
+                },
+                {
+                    "last": "Smith",
+                    "first": datetime.datetime.now(tz=datetime.UTC).date(),
+                },
             ]
         )
 
@@ -391,11 +397,10 @@ class TestConcurrencyAndPerformance:
     def test_memory_usage_large_dataset(self):
         """Test memory usage with large datasets."""
         # Create a larger dataset to test memory handling
-        large_data = []
-        for i in range(5000):  # 5k rows
-            large_data.append(
-                {"last": f"Name{i}", "first": f"First{i}", "extra_col": f"data{i}"}
-            )
+        large_data = [
+            {"last": f"Name{i}", "first": f"First{i}", "extra_col": f"data{i}"}
+            for i in range(5000)
+        ]
 
         large_df = pd.DataFrame(large_data)
 
@@ -492,7 +497,8 @@ class TestErrorRecovery:
 
         result = estimate_census_surname(mixed_df, "last", year=2010)
 
-        # Should return results for all rows (with some predictions possibly null/default)
+        # Should return results for all rows (with some predictions
+        # possibly null/default)
         assert len(result) == 5
 
         # Should have prediction columns

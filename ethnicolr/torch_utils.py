@@ -7,11 +7,14 @@ import math
 import os
 import unicodedata
 from functools import cache
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 import torch
 import torch.nn as nn
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def name_support_reason(value: str) -> str | None:
@@ -68,6 +71,7 @@ class CharacterNgramLSTM(nn.Module):
         hidden_dimension: int = 128,
         dropout: float = 0.2,
     ):
+        """Build the embedding, LSTM, dropout, and output layers."""
         super().__init__()
         self.embedding = nn.Embedding(
             vocabulary_size, embedding_dimension, padding_idx=0
@@ -77,6 +81,7 @@ class CharacterNgramLSTM(nn.Module):
         self.output_layer = nn.Linear(hidden_dimension, category_count)
 
     def forward(self, input_sequences: torch.Tensor) -> torch.Tensor:
+        """Return category logits for a batch of encoded name sequences."""
         embedded = self.embedding(input_sequences)
         _, (hidden, _) = self.lstm(embedded)
         hidden = self.dropout(hidden.squeeze(0))
@@ -160,8 +165,11 @@ def build_conformal_prediction_sets(
     categories: list[str],
     conformal_quantile: float,
 ) -> list[list[str]]:
-    """Adaptive prediction sets: smallest class sets with cumulative
-    calibrated probability mass reaching the conformal quantile."""
+    """Build adaptive prediction sets.
+
+    Returns the smallest class sets whose cumulative calibrated probability
+    mass reaches the conformal quantile.
+    """
     descending_category_indices = np.argsort(-category_probabilities, axis=1)
     sorted_probabilities = np.take_along_axis(
         category_probabilities, descending_category_indices, axis=1

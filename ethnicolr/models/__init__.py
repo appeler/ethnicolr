@@ -1,0 +1,1 @@
+"""Packaged model metadata bundles."""

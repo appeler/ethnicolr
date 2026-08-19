@@ -1,0 +1,1 @@
+"""Census LSTM model metadata."""

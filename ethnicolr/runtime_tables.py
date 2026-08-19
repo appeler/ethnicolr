@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
-import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    import pandas as pd
 
 RACE_PERCENTAGE_COLUMNS = [
     "pctwhite",

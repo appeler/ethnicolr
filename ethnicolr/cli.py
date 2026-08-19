@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-"""
-Modern CLI for ethnicolr using Click framework.
+"""Modern CLI for ethnicolr using Click framework.
 
 Provides user-friendly commands for race/ethnicity estimation with improved
 help, progress indicators, and better error handling.
@@ -51,9 +49,11 @@ class CSVFile(click.Path):
     """Click type for CSV file validation."""
 
     def __init__(self):
+        """Require an existing, readable path."""
         super().__init__(exists=True, readable=True, path_type=Path)
 
     def convert(self, value, param, ctx):
+        """Convert the value to a path and require a .csv suffix."""
         path = super().convert(value, param, ctx)
         if not str(path).lower().endswith(".csv"):
             self.fail(f"File must be a CSV file: {path}", param, ctx)
@@ -64,9 +64,11 @@ class OutputPath(click.Path):
     """Click type for output file validation."""
 
     def __init__(self):
+        """Require a writable output path."""
         super().__init__(writable=True, path_type=Path)
 
     def convert(self, value, param, ctx):
+        """Convert the value to a path, creating its parent directory."""
         path = super().convert(value, param, ctx)
         # Create parent directory if it doesn't exist
         if isinstance(path, Path):
@@ -82,8 +84,7 @@ class OutputPath(click.Path):
 @click.version_option()
 @click.pass_context
 def cli(ctx: click.Context, verbose: bool, debug: bool):
-    """
-    Ethnicolr: Estimate race/ethnicity from names using machine learning.
+    """Ethnicolr: Estimate race/ethnicity from names using machine learning.
 
     This tool provides multiple models trained on different datasets
     for estimating race and ethnicity from first and last names.
@@ -105,7 +106,6 @@ def cli(ctx: click.Context, verbose: bool, debug: bool):
 @cli.group()
 def estimate():
     """Estimate race/ethnicity from name patterns using supported models."""
-    pass
 
 
 @estimate.command("census-surname")
@@ -159,8 +159,7 @@ def estimate_census_surname_command(
     mc_iterations: int,
     overwrite: bool,
 ):
-    """
-    Estimate race/ethnicity using Census LSTM model.
+    """Estimate race/ethnicity using Census LSTM model.
 
     Uses LSTM neural networks trained on U.S. Census data to predict
     race/ethnicity probabilities from last names.
@@ -171,9 +170,11 @@ def estimate_census_surname_command(
         # Basic estimate
         ethnicolr estimate census-surname data.csv -l surname
 
+    \b
         # With MC-dropout ranges
         ethnicolr estimate census-surname data.csv -l surname -u 0.95 -m 200
 
+    \b
         # Specify output file and Census year
         ethnicolr estimate census-surname data.csv -l surname -o results.csv -y 2000
     """
@@ -288,8 +289,7 @@ def estimate_florida_voter_surname_command(
     mc_iterations: int,
     overwrite: bool,
 ):
-    """
-    Estimate race/ethnicity using Florida voter registration LSTM model.
+    """Estimate race/ethnicity using Florida voter registration LSTM model.
 
     Uses LSTM neural networks trained on Florida voter registration data
     to predict race/ethnicity probabilities from last names. Estimates
@@ -297,13 +297,15 @@ def estimate_florida_voter_surname_command(
 
     Examples:
 
-    \\b
+    \b
         # Basic estimate
         ethnicolr estimate florida-voter-surname data.csv -l surname
 
+    \b
         # With MC-dropout ranges
         ethnicolr estimate florida-voter-surname data.csv -l surname -u 0.95 -m 200
 
+    \b
         # Specify output file
         ethnicolr estimate florida-voter-surname data.csv -l surname -o results.csv
     """
@@ -417,8 +419,7 @@ def estimate_wikipedia_surname_command(
     mc_iterations: int,
     overwrite: bool,
 ):
-    """
-    Estimate race/ethnicity using Wikipedia LSTM model.
+    """Estimate race/ethnicity using Wikipedia LSTM model.
 
     Uses LSTM neural networks trained on Wikipedia person data to predict
     detailed ethnic categories from last names. Provides 13 ethnic categories
@@ -426,13 +427,15 @@ def estimate_wikipedia_surname_command(
 
     Examples:
 
-    \\b
+    \b
         # Basic estimate
         ethnicolr estimate wikipedia-surname data.csv -l surname
 
+    \b
         # With MC-dropout ranges
         ethnicolr estimate wikipedia-surname data.csv -l surname -u 0.95 -m 200
 
+    \b
         # Specify output file
         ethnicolr estimate wikipedia-surname data.csv -l surname -o results.csv
     """
@@ -488,7 +491,8 @@ def estimate_wikipedia_surname_command(
         # Show sample estimates
         if verbose and len(result) > 0:
             click.echo("\nSample estimates:")
-            # Show just the main race column for readability since wiki has very detailed categories
+            # Show just the main race column for readability since wiki has
+            # very detailed categories
             sample = result.head(3)[[last_col, "race"]]
             click.echo(sample.to_string(index=False))
 
@@ -501,7 +505,6 @@ def estimate_wikipedia_surname_command(
 @cli.group()
 def models():
     """Inspect bundled estimate models (list, info)."""
-    pass
 
 
 @models.command("list")
@@ -549,8 +552,7 @@ def quick_estimate(
     output: Path | None,
     model: str,
 ):
-    """
-    Quick estimate using the best available model.
+    """Quick estimate using the best available model.
 
     Automatically selects appropriate model based on available data
     and provides fast estimates with minimal configuration.

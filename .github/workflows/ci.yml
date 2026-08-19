@@ -5,7 +5,7 @@ on:
     branches: [master]
   pull_request:
   schedule:
-    - cron: "17 6 * * 1"
+    - cron: "17 6 * * 1"  # weekly: surface ecosystem drift on quiet repos
 
 permissions:
   contents: read
@@ -16,7 +16,8 @@ concurrency:
 
 jobs:
   ci:
-    uses: gojiplus/py-canon/.github/workflows/reusable-ci.yml@07c6621880b82afd28ab7230eab6e79f96d080e3 # v1
+    uses: gojiplus/py-canon/.github/workflows/reusable-ci.yml@v1
     with:
       wheel-import: ethnicolr
-      coverage-floor: 60
+      coverage-floor: 76
+      run-preen: true

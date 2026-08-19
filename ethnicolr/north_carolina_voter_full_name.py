@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-import pandas as pd
+from typing import TYPE_CHECKING
 
 from .inference import prepare_full_name_data
 from .neural_name_model import NeuralNameModel
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class NorthCarolinaVoterFullNameModel(NeuralNameModel):
