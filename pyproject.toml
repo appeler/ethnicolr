@@ -215,11 +215,12 @@ skip = "*.csv,*.csv.gz,*.parquet,*.joblib,*.h5,*.keras,./ethnicolr/data,./ethnic
 
 [tool.preen]
 # API bases and RDF namespace URIs that are alive but answer 404 to the bare
-# GET the links check sends.
+# GET the links check sends. Schemeless on purpose: with a scheme the check's
+# URL extractor reads the patterns themselves as links.
 link_ignore = [
-  "https://dataverse\\.harvard\\.edu/api/access/datafile",
-  "http://www\\.wikidata\\.org/prop/direct/",
-  "https://qlever\\.dev/api/wikidata",
+  'dataverse\.harvard\.edu/api/access/datafile',
+  'www\.wikidata\.org/prop/direct/',
+  'qlever\.dev/api/wikidata',
 ]
 
 [tool.pydoclint]

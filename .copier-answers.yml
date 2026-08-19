@@ -1,0 +1,12 @@
+# Managed by copier — records template version for `copier update`. Do not edit.
+_commit: v1.0.1
+_src_path: gh:gojiplus/py-canon
+author_email: contact@gsood.com
+author_name: Gaurav Sood
+coverage_floor: 76
+default_branch: master
+description: Name-pattern estimates with calibrated probabilities and explicit abstention
+needs_cli: true
+org: appeler
+package_name: ethnicolr
+project_name: ethnicolr
