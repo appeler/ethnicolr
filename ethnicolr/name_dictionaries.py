@@ -1,12 +1,11 @@
-#!/usr/bin/env python
 """Dictionary-based race/ethnicity estimators.
 
 These estimators use conditional frequencies from published name tables. A
 neural model is used only as the documented surname fallback in
 ``estimate_census_full_name``.
 
-- ``lookup_census_first_name``: first-name lookup against the Census 2020 first-name file
-  (53,616 names covering ~94% of the enumerated population).
+- ``lookup_census_first_name``: first-name lookup against the Census 2020
+  first-name file (53,616 names covering ~94% of the enumerated population).
 - ``estimate_census_full_name``: six-category posterior from first+last name via naive
   Bayes over the census first-name and surname tables, with the census LSTM
   as fallback for out-of-dictionary surnames.
@@ -25,7 +24,7 @@ import json
 import logging
 from pathlib import Path
 from statistics import NormalDist
-from typing import cast
+from typing import ClassVar, cast
 
 import numpy as np
 import pandas as pd
@@ -79,9 +78,9 @@ class _NameTables:
     """Lazy caches for the dictionary tables."""
 
     _census_first_name_table: pd.DataFrame | None = None
-    _census_surname_tables: dict[int, pd.DataFrame] = {}
+    _census_surname_tables: ClassVar[dict[int, pd.DataFrame]] = {}
     _census_population_prior: np.ndarray | None = None
-    _voter_file_name_probabilities: dict[str, pd.DataFrame] = {}
+    _voter_file_name_probabilities: ClassVar[dict[str, pd.DataFrame]] = {}
     _voter_file_population_marginal: np.ndarray | None = None
 
     @classmethod
@@ -118,7 +117,8 @@ class _NameTables:
             cls._census_population_prior = (
                 weighted_category_counts / weighted_category_counts.sum()
             )
-        assert cls._census_population_prior is not None
+        if cls._census_population_prior is None:
+            raise RuntimeError("census population prior failed to initialize")
         return cls._census_population_prior
 
     @classmethod
@@ -132,7 +132,7 @@ class _NameTables:
             data = read_runtime_table(path, NAME_RACE_PROBABILITY_SCHEMA)
             # A list key always yields a DataFrame; the stubs widen it.
             cls._voter_file_name_probabilities[name_part] = cast(
-                pd.DataFrame, data.set_index("name")[VOTER_FILE_CATEGORIES]
+                "pd.DataFrame", data.set_index("name")[VOTER_FILE_CATEGORIES]
             )
         return cls._voter_file_name_probabilities[name_part]
 
@@ -197,16 +197,22 @@ def lookup_census_first_name(
     Returns:
         DataFrame with original data plus pctwhite/pctblack/pctapi/pctaian/
         pct2prace/pcthispanic columns (NaN for names not in the file).
+
+    Raises:
+        ValueError: If ``year`` is not 2020 or ``uncertainty_level`` is not
+            between 0 and 1.
     """
     if year != 2020:
         raise ValueError("First-name data is only available for 2020")
     data = NeuralNameModel.validate_name_column(data, first_name_column)
 
     first_name_table = _NameTables.census_first_name_table()
-    normalized_first_names = _normalize_names(cast(pd.Series, data[first_name_column]))
+    normalized_first_names = _normalize_names(
+        cast("pd.Series", data[first_name_column])
+    )
     matched_names = first_name_table.reindex(normalized_first_names)
     script_supported, abstention_reasons = combined_name_support(
-        cast(pd.Series, data[first_name_column])
+        cast("pd.Series", data[first_name_column])
     )
 
     output_columns = set(CENSUS_PERCENTAGE_COLUMNS) | {"race"}
@@ -248,7 +254,7 @@ def lookup_census_first_name(
         ]
     result["race"] = predicted_categories
     matched_count = int(matched_rows.sum())
-    logger.info(f"Matched {matched_count} of {len(result)} first names")
+    logger.info("Matched %d of %d first names", matched_count, len(result))
     scored_rows = script_supported & matched_rows
     abstention_reasons[script_supported & ~matched_rows] = "out-of-dictionary"
     add_inference_metadata(
@@ -318,6 +324,10 @@ def estimate_census_full_name(
     Returns:
         DataFrame with probability columns per category, ``race`` (argmax),
         and ``evidence_basis``.
+
+    Raises:
+        ValueError: If the name columns are missing or ``target_prior`` does
+            not cover the model categories.
     """
     from .census_surname_model import (
         estimate_census_surname,
@@ -331,12 +341,12 @@ def estimate_census_full_name(
 
     result = data.copy()
     script_supported, abstention_reasons = combined_name_support(
-        cast(pd.Series, result[surname_column]),
-        cast(pd.Series, result[first_name_column]),
+        cast("pd.Series", result[surname_column]),
+        cast("pd.Series", result[first_name_column]),
     )
-    normalized_surnames = _normalize_names(cast(pd.Series, result[surname_column]))
+    normalized_surnames = _normalize_names(cast("pd.Series", result[surname_column]))
     normalized_first_names = _normalize_names(
-        cast(pd.Series, result[first_name_column])
+        cast("pd.Series", result[first_name_column])
     )
 
     surname_table = _NameTables.census_surname_table(year)
@@ -609,6 +619,9 @@ def estimate_voter_file_full_name(
 
     Returns:
         DataFrame with the five probability columns, ``race``, and ``evidence_basis``.
+
+    Raises:
+        ValueError: If the name columns are missing from the DataFrame.
     """
     if surname_column not in data.columns or first_name_column not in data.columns:
         raise ValueError(
@@ -617,12 +630,12 @@ def estimate_voter_file_full_name(
 
     result = data.copy()
     script_supported, abstention_reasons = combined_name_support(
-        cast(pd.Series, result[surname_column]),
-        cast(pd.Series, result[first_name_column]),
+        cast("pd.Series", result[surname_column]),
+        cast("pd.Series", result[first_name_column]),
     )
-    normalized_surnames = _normalize_names(cast(pd.Series, result[surname_column]))
+    normalized_surnames = _normalize_names(cast("pd.Series", result[surname_column]))
     normalized_first_names = _normalize_names(
-        cast(pd.Series, result[first_name_column])
+        cast("pd.Series", result[first_name_column])
     )
 
     surname_table = _NameTables.voter_file_name_probabilities("last")
@@ -712,5 +725,5 @@ def estimate_voter_file_full_name(
     )
 
     evidence_counts = pd.Series(evidence_basis).value_counts().to_dict()
-    logger.info(f"Evidence counts: {evidence_counts}")
+    logger.info("Evidence counts: %s", evidence_counts)
     return result

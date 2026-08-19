@@ -38,8 +38,10 @@ PERSON_BODY = """
   ?p wdt:P31 wd:Q5 .
   {anchor}
   ?p rdfs:label ?pLabel . FILTER(LANG(?pLabel) = "en")
-  OPTIONAL {{ ?p wdt:P734 ?fam . ?fam rdfs:label ?famLabel_ . FILTER(LANG(?famLabel_) = "en") }}
-  OPTIONAL {{ ?p wdt:P735 ?giv . ?giv rdfs:label ?givLabel_ . FILTER(LANG(?givLabel_) = "en") }}
+  OPTIONAL {{ ?p wdt:P734 ?fam . ?fam rdfs:label ?famLabel_ .
+    FILTER(LANG(?famLabel_) = "en") }}
+  OPTIONAL {{ ?p wdt:P735 ?giv . ?giv rdfs:label ?givLabel_ .
+    FILTER(LANG(?givLabel_) = "en") }}
 """
 
 EDGES_QUERY = (
@@ -88,7 +90,7 @@ def fetch_anchor(endpoint: str, anchor: str, out_path: Path) -> int:
     # nothing behind (a partial file would defeat --skip-existing)
     tmp_path = out_path.with_suffix(".tmp")
     total = 0
-    with open(tmp_path, "w", newline="") as fh:
+    with tmp_path.open("w", newline="") as fh:
         writer = csv.writer(fh)
         writer.writerow(["person", "label", "family_name", "given_name"])
         offset = 0
@@ -120,7 +122,7 @@ def main() -> None:
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
-    with open(args.mappings / "country_to_category.csv") as fh:
+    with (args.mappings / "country_to_category.csv").open() as fh:
         rows = list(csv.DictReader(fh))
     if args.only:
         # Explicit selection overrides the category filter (other pipelines,
@@ -139,7 +141,7 @@ def main() -> None:
         out = args.out_dir / "p172_edges.csv"
         if not (args.skip_existing and out.exists()):
             rows = run_query(args.endpoint, EDGES_QUERY)
-            with open(out, "w", newline="") as fh:
+            with out.open("w", newline="") as fh:
                 writer = csv.writer(fh)
                 writer.writerow(["person", "ethnic_group"])
                 writer.writerows(rows)

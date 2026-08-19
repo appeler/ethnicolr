@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-import pandas as pd
+from typing import TYPE_CHECKING
 
 from .neural_name_model import NeuralNameModel
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class WikipediaSurnameModel(NeuralNameModel):

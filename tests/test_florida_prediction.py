@@ -45,7 +45,7 @@ def test_runtime_sequence_length_matches_training_manifest(
     )
     manifest = json.loads(manifest_path.read_text())
 
-    assert model_class.MAX_SEQUENCE_LENGTH == manifest["features"]["sequence_length"]
+    assert manifest["features"]["sequence_length"] == model_class.MAX_SEQUENCE_LENGTH
 
 
 def test_florida_api_has_no_historical_model_selector():

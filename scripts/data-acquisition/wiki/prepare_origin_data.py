@@ -43,7 +43,7 @@ def main() -> None:
     parser.add_argument("--min-rows", type=int, default=3000)
     args = parser.parse_args()
 
-    with open(args.mappings / "country_to_origin.csv") as fh:
+    with (args.mappings / "country_to_origin.csv").open() as fh:
         origin_map = {
             row["qid"]: row["origin"]
             for row in csv.DictReader(fh)

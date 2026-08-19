@@ -1,0 +1,1 @@
+"""Census surname runtime tables."""

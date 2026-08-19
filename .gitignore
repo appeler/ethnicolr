@@ -5,6 +5,7 @@
 !.travis.yml
 !.pep8speaks.yml
 !.github
+!.copier-answers.yml
 *.pyc
 *.log
 output.csv

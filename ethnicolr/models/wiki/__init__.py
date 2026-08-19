@@ -1,0 +1,1 @@
+"""Wikipedia model metadata."""

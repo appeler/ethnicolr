@@ -21,11 +21,13 @@ recorded in the JSON and surfaced in the model cards.
 
 Usage:
     python calibrate_model.py wikipedia_surname
-    python calibrate_model.py north_carolina_voter_full_name --data-dir ../data-acquisition/raw
+    python calibrate_model.py north_carolina_voter_full_name \
+        --data-dir ../data-acquisition/raw
     python calibrate_model.py census --year 2010
 """
 
 import argparse
+import itertools
 import json
 import sys
 from dataclasses import dataclass
@@ -149,7 +151,7 @@ def expected_calibration_error(
     total_weight = row_weights.sum()
     calibration_error = 0.0
     reliability_bins = []
-    for lower_edge, upper_edge in zip(bin_edges[:-1], bin_edges[1:], strict=False):
+    for lower_edge, upper_edge in itertools.pairwise(bin_edges):
         rows_in_bin = (predicted_confidence > lower_edge) & (
             predicted_confidence <= upper_edge
         )
@@ -371,7 +373,7 @@ def load_census_model_context(
 ) -> CalibrationContext:
     census_training_directory = Path(__file__).parent / "census"
     sys.path.insert(0, str(census_training_directory))
-    import train_census_lstm_pytorch as census  # noqa: PLC0415
+    import train_census_lstm_pytorch as census
 
     census_data = census.load_census_data(year)
     evaluation_data = census.sample_and_assign_race(
@@ -417,7 +419,8 @@ def load_census_model_context(
         observed_categories=observed_categories,
         row_weights=np.ones(len(observed_categories)),
         reference_weighting=(
-            "person (census count-weighted sample, labels drawn from census race shares)"
+            "person (census count-weighted sample, labels drawn from "
+            "census race shares)"
         ),
         training_distribution=training_distribution,
         statistics_path=(artifact_directory / f"census{year}_ln_stats_pytorch.json"),
@@ -432,9 +435,9 @@ def write_reliability_diagram(
     model_name: str,
     output_directory: Path,
 ) -> None:
-    import matplotlib
+    import matplotlib as mpl
 
-    matplotlib.use("Agg")
+    mpl.use("Agg")
     import matplotlib.pyplot as plt
 
     figure, axes = plt.subplots(1, 2, figsize=(9, 4), sharey=True)
@@ -560,8 +563,8 @@ def main() -> None:
         "calibration_weighting": calibration_context.reference_weighting,
         "conformal_quantiles": conformal_quantiles,
         "metrics": {
-            "n_calibration": int(len(calibration_rows)),
-            "n_evaluation": int(len(evaluation_rows)),
+            "n_calibration": len(calibration_rows),
+            "n_evaluation": len(evaluation_rows),
             "accuracy": top_k_accuracy(
                 calibrated_probabilities[evaluation_rows],
                 observed_categories[evaluation_rows],
