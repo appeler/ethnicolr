@@ -2,7 +2,7 @@
 
 The data were originally collected by a team lead by Steven Skiena as part of the project to build a classifier for race and ethnicity based on names. The team scraped Wikipedia to produce a novel database of over 140k name/race associations. For details of the how the data was collected, see [Name-ethnicity classification from open sources](http://dl.acm.org/citation.cfm?id=1557032) (for reference, see below).
 
-The team has two papers (reference for one of the papers can be found below; the other paper is forthcoming) on novel ways of building a classifier. The team has also made it easy to use the classifiers they have built by providing public APIs. The classifier based on the methods discussed in the first paper can be accessed at: [http://www.textmap.com/ethnicity](http://www.textmap.com/ethnicity), and for the second paper at: [http://www.data-prism.com](http://www.data-prism.com).
+The team has two papers (reference for one of the papers can be found below; the other paper is forthcoming) on novel ways of building a classifier. The team also provided public APIs for the classifiers they built, at `textmap.com/ethnicity` and `data-prism.com`; both services are now offline.
 
 If you use this data, please cite:
 
@@ -17,7 +17,8 @@ If you use this data, please cite:
 
 ## Refreshing with Wikidata (2026 pipeline)
 
-The wiki models are now trained on this 2009-era file **merged with fresh
+The wiki models are now trained on this 2009-era file (kept at
+`scripts/data-acquisition/source-tables/wiki/wiki_name_race.csv`) **merged with fresh
 Wikidata-derived names**. The pipeline is fully scripted and needs no
 credentials (public QLever SPARQL endpoint):
 

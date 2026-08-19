@@ -5,8 +5,8 @@ Downloads the CC0 dictionaries of P(race | name) for first names and surnames
 built from six Southern-state voter files (Rosenman, Olivella & Imai 2023,
 Scientific Data; doi:10.7910/DVN/YL2OXB) and writes them as package data:
 
-    ethnicolr/data/rosenman/first_name_race.csv.gz
-    ethnicolr/data/rosenman/last_name_race.csv.gz
+    scripts/data-acquisition/source-tables/rosenman/first_name_race.csv.gz
+    scripts/data-acquisition/source-tables/rosenman/last_name_race.csv.gz
     ethnicolr/data/rosenman/rosenman_stats.json
 
 The stats file records the implied voter-population race marginal, recovered
@@ -44,7 +44,10 @@ RACES = {
 }
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-OUT_DIR = REPO_ROOT / "ethnicolr" / "data" / "rosenman"
+# The csv.gz dictionaries are conversion sources, not package data; only the
+# stats file ships inside the wheel.
+OUT_DIR = REPO_ROOT / "scripts" / "data-acquisition" / "source-tables" / "rosenman"
+STATS_DIR = REPO_ROOT / "ethnicolr" / "data" / "rosenman"
 
 
 def fetch_rdata(name: str, file_id: int, cache: Path) -> pd.DataFrame:
@@ -119,7 +122,8 @@ def main() -> None:
         "n_first_names": len(frames["first_nameRaceProbs"]),
         "n_last_names": len(frames["last_nameRaceProbs"]),
     }
-    (OUT_DIR / "rosenman_stats.json").write_text(json.dumps(stats, indent=2) + "\n")
+    STATS_DIR.mkdir(parents=True, exist_ok=True)
+    (STATS_DIR / "rosenman_stats.json").write_text(json.dumps(stats, indent=2) + "\n")
     print("Implied voter-population marginal:", marginal)
 
 

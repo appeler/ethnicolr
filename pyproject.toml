@@ -74,6 +74,7 @@ dev = [
   "ruff>=0.7.0",
   "pre-commit>=3.0",
   "pyright>=1.1.411",
+  "pydoclint>=0.5",
 ]
 test = [
   "pytest>=7.0",
@@ -95,8 +96,6 @@ source-exclude = [
   "/ethnicolr/.DS_Store",
   "/ethnicolr/.pytype",
   "/ethnicolr/data/**/.DS_Store",
-  "/ethnicolr/data/**/*.csv",
-  "/ethnicolr/data/**/*.csv.gz",
 ]
 
 [tool.ruff]
@@ -115,24 +114,37 @@ exclude = [
 ]
 
 [tool.ruff.lint]
+external = ["DOC"]
 select = [
-  "E",  # pycodestyle errors
-  "W",  # pycodestyle warnings
-  "F",  # pyflakes
-  "I",  # isort
-  "B",  # flake8-bugbear
-  "C4", # flake8-comprehensions
-  "UP", # pyupgrade
+    "E", "W", "F", "I", "B", "C4", "UP", "N", "D", "S", "SIM", "T20", "PT", "RUF",
+    "PTH", "RET", "PIE", "FURB", "PERF", "DTZ", "LOG", "G", "TC", "FLY",
+    "RSE", "SLOT", "FA", "A", "EXE", "ICN", "PGH", "PLE", "ARG", "SLF",
 ]
-ignore = [
-  "E501",  # line too long
-  "B008",  # function calls in argument defaults
-  "C901",  # too complex
-]
+# D203/D213: the google convention the fleet standard picks. W191/D206/D300:
+# ruff's own docs list these as always incompatible with `ruff format`, which
+# the standard also runs.
+ignore = ["D203", "D213", "W191", "D206", "D300"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
+# S603: the CLI tests exercise the installed console script through subprocess;
+# that is the point of those tests, not an injection risk.
+"tests/**" = ["S101", "D", "ARG", "SLF", "S603"]
+# These docstrings are click help text, not Sphinx prose. D301: click's
+# no-rewrap marker is a real backspace escape (\b); a raw docstring would turn
+# it into literal text and break the help formatting. D412: the marker only
+# works as its own paragraph, which needs the blank line D412 forbids.
+"ethnicolr/cli.py" = ["D301", "D412"]
+"docs/**" = ["D"]
 "__init__.py" = ["F401"]
-"tests/*" = ["S101"]
+# Research and data-acquisition scripts, excluded from the wheel. print is
+# their output channel (T20), shebang permissions do not survive checkout
+# (EXE), subprocess/urlopen against fixed government and Wikidata endpoints is
+# their job (S), and X/X_train/functional-as-F follow sklearn and torch
+# convention (N806, N812). Docstring rules stay off one-off helpers (D).
+"scripts/**" = ["T20", "D", "S", "EXE", "N806", "N812"]
 "*.ipynb" = ["E402", "E722", "UP031", "B905", "F821", "F811", "W293", "F841", "E501", "F401", "E302", "E305", "W391"]
 "docs/examples/*.ipynb" = ["E402", "E722", "UP031", "B905", "F821", "F811", "W293", "F841", "E501", "F401", "E302", "E305", "W391"]
 
@@ -199,4 +211,21 @@ typeCheckingMode = "standard"
 # findings across this repo and every one was in the corpora or the model
 # files -- there are no misspellings in the source. Auto-"correcting" a name
 # would also silently corrupt the data these models are trained on.
-skip = "*.csv,*.parquet,*.joblib,*.h5,*.keras,./ethnicolr/data,./ethnicolr/models,uv.lock"
+skip = "*.csv,*.csv.gz,*.parquet,*.joblib,*.h5,*.keras,./ethnicolr/data,./ethnicolr/models,./scripts/data-acquisition/source-tables,uv.lock"
+
+[tool.preen]
+# API bases and RDF namespace URIs that are alive but answer 404 to the bare
+# GET the links check sends.
+link_ignore = [
+  "https://dataverse\\.harvard\\.edu/api/access/datafile",
+  "http://www\\.wikidata\\.org/prop/direct/",
+  "https://qlever\\.dev/api/wikidata",
+]
+
+[tool.pydoclint]
+style = "google"
+arg-type-hints-in-docstring = false
+check-return-types = false
+check-class-attributes = false
+allow-init-docstring = true
+exclude = '\.venv|tests|docs'

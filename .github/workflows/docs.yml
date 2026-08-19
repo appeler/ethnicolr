@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   docs:
-    uses: gojiplus/py-canon/.github/workflows/reusable-docs.yml@07c6621880b82afd28ab7230eab6e79f96d080e3 # v1
+    uses: gojiplus/py-canon/.github/workflows/reusable-docs.yml@v1
     permissions:
       contents: read
       pages: write

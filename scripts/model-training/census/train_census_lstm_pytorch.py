@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-PyTorch LSTM training script for Census surname → race/ethnicity prediction.
+"""PyTorch LSTM training script for Census surname → race/ethnicity prediction.
 
 Trains a character-bigram LSTM model on US Census surname data.
 Compatible with ethnicolr inference pipeline.
@@ -49,7 +48,7 @@ class CensusLSTM(nn.Module):
             embed_dim,
             hidden_dim,
             batch_first=True,
-            dropout=dropout if dropout > 0 else 0,
+            dropout=max(0, dropout),
         )
         self.dropout = nn.Dropout(dropout)
         self.fc = nn.Linear(hidden_dim, num_classes)
@@ -72,7 +71,7 @@ def load_census_data(year: int) -> pd.DataFrame:
     df.dropna(subset=["name"], inplace=True)
     df.replace("(S)", 0, inplace=True)
 
-    for col in RACE_PCT_COLS + ["count"]:
+    for col in [*RACE_PCT_COLS, "count"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
         df[col] = df[col].fillna(0)
 
@@ -252,7 +251,6 @@ def save_model_for_ethnicolr(
 
 def export_to_onnx(
     model: nn.Module,
-    vocab_size: int,
     seq_len: int,
     year: int,
     output_dir: Path,
@@ -402,9 +400,7 @@ def main():
     save_model_for_ethnicolr(model, words_list, args.year, MODEL_DIR)
 
     if args.export_onnx:
-        export_to_onnx(
-            model, len(words_list), args.seq_len, args.year, MODEL_DIR, device
-        )
+        export_to_onnx(model, args.seq_len, args.year, MODEL_DIR, device)
 
     print("\nDone!")
 

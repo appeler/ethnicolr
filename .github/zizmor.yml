@@ -1,0 +1,7 @@
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        "gojiplus/py-canon": ref-pin
+        "gojiplus/py-canon/*": ref-pin
+        "*": hash-pin

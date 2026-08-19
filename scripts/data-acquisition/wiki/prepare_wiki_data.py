@@ -9,7 +9,8 @@ Labeling policy:
   their people only enter via P172.
 - Name = family-name/given-name labels where present, else the English label
   split on its last space. Names must be mostly-Latin after NFKD normalization.
-- The result is merged with the 2009-era ethnicolr/data/wiki/wiki_name_race.csv
+- The result is merged with the 2009-era
+  scripts/data-acquisition/source-tables/wiki/wiki_name_race.csv
   (kept in full) and deduplicated on (name_last, name_first, race).
 
 Usage:
@@ -28,14 +29,21 @@ from pathlib import Path
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-OLD_DATA = REPO_ROOT / "ethnicolr" / "data" / "wiki" / "wiki_name_race.csv"
+OLD_DATA = (
+    REPO_ROOT
+    / "scripts"
+    / "data-acquisition"
+    / "source-tables"
+    / "wiki"
+    / "wiki_name_race.csv"
+)
 
 PAREN_RE = re.compile(r"\s*\(.*?\)\s*")
 SUFFIXES = {"jr", "jr.", "sr", "sr.", "ii", "iii", "iv", "v"}
 
 
-def load_mapping(path: Path, key: str) -> dict[str, str]:
-    with open(path) as fh:
+def load_mapping(path: Path) -> dict[str, str]:
+    with path.open() as fh:
         return {
             row["qid"]: row["category"]
             for row in csv.DictReader(fh)
@@ -88,10 +96,8 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    country_map = load_mapping(args.mappings / "country_to_category.csv", "country")
-    ethnic_map = load_mapping(
-        args.mappings / "ethnic_group_to_category.csv", "ethnic_group"
-    )
+    country_map = load_mapping(args.mappings / "country_to_category.csv")
+    ethnic_map = load_mapping(args.mappings / "ethnic_group_to_category.csv")
 
     stats = Counter()
 
@@ -126,7 +132,7 @@ def main() -> None:
 
     edges_path = args.raw_dir / "p172_edges.csv"
     if edges_path.exists():
-        with open(edges_path) as fh:
+        with edges_path.open() as fh:
             for edge in csv.DictReader(fh):
                 person_eth.setdefault(qid(edge["person"]), set()).add(
                     qid(edge["ethnic_group"])

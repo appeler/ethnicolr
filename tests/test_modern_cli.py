@@ -2,7 +2,6 @@
 Tests for the modern CLI interface using Click framework.
 """
 
-import os
 import subprocess
 import sys
 import tempfile
@@ -22,13 +21,13 @@ def sample_input_file():
         f.write("garcia,maria,3\n")
         f.write("johnson,james,4\n")
         f.write("patel,raj,5\n")
-        temp_path = f.name
+        temp_path = Path(f.name)
 
-    yield temp_path
+    yield str(temp_path)
 
     # Cleanup
-    if os.path.exists(temp_path):
-        os.unlink(temp_path)
+    if temp_path.exists():
+        temp_path.unlink()
 
 
 @pytest.fixture
@@ -40,7 +39,7 @@ def temp_output_dir():
     # Cleanup - remove all files in temp directory
     for file in Path(temp_dir).glob("*"):
         file.unlink()
-    os.rmdir(temp_dir)
+    Path(temp_dir).rmdir()
 
 
 class TestModernCLI:
@@ -91,7 +90,7 @@ class TestEstimateCommands:
 
     def test_estimate_census_basic(self, sample_input_file, temp_output_dir):
         """Test basic census estimate."""
-        output_file = os.path.join(temp_output_dir, "census_output.csv")
+        output_file = str(Path(temp_output_dir) / "census_output.csv")
 
         cmd = [
             sys.executable,
@@ -111,7 +110,7 @@ class TestEstimateCommands:
 
         # Should succeed
         assert result.returncode == 0, f"Command failed: {result.stderr}"
-        assert os.path.exists(output_file)
+        assert Path(output_file).exists()
 
         # Verify output structure
         output_df = pd.read_csv(output_file)
@@ -121,7 +120,7 @@ class TestEstimateCommands:
 
     def test_estimate_census_with_year(self, sample_input_file, temp_output_dir):
         """Test census estimate with specific year."""
-        output_file = os.path.join(temp_output_dir, "census_2000.csv")
+        output_file = str(Path(temp_output_dir) / "census_2000.csv")
 
         cmd = [
             sys.executable,
@@ -141,11 +140,11 @@ class TestEstimateCommands:
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         assert result.returncode == 0
-        assert os.path.exists(output_file)
+        assert Path(output_file).exists()
 
     def test_estimate_census_uncertainty(self, sample_input_file, temp_output_dir):
         """Test census estimates with MC-dropout uncertainty summaries."""
-        output_file = os.path.join(temp_output_dir, "census_uncertainty.csv")
+        output_file = str(Path(temp_output_dir) / "census_uncertainty.csv")
 
         cmd = [
             sys.executable,
@@ -167,7 +166,7 @@ class TestEstimateCommands:
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
         assert result.returncode == 0, result.stderr
-        assert os.path.exists(output_file)
+        assert Path(output_file).exists()
         output_df = pd.read_csv(output_file)
         mean_columns = [
             column for column in output_df.columns if column.endswith("_mc_mean")
@@ -176,7 +175,7 @@ class TestEstimateCommands:
 
     def test_estimate_florida_basic(self, sample_input_file, temp_output_dir):
         """Test basic Florida estimate."""
-        output_file = os.path.join(temp_output_dir, "florida_output.csv")
+        output_file = str(Path(temp_output_dir) / "florida_output.csv")
 
         cmd = [
             sys.executable,
@@ -195,7 +194,7 @@ class TestEstimateCommands:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
         if result.returncode == 0:
-            assert os.path.exists(output_file)
+            assert Path(output_file).exists()
             output_df = pd.read_csv(output_file)
             assert len(output_df) == 5
             assert "race" in output_df.columns
@@ -209,7 +208,7 @@ class TestEstimateCommands:
 
     def test_estimate_wiki_basic(self, sample_input_file, temp_output_dir):
         """Test basic Wikipedia estimate."""
-        output_file = os.path.join(temp_output_dir, "wiki_output.csv")
+        output_file = str(Path(temp_output_dir) / "wiki_output.csv")
 
         cmd = [
             sys.executable,
@@ -229,7 +228,7 @@ class TestEstimateCommands:
 
         # Wiki models may not be installed, so we allow failure
         if result.returncode == 0:
-            assert os.path.exists(output_file)
+            assert Path(output_file).exists()
             output_df = pd.read_csv(output_file)
             assert len(output_df) == 5
             assert "race" in output_df.columns
@@ -284,7 +283,7 @@ class TestQuickEstimate:
 
     def test_quick_estimate_census(self, sample_input_file, temp_output_dir):
         """Test quick estimate with census model."""
-        output_file = os.path.join(temp_output_dir, "quick_output.csv")
+        output_file = str(Path(temp_output_dir) / "quick_output.csv")
 
         cmd = [
             sys.executable,
@@ -303,7 +302,7 @@ class TestQuickEstimate:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
         if result.returncode == 0:
-            assert os.path.exists(output_file)
+            assert Path(output_file).exists()
             output_df = pd.read_csv(output_file)
             assert len(output_df) == 5
 
@@ -314,7 +313,7 @@ class TestCLIErrorHandling:
     def test_missing_file_error(self, temp_output_dir):
         """Test error when input file doesn't exist."""
         nonexistent_file = "/nonexistent/path/file.csv"
-        output_file = os.path.join(temp_output_dir, "output.csv")
+        output_file = str(Path(temp_output_dir) / "output.csv")
 
         cmd = [
             sys.executable,
@@ -336,7 +335,7 @@ class TestCLIErrorHandling:
 
     def test_invalid_column_error(self, sample_input_file, temp_output_dir):
         """Test error when column doesn't exist."""
-        output_file = os.path.join(temp_output_dir, "output.csv")
+        output_file = str(Path(temp_output_dir) / "output.csv")
 
         cmd = [
             sys.executable,
@@ -358,7 +357,7 @@ class TestCLIErrorHandling:
 
     def test_invalid_uncertainty_level_error(self, sample_input_file, temp_output_dir):
         """Test the error for an invalid uncertainty level."""
-        output_file = os.path.join(temp_output_dir, "output.csv")
+        output_file = str(Path(temp_output_dir) / "output.csv")
 
         cmd = [
             sys.executable,
@@ -393,7 +392,7 @@ class TestCLIIntegration:
         assert status_result.returncode == 0
 
         # Step 2: Run estimate
-        output_file = os.path.join(temp_output_dir, "workflow_output.csv")
+        output_file = str(Path(temp_output_dir) / "workflow_output.csv")
 
         estimate_result = subprocess.run(
             [
@@ -415,13 +414,13 @@ class TestCLIIntegration:
         )
 
         if estimate_result.returncode == 0:
-            assert os.path.exists(output_file)
+            assert Path(output_file).exists()
             output_df = pd.read_csv(output_file)
             assert len(output_df) == 5
 
     def test_verbose_mode(self, sample_input_file, temp_output_dir):
         """Test verbose mode."""
-        output_file = os.path.join(temp_output_dir, "verbose_output.csv")
+        output_file = str(Path(temp_output_dir) / "verbose_output.csv")
 
         cmd = [
             sys.executable,

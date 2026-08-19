@@ -4,7 +4,8 @@
 Downloads the April 2026 "Frequently Occurring First Names in the 2020 Census"
 Excel files (race/Hispanic-origin counts and sex counts), converts the
 noise-infused category counts to percentages, and writes
-ethnicolr/data/census/census_2020_first_names.csv in the same schema as the
+scripts/data-acquisition/source-tables/census/census_2020_first_names.csv
+in the same schema as the
 surname files (plus pctmale/pctfemale).
 
 Counts carry the Census Bureau's disclosure-avoidance noise (±3 per cell at
@@ -25,7 +26,14 @@ RACE_URL = f"{BASE}/Names2020_FirstNames_RaceHispanic.xlsx"
 SEX_URL = f"{BASE}/Names2020_FirstNames_Sex.xlsx"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-OUT = REPO_ROOT / "ethnicolr" / "data" / "census" / "census_2020_first_names.csv"
+OUT = (
+    REPO_ROOT
+    / "scripts"
+    / "data-acquisition"
+    / "source-tables"
+    / "census"
+    / "census_2020_first_names.csv"
+)
 
 RACE_COLS = ["pctwhite", "pctblack", "pctaian", "pctapi", "pct2prace", "pcthispanic"]
 
@@ -40,8 +48,7 @@ def fetch_sheet(url: str, columns: list[str]) -> pd.DataFrame:
     df["name"] = df["name"].astype(str).str.strip().str.upper()
     for col in df.columns[1:]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
-    df = df.dropna(subset=["count"])
-    return df
+    return df.dropna(subset=["count"])
 
 
 def main() -> None:

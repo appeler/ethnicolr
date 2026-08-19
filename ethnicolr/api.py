@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import pandas as pd
+from typing import TYPE_CHECKING
 
 from .census_surname import lookup_census_surname as _lookup_census_surname
 from .census_surname_model import estimate_census_surname as _estimate_census_surname
@@ -31,6 +31,9 @@ from .wikipedia_origin import estimate_wikipedia_origin as _estimate_wikipedia_o
 from .wikipedia_surname import (
     estimate_wikipedia_surname as _estimate_wikipedia_surname,
 )
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 def lookup_census_surname(

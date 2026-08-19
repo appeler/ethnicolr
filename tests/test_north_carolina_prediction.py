@@ -78,30 +78,17 @@ class TestNorthCarolinaPrediction:
         # Test accuracy for major ethnic groups
         # Note: NC model has known limitations with Hispanic category prediction
         # Hispanic names analysis (informational only, no strict requirements)
-        hispanic_mask = nc_df["expected_major"] == "hispanic"
-        if hispanic_mask.any():
-            hispanic_results = result[hispanic_mask]
-            hispanic_predictions = hispanic_results["race"].str.startswith("HL+")
-            hispanic_accuracy = hispanic_predictions.mean()
-            # Log the accuracy but don't fail the test due to model training limitations
-            print(
-                f"Info: Hispanic prediction accuracy: {hispanic_accuracy:.2%} (model limitation - no assertion)"
-            )
-
-        # Non-Hispanic whites analysis (informational only due to model limitations)
+        # Non-Hispanic whites analysis; Hispanic accuracy is not asserted
+        # because of known model training limitations.
         white_mask = nc_df["expected_major"] == "white"
         if white_mask.any():
             white_results = result[white_mask]
-            white_accuracy = (white_results["race"] == "NL+W").mean()
-            # Log the accuracy but don't fail the test due to model training limitations
-            print(
-                f"Info: White prediction accuracy: {white_accuracy:.2%} (model limitation - no assertion)"
-            )
 
             # At minimum, should predict some NL+ category for white names
             nl_predictions = white_results["race"].str.startswith("NL+").mean()
             assert nl_predictions >= 0.5, (
-                f"Expected most white names to predict NL+ categories, got {nl_predictions:.2%}"
+                f"Expected most white names to predict NL+ categories, "
+                f"got {nl_predictions:.2%}"
             )
 
     def test_nc_race_categories_comprehensive(self, sample_nc_names):
@@ -165,7 +152,8 @@ class TestNorthCarolinaPrediction:
         result = estimate_north_carolina_voter_full_name(test_names, "last", "first")
         assert_prediction_quality(result, "nc")
 
-        # Check that Hispanic/Non-Hispanic distinction shows some pattern (flexible test)
+        # Check that Hispanic/Non-Hispanic distinction shows some pattern
+        # (flexible test)
         hl_predictions = result["race"].str.startswith("HL+").sum()
         nl_predictions = result["race"].str.startswith("NL+").sum()
 
@@ -290,7 +278,9 @@ class TestNorthCarolinaPerformance:
         assert all(result["notes"] == test_df["notes"])
 
     def test_nc_confidence_vs_regular_consistency(self, sample_nc_names):
-        """Test consistency between regular and MC-dropout uncertainty summary predictions."""
+        """Test consistency between regular and MC-dropout uncertainty
+        summary predictions.
+        """
         regular = estimate_north_carolina_voter_full_name(
             sample_nc_names, "last", "first"
         )
@@ -362,16 +352,13 @@ class TestNorthCarolinaUniqueFeatures:
             f"Only predicted {unique_predictions} unique categories"
         )
 
-        # Should have Non-Hispanic predictions (Hispanic predictions are optional due to model limitations)
+        # Should have Non-Hispanic predictions (Hispanic predictions are
+        # optional due to model limitations)
         has_nonhispanic = result["race"].str.startswith("NL+").any()
         assert has_nonhispanic, "No Non-Hispanic (NL+) predictions found"
 
-        # Hispanic predictions are welcomed but not required due to model training limitations
-        has_hispanic = result["race"].str.startswith("HL+").any()
-        if has_hispanic:
-            print(
-                f"Model successfully predicted {result['race'].str.startswith('HL+').sum()} Hispanic categories"
-            )
+        # Hispanic predictions are welcomed but not required due to model
+        # training limitations, so they are not asserted here.
 
     def test_nc_probability_distribution_sanity(self, sample_nc_names):
         """Test that probability distributions make intuitive sense."""
@@ -379,7 +366,8 @@ class TestNorthCarolinaUniqueFeatures:
             sample_nc_names, "last", "first"
         )
 
-        # For each prediction, the highest probability should correspond to predicted race
+        # For each prediction, the highest probability should correspond to
+        # the predicted race
         race_cols = [
             "HL+A",
             "HL+B",
