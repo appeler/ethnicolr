@@ -2,6 +2,12 @@ version: 2
 updates:
   - package-ecosystem: "uv"
     directory: "/"
+    # Dependabot's default keeps only the dependencies pyproject.toml names
+    # current; everything they pull in sits in uv.lock untouched until an
+    # advisory or an upstream floor forces the issue (reporoulette carried
+    # grpcio 1.76 for eleven months). The grouped weekly PR absorbs the churn.
+    allow:
+      - dependency-type: "all"
     schedule:
       interval: "weekly"
       day: "monday"
