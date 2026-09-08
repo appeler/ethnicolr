@@ -7,7 +7,7 @@ name = "ethnicolr"
 version = "2.0.0"
 description = "Name-pattern estimates with calibrated probabilities and explicit abstention"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = "MIT"
 license-files = ["LICENSE"]
 
@@ -34,7 +34,6 @@ classifiers = [
   "Topic :: Utilities",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
@@ -102,7 +101,7 @@ source-exclude = [
 
 [tool.ruff]
 line-length = 88
-target-version = "py311"
+target-version = "py312"
 exclude = [
   ".git",
   "__pycache__",
