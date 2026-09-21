@@ -164,10 +164,14 @@ addopts = [
   # html and xml reports were writing htmlcov/ and coverage.xml into the tree
   # on every run for no reader. Ask for them explicitly when you want them.
   "--cov-report=term-missing",
+  "--strict-config",
 ]
 markers = [
   "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]
+log_level = "INFO"
+xfail_strict = true
+filterwarnings = ["error"]
 
 
 [tool.coverage.run]
