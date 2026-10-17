@@ -12,6 +12,7 @@ import torch
 
 from .inference import (
     add_inference_metadata,
+    prepare_full_name_data,
     rename_conflicting_input_columns,
     validate_inference_options,
 )
@@ -429,3 +430,136 @@ class NeuralNameModel:
         )
 
         return result
+
+
+class _TrainedNameModel(NeuralNameModel):
+    """A trained model: its artifact files and what it estimates.
+
+    Subclasses declare the files and, when it differs from race/ethnicity, the
+    target and label column. Running one is the same call for every model, so it
+    lives here once.
+    """
+
+    MODEL_FILE: ClassVar[str]
+    VOCABULARY_FILE: ClassVar[str]
+    LABELS_FILE: ClassVar[str]
+    NGRAM_SIZE: ClassVar[int] = 2
+    MAX_SEQUENCE_LENGTH: ClassVar[int]
+    TARGET: ClassVar[str] = "race-ethnicity"
+    LABEL_COLUMN: ClassVar[str] = "race"
+
+    @classmethod
+    def _run(
+        cls,
+        data: pd.DataFrame,
+        name_column: str,
+        input_scope: str,
+        *,
+        mc_iterations: int,
+        uncertainty_level: float | None,
+        target_prior: dict[str, float] | None,
+        conformal_coverage: float | None,
+    ) -> pd.DataFrame:
+        return cls.estimate_names(
+            data=data,
+            name_column=name_column,
+            vocabulary_file=cls.VOCABULARY_FILE,
+            labels_file=cls.LABELS_FILE,
+            model_file=cls.MODEL_FILE,
+            ngram_size=cls.NGRAM_SIZE,
+            max_sequence_length=cls.MAX_SEQUENCE_LENGTH,
+            mc_iterations=mc_iterations,
+            uncertainty_level=uncertainty_level,
+            target=cls.TARGET,
+            input_scope=input_scope,
+            label_column=cls.LABEL_COLUMN,
+            target_prior=target_prior,
+            conformal_coverage=conformal_coverage,
+        )
+
+
+class SurnameModel(_TrainedNameModel):
+    """A model that reads surnames only."""
+
+    @classmethod
+    def estimate(
+        cls,
+        data: pd.DataFrame,
+        surname_column: str,
+        *,
+        mc_iterations: int = 100,
+        uncertainty_level: float | None = None,
+        target_prior: dict[str, float] | None = None,
+        conformal_coverage: float | None = None,
+    ) -> pd.DataFrame:
+        """Estimate patterns from surnames.
+
+        Args:
+            data: Input rows.
+            surname_column: Column holding surnames.
+            mc_iterations: Monte Carlo dropout passes.
+            uncertainty_level: Interval level, or ``None`` for point estimates.
+            target_prior: Class prior of the population being scored.
+            conformal_coverage: Coverage for conformal prediction sets.
+
+        Returns:
+            pd.DataFrame: ``data`` with probabilities and metadata appended.
+
+        Raises:
+            ValueError: If ``surname_column`` is not in ``data``.
+        """
+        if surname_column not in data.columns:
+            raise ValueError(f"Surname column {surname_column!r} does not exist.")
+        return cls._run(
+            data,
+            surname_column,
+            "last-name",
+            mc_iterations=mc_iterations,
+            uncertainty_level=uncertainty_level,
+            target_prior=target_prior,
+            conformal_coverage=conformal_coverage,
+        )
+
+
+class FullNameModel(_TrainedNameModel):
+    """A model that reads first and last names joined into one string."""
+
+    @classmethod
+    def estimate(
+        cls,
+        data: pd.DataFrame,
+        surname_column: str,
+        first_name_column: str,
+        *,
+        mc_iterations: int = 100,
+        uncertainty_level: float | None = None,
+        target_prior: dict[str, float] | None = None,
+        conformal_coverage: float | None = None,
+    ) -> pd.DataFrame:
+        """Estimate patterns from full names.
+
+        Args:
+            data: Input rows.
+            surname_column: Column holding surnames.
+            first_name_column: Column holding first names.
+            mc_iterations: Monte Carlo dropout passes.
+            uncertainty_level: Interval level, or ``None`` for point estimates.
+            target_prior: Class prior of the population being scored.
+            conformal_coverage: Coverage for conformal prediction sets.
+
+        Returns:
+            pd.DataFrame: ``data`` with probabilities and metadata appended.
+        """
+        result, full_name_column = prepare_full_name_data(
+            data, surname_column, first_name_column
+        )
+        result = cls._run(
+            result,
+            full_name_column,
+            "full-name",
+            mc_iterations=mc_iterations,
+            uncertainty_level=uncertainty_level,
+            target_prior=target_prior,
+            conformal_coverage=conformal_coverage,
+        )
+        return result.drop(columns=[full_name_column])
