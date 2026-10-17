@@ -58,7 +58,7 @@ jobs:
           attestations: true
           # The `if:` above decides *which builds may publish*. This decides what
           # happens when one version is published twice, which that guard cannot
-          # see. The concurrency group serialises a manual dispatch and a tag
+          # see. The concurrency group serializes a manual dispatch and a tag
           # push aimed at the same version, it does not deduplicate them, and
           # cancel-in-progress is false -- so the queued run starts once the
           # first finishes and uploads identical files. A completed run is not

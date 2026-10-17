@@ -212,6 +212,7 @@ include = ["ethnicolr"]
 typeCheckingMode = "standard"
 
 [tool.codespell]
+builtin = "clear,rare,en-GB_to_en-US"
 # The census and wiki tables are names, not prose. codespell reported 12,249
 # findings across this repo and every one was in the corpora or the model
 # files -- there are no misspellings in the source. Auto-"correcting" a name
