@@ -300,17 +300,17 @@ class TestDataTypeEdgeCases:
 
     def test_datetime_in_name_columns(self):
         """Test handling of datetime objects in name columns."""
-        import datetime
+        import datetime as dt
 
         datetime_df = pd.DataFrame(
             [
                 {
-                    "last": datetime.datetime.now(tz=datetime.UTC),
+                    "last": dt.datetime.now(tz=dt.UTC),
                     "first": "John",
                 },
                 {
                     "last": "Smith",
-                    "first": datetime.datetime.now(tz=datetime.UTC).date(),
+                    "first": dt.datetime.now(tz=dt.UTC).date(),
                 },
             ]
         )
