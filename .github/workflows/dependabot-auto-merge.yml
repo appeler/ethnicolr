@@ -16,6 +16,7 @@ permissions: {}
 jobs:
   auto-merge:
     permissions:
+      actions: write
       contents: write        # arm auto-merge, or squash-merge outright
       pull-requests: write   # label, comment, merge
     uses: gojiplus/py-canon/.github/workflows/reusable-dependabot-auto-merge.yml@v1
