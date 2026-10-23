@@ -1,0 +1,194 @@
+{
+  "census-surname-default-output": {
+    "calls": [
+      {
+        "estimator": "estimate_census_surname",
+        "mc_iterations": 100,
+        "uncertainty_level": null,
+        "year": 2020
+      }
+    ],
+    "exit_code": 0,
+    "output": "Loading data\nReading input file: names.csv\nRunning Census 2020 estimate on 3 rows...\nSaving results to: census-estimates.csv\n[OK] Estimate completed successfully!\n  Processed: 3 rows\n  Estimated: 2 rows (66.7%)\n  Output: census-estimates.csv\n",
+    "written_files": {
+      "census-estimates.csv": "surname,id,race,white,black,api,hispanic,asian,nh_black,nh_white,other\nsmith,1,white,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nzhang,2,api,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nunknownname,3,,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\n"
+    }
+  },
+  "census-surname-help": {
+    "calls": [],
+    "exit_code": 0,
+    "output": "Usage: cli estimate census-surname [OPTIONS] INPUT_FILE\n\n  Estimate race/ethnicity using Census LSTM model.\n\n  Uses LSTM neural networks trained on U.S. Census data to predict\n  race/ethnicity probabilities from last names.\n\n  Examples:\n\n      # Basic estimate\n      ethnicolr estimate census-surname data.csv -l surname\n\n      # With MC-dropout ranges\n      ethnicolr estimate census-surname data.csv -l surname -u 0.95 -m 200\n\n      # Specify output file and Census year\n      ethnicolr estimate census-surname data.csv -l surname -o results.csv -y 2000\n\nOptions:\n  -l, --last-column TEXT          Column name containing last names  [required]\n  -o, --output PATH               Output CSV file (default: census-\n                                  estimates.csv)\n  -y, --year [2000|2010|2020]     Census year for model  [default: 2020]\n  -u, --uncertainty-level FLOAT RANGE\n                                  MC-dropout range level (0.0-1.0)  [0.0<x<1.0]\n  -m, --mc-iterations INTEGER RANGE\n                                  Monte Carlo iterations for MC-dropout ranges\n                                  [default: 100; 10<=x<=1000]\n  --overwrite                     Overwrite output file if it exists\n  --help                          Show this message and exit.\n",
+    "written_files": {}
+  },
+  "census-surname-missing-column": {
+    "calls": [],
+    "exit_code": 1,
+    "output": "Loading data\nReading input file: names.csv\nError: Estimate failed: Column 'last' not found. Available columns: surname, id\n",
+    "written_files": {}
+  },
+  "census-surname-quick": {
+    "calls": [
+      {
+        "estimator": "estimate_census_surname",
+        "mc_iterations": 100,
+        "uncertainty_level": null,
+        "year": 2020
+      }
+    ],
+    "exit_code": 0,
+    "output": "Running quick estimate with census-surname model...\nLoading data\nReading input file: names.csv\nRunning Census 2020 estimate on 3 rows...\nSaving results to: names-estimates.csv\n[OK] Estimate completed successfully!\n  Processed: 3 rows\n  Estimated: 2 rows (66.7%)\n  Output: names-estimates.csv\n\nSample estimates:\n    surname  race  white  black  api  hispanic\n      smith white    0.5    0.1  0.2      0.15\n      zhang   api    0.5    0.1  0.2      0.15\nunknownname   NaN    0.5    0.1  0.2      0.15\n",
+    "written_files": {
+      "names-estimates.csv": "surname,id,race,white,black,api,hispanic,asian,nh_black,nh_white,other\nsmith,1,white,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nzhang,2,api,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nunknownname,3,,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\n"
+    }
+  },
+  "census-surname-verbose": {
+    "calls": [
+      {
+        "estimator": "estimate_census_surname",
+        "mc_iterations": 50,
+        "uncertainty_level": 0.9,
+        "year": 2020
+      }
+    ],
+    "exit_code": 0,
+    "output": "Loading data\nReading input file: names.csv\nRunning Census 2020 estimate on 3 rows...\nSaving results to: out/result.csv\n[OK] Estimate completed successfully!\n  Processed: 3 rows\n  Estimated: 2 rows (66.7%)\n  Output: out/result.csv\n\nSample estimates:\n    surname  race  white  black  api  hispanic\n      smith white    0.5    0.1  0.2      0.15\n      zhang   api    0.5    0.1  0.2      0.15\nunknownname   NaN    0.5    0.1  0.2      0.15\n",
+    "written_files": {
+      "out/result.csv": "surname,id,race,white,black,api,hispanic,asian,nh_black,nh_white,other\nsmith,1,white,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nzhang,2,api,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nunknownname,3,,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\n"
+    }
+  },
+  "census-surname-year": {
+    "calls": [
+      {
+        "estimator": "estimate_census_surname",
+        "mc_iterations": 100,
+        "uncertainty_level": null,
+        "year": 2000
+      }
+    ],
+    "exit_code": 0,
+    "output": "Loading data\nReading input file: names.csv\nRunning Census 2000 estimate on 3 rows...\nSaving results to: census-2000.csv\n[OK] Estimate completed successfully!\n  Processed: 3 rows\n  Estimated: 2 rows (66.7%)\n  Output: census-2000.csv\n",
+    "written_files": {
+      "census-2000.csv": "surname,id,race,white,black,api,hispanic,asian,nh_black,nh_white,other\nsmith,1,white,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nzhang,2,api,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nunknownname,3,,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\n"
+    }
+  },
+  "estimate-help": {
+    "calls": [],
+    "exit_code": 0,
+    "output": "Usage: cli estimate [OPTIONS] COMMAND [ARGS]...\n\n  Estimate race/ethnicity from name patterns using supported models.\n\nOptions:\n  --help  Show this message and exit.\n\nCommands:\n  census-surname         Estimate race/ethnicity using Census LSTM model.\n  florida-voter-surname  Estimate race/ethnicity using Florida voter...\n  wikipedia-surname      Estimate race/ethnicity using Wikipedia LSTM model.\n",
+    "written_files": {}
+  },
+  "florida-voter-surname-default-output": {
+    "calls": [
+      {
+        "estimator": "estimate_florida_voter_surname",
+        "mc_iterations": 100,
+        "uncertainty_level": null
+      }
+    ],
+    "exit_code": 0,
+    "output": "Loading data\nReading input file: names.csv\nRunning Florida estimate on 3 rows...\nSaving results to: florida-estimates.csv\n[OK] Estimate completed successfully!\n  Processed: 3 rows\n  Estimated: 2 rows (66.7%)\n  Output: florida-estimates.csv\n",
+    "written_files": {
+      "florida-estimates.csv": "surname,id,race,white,black,api,hispanic,asian,nh_black,nh_white,other\nsmith,1,white,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nzhang,2,api,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nunknownname,3,,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\n"
+    }
+  },
+  "florida-voter-surname-help": {
+    "calls": [],
+    "exit_code": 0,
+    "output": "Usage: cli estimate florida-voter-surname [OPTIONS] INPUT_FILE\n\n  Estimate race/ethnicity using Florida voter registration LSTM model.\n\n  Uses LSTM neural networks trained on Florida voter registration data to\n  predict race/ethnicity probabilities from last names. Estimates 5 categories:\n  asian, hispanic, nh_black, nh_white, other.\n\n  Examples:\n\n      # Basic estimate\n      ethnicolr estimate florida-voter-surname data.csv -l surname\n\n      # With MC-dropout ranges\n      ethnicolr estimate florida-voter-surname data.csv -l surname -u 0.95 -m 200\n\n      # Specify output file\n      ethnicolr estimate florida-voter-surname data.csv -l surname -o results.csv\n\nOptions:\n  -l, --last-column TEXT          Column name containing last names  [required]\n  -o, --output PATH               Output CSV file (default: florida-\n                                  estimates.csv)\n  -u, --uncertainty-level FLOAT RANGE\n                                  MC-dropout range level (0.0-1.0)  [0.0<x<1.0]\n  -m, --mc-iterations INTEGER RANGE\n                                  Monte Carlo iterations for MC-dropout ranges\n                                  [default: 100; 10<=x<=1000]\n  --overwrite                     Overwrite output file if it exists\n  --help                          Show this message and exit.\n",
+    "written_files": {}
+  },
+  "florida-voter-surname-missing-column": {
+    "calls": [],
+    "exit_code": 1,
+    "output": "Loading data\nReading input file: names.csv\nError: Estimate failed: Column 'last' not found. Available columns: surname, id\n",
+    "written_files": {}
+  },
+  "florida-voter-surname-quick": {
+    "calls": [
+      {
+        "estimator": "estimate_florida_voter_surname",
+        "mc_iterations": 100,
+        "uncertainty_level": null
+      }
+    ],
+    "exit_code": 0,
+    "output": "Running quick estimate with florida-voter-surname model...\nLoading data\nReading input file: names.csv\nRunning Florida estimate on 3 rows...\nSaving results to: names-estimates.csv\n[OK] Estimate completed successfully!\n  Processed: 3 rows\n  Estimated: 2 rows (66.7%)\n  Output: names-estimates.csv\n\nSample estimates:\n    surname  race  hispanic  asian  nh_black  nh_white\n      smith white      0.15   0.25      0.05       0.6\n      zhang   api      0.15   0.25      0.05       0.6\nunknownname   NaN      0.15   0.25      0.05       0.6\n",
+    "written_files": {
+      "names-estimates.csv": "surname,id,race,white,black,api,hispanic,asian,nh_black,nh_white,other\nsmith,1,white,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nzhang,2,api,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nunknownname,3,,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\n"
+    }
+  },
+  "florida-voter-surname-verbose": {
+    "calls": [
+      {
+        "estimator": "estimate_florida_voter_surname",
+        "mc_iterations": 50,
+        "uncertainty_level": 0.9
+      }
+    ],
+    "exit_code": 0,
+    "output": "Loading data\nReading input file: names.csv\nRunning Florida estimate on 3 rows...\nSaving results to: out/result.csv\n[OK] Estimate completed successfully!\n  Processed: 3 rows\n  Estimated: 2 rows (66.7%)\n  Output: out/result.csv\n\nSample estimates:\n    surname  race  hispanic  asian  nh_black  nh_white\n      smith white      0.15   0.25      0.05       0.6\n      zhang   api      0.15   0.25      0.05       0.6\nunknownname   NaN      0.15   0.25      0.05       0.6\n",
+    "written_files": {
+      "out/result.csv": "surname,id,race,white,black,api,hispanic,asian,nh_black,nh_white,other\nsmith,1,white,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nzhang,2,api,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nunknownname,3,,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\n"
+    }
+  },
+  "quick-estimate-help": {
+    "calls": [],
+    "exit_code": 0,
+    "output": "Usage: cli quick-estimate [OPTIONS] INPUT_FILE\n\n  Quick estimate using the best available model.\n\n  Automatically selects appropriate model based on available data and provides\n  fast estimates with minimal configuration.\n\nOptions:\n  -l, --last-column TEXT          [required]\n  -o, --output PATH\n  --model [census-surname|florida-voter-surname|wikipedia-surname]\n                                  [default: census-surname]\n  --help                          Show this message and exit.\n",
+    "written_files": {}
+  },
+  "wikipedia-surname-default-output": {
+    "calls": [
+      {
+        "estimator": "estimate_wikipedia_surname",
+        "mc_iterations": 100,
+        "uncertainty_level": null
+      }
+    ],
+    "exit_code": 0,
+    "output": "Loading data\nReading input file: names.csv\nRunning Wikipedia estimate on 3 rows...\nSaving results to: wiki-estimates.csv\n[OK] Estimate completed successfully!\n  Processed: 3 rows\n  Estimated: 2 rows (66.7%)\n  Output: wiki-estimates.csv\n",
+    "written_files": {
+      "wiki-estimates.csv": "surname,id,race,white,black,api,hispanic,asian,nh_black,nh_white,other\nsmith,1,white,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nzhang,2,api,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nunknownname,3,,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\n"
+    }
+  },
+  "wikipedia-surname-help": {
+    "calls": [],
+    "exit_code": 0,
+    "output": "Usage: cli estimate wikipedia-surname [OPTIONS] INPUT_FILE\n\n  Estimate race/ethnicity using Wikipedia LSTM model.\n\n  Uses LSTM neural networks trained on Wikipedia person data to predict detailed\n  ethnic categories from last names. Provides 13 ethnic categories with\n  hierarchical naming (e.g., \"GreaterEuropean,WestEuropean,Germanic\").\n\n  Examples:\n\n      # Basic estimate\n      ethnicolr estimate wikipedia-surname data.csv -l surname\n\n      # With MC-dropout ranges\n      ethnicolr estimate wikipedia-surname data.csv -l surname -u 0.95 -m 200\n\n      # Specify output file\n      ethnicolr estimate wikipedia-surname data.csv -l surname -o results.csv\n\nOptions:\n  -l, --last-column TEXT          Column name containing last names  [required]\n  -o, --output PATH               Output CSV file (default: wiki-estimates.csv)\n  -u, --uncertainty-level FLOAT RANGE\n                                  MC-dropout range level (0.0-1.0)  [0.0<x<1.0]\n  -m, --mc-iterations INTEGER RANGE\n                                  Monte Carlo iterations for MC-dropout ranges\n                                  [default: 100; 10<=x<=1000]\n  --overwrite                     Overwrite output file if it exists\n  --help                          Show this message and exit.\n",
+    "written_files": {}
+  },
+  "wikipedia-surname-missing-column": {
+    "calls": [],
+    "exit_code": 1,
+    "output": "Loading data\nReading input file: names.csv\nError: Estimate failed: Column 'last' not found. Available columns: surname, id\n",
+    "written_files": {}
+  },
+  "wikipedia-surname-quick": {
+    "calls": [
+      {
+        "estimator": "estimate_wikipedia_surname",
+        "mc_iterations": 100,
+        "uncertainty_level": null
+      }
+    ],
+    "exit_code": 0,
+    "output": "Running quick estimate with wikipedia-surname model...\nLoading data\nReading input file: names.csv\nRunning Wikipedia estimate on 3 rows...\nSaving results to: names-estimates.csv\n[OK] Estimate completed successfully!\n  Processed: 3 rows\n  Estimated: 2 rows (66.7%)\n  Output: names-estimates.csv\n\nSample estimates:\n    surname  race\n      smith white\n      zhang   api\nunknownname   NaN\n",
+    "written_files": {
+      "names-estimates.csv": "surname,id,race,white,black,api,hispanic,asian,nh_black,nh_white,other\nsmith,1,white,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nzhang,2,api,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nunknownname,3,,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\n"
+    }
+  },
+  "wikipedia-surname-verbose": {
+    "calls": [
+      {
+        "estimator": "estimate_wikipedia_surname",
+        "mc_iterations": 50,
+        "uncertainty_level": 0.9
+      }
+    ],
+    "exit_code": 0,
+    "output": "Loading data\nReading input file: names.csv\nRunning Wikipedia estimate on 3 rows...\nSaving results to: out/result.csv\n[OK] Estimate completed successfully!\n  Processed: 3 rows\n  Estimated: 2 rows (66.7%)\n  Output: out/result.csv\n\nSample estimates:\n    surname  race\n      smith white\n      zhang   api\nunknownname   NaN\n",
+    "written_files": {
+      "out/result.csv": "surname,id,race,white,black,api,hispanic,asian,nh_black,nh_white,other\nsmith,1,white,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nzhang,2,api,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\nunknownname,3,,0.5,0.1,0.2,0.15,0.25,0.05,0.6,0.1\n"
+    }
+  }
+}

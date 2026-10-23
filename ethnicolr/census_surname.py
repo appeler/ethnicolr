@@ -8,12 +8,9 @@ from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-import numpy as np
-
 from .inference import (
     add_inference_metadata,
     combined_name_support,
-    rename_conflicting_input_columns,
 )
 from .neural_name_model import NeuralNameModel
 from .runtime_tables import CENSUS_SURNAME_SCHEMA, read_runtime_table
@@ -73,44 +70,12 @@ def lookup_census_surname(
         cast("pd.Series", data[surname_column])
     )
 
-    output_columns = set(CENSUS_PERCENTAGE_COLUMNS) | {"race"}
-    if uncertainty_level is not None:
-        for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
-            output_columns.update(
-                {f"{percentage_column}_lower", f"{percentage_column}_upper"}
-            )
-    result = rename_conflicting_input_columns(data, output_columns)
-    for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
-        result[percentage_column] = matched_names[percentage_column].to_numpy()
+    # name_dictionaries imports this module, so its helper loads at call time.
+    from .name_dictionaries import _add_census_percentages
 
-    if uncertainty_level is not None:
-        if not 0 < uncertainty_level < 1:
-            raise ValueError("uncertainty_level must be strictly between 0 and 1")
-        from .name_dictionaries import wilson_interval
-
-        sample_sizes = matched_names["count"].to_numpy(dtype=float)
-        for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
-            proportions = result[percentage_column].to_numpy(dtype=float) / 100
-            lower_bound, upper_bound = wilson_interval(
-                proportions,
-                sample_sizes,
-                uncertainty_level,
-            )
-            result[f"{percentage_column}_lower"] = (lower_bound * 100).round(2)
-            result[f"{percentage_column}_upper"] = (upper_bound * 100).round(2)
-    matched_rows = np.isfinite(
-        result[CENSUS_PERCENTAGE_COLUMNS].to_numpy(dtype=float)
-    ).any(axis=1)
-    predicted_categories = np.full(len(result), None, dtype=object)
-    if matched_rows.any():
-        matched_percentages = result.loc[
-            matched_rows, CENSUS_PERCENTAGE_COLUMNS
-        ].to_numpy(dtype=float)
-        predicted_categories[matched_rows] = [
-            CENSUS_CATEGORIES[category_index]
-            for category_index in np.nanargmax(matched_percentages, axis=1)
-        ]
-    result["race"] = predicted_categories
+    result, matched_rows = _add_census_percentages(
+        data, matched_names, uncertainty_level
+    )
 
     scored_rows = script_supported & matched_rows
     abstention_reasons[script_supported & ~matched_rows] = "out-of-dictionary"
