@@ -97,7 +97,7 @@ class NeuralNameModel:
         if name_column not in data.columns:
             raise ValueError(f"Column {name_column!r} does not exist.")
 
-        if (data.columns == name_column).sum() > 1:
+        if data.columns.tolist().count(name_column) > 1:
             raise ValueError(f"Duplicate column name {name_column!r}.")
         null_rows = np.asarray(data[name_column].isna(), dtype=bool)
         null_count = int(null_rows.sum())
@@ -217,7 +217,12 @@ class NeuralNameModel:
         validate_mc_dropout(uncertainty_level, mc_iterations)
 
         data[name_column] = (
-            data[name_column].fillna("").astype(str).str.strip().str.title()
+            data[name_column]
+            .astype("string")
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .str.title()
         )
 
         model_resources = cls._load_resources(vocabulary_file, labels_file, model_file)

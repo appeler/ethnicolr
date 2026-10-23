@@ -68,8 +68,8 @@ def load_census_data(year: int) -> pd.DataFrame:
         raise FileNotFoundError(f"Census data not found: {csv_path}")
 
     df = pd.read_csv(csv_path)
-    df.dropna(subset=["name"], inplace=True)
-    df.replace("(S)", 0, inplace=True)
+    df = df.dropna(subset=["name"])
+    df = df.replace("(S)", 0)
 
     for col in [*RACE_PCT_COLS, "count"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
