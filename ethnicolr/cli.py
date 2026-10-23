@@ -4,6 +4,7 @@ Provides user-friendly commands for race/ethnicity estimation with improved
 help, progress indicators, and better error handling.
 """
 
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 import click
@@ -108,52 +109,137 @@ def estimate():
     """Estimate race/ethnicity from name patterns using supported models."""
 
 
+def _estimate_options(default_output: str, *model_options):
+    """Attach the arguments and options every estimate command takes.
+
+    ``model_options`` go between ``--output`` and ``--uncertainty-level`` so
+    each command's help lists its options in the established order.
+    """
+    options = [
+        click.argument("input_file", type=CSVFile()),
+        click.option(
+            "-l",
+            "--last-column",
+            "last_col",
+            required=True,
+            help="Column name containing last names",
+        ),
+        click.option(
+            "-o",
+            "--output",
+            type=OutputPath(),
+            default=default_output,
+            help=f"Output CSV file (default: {default_output})",
+        ),
+        *model_options,
+        click.option(
+            "-u",
+            "--uncertainty-level",
+            type=click.FloatRange(0.0, 1.0, min_open=True, max_open=True),
+            default=None,
+            show_default=True,
+            help="MC-dropout range level (0.0-1.0)",
+        ),
+        click.option(
+            "-m",
+            "--mc-iterations",
+            type=click.IntRange(10, 1000),
+            default=100,
+            show_default=True,
+            help="Monte Carlo iterations for MC-dropout ranges",
+        ),
+        click.option(
+            "--overwrite", is_flag=True, help="Overwrite output file if it exists"
+        ),
+    ]
+
+    def decorate(command):
+        for option in reversed(options):
+            command = option(command)
+        return command
+
+    return decorate
+
+
+def _run_estimate(
+    ctx: click.Context,
+    input_file: Path,
+    last_col: str,
+    output: Path,
+    overwrite: bool,
+    *,
+    label: str,
+    estimator: Callable[..., pd.DataFrame],
+    sample_categories: Sequence[str],
+    **estimator_options,
+):
+    """Read the input CSV, run one estimator, save the result, and summarize it."""
+    verbose = ctx.obj.get("verbose", False)
+
+    if output.exists() and not overwrite:
+        click.confirm(f"Output file {output} exists. Overwrite?", abort=True)
+
+    try:
+        with click.progressbar(length=4, label="Loading data") as bar:
+            click.echo(f"Reading input file: {input_file}")
+            input_data = pd.read_csv(input_file, dtype=str, keep_default_na=False)
+            bar.update(1)
+
+            if last_col not in input_data.columns:
+                raise click.ClickException(
+                    f"Column '{last_col}' not found. Available columns: "
+                    f"{', '.join(input_data.columns)}"
+                )
+            bar.update(1)
+
+            click.echo(f"Running {label} estimate on {len(input_data)} rows...")
+            result = estimator(input_data, last_col, **estimator_options)
+            bar.update(1)
+
+            click.echo(f"Saving results to: {output}")
+            result.to_csv(output, index=False)
+            bar.update(1)
+
+        estimated_count = result.dropna(subset=["race"]).shape[0]
+        success_rate = estimated_count / len(result) * 100
+
+        click.echo(click.style(f"{CHECK} Estimate completed successfully!", fg="green"))
+        click.echo(f"  Processed: {len(result)} rows")
+        click.echo(f"  Estimated: {estimated_count} rows ({success_rate:.1f}%)")
+        click.echo(f"  Output: {output}")
+
+        if verbose and len(result) > 0:
+            click.echo("\nSample estimates:")
+            sample = result.head(3)[
+                [last_col, "race"]
+                + [col for col in result.columns if col in sample_categories]
+            ]
+            click.echo(sample.to_string(index=False))
+
+    except FileNotFoundError as e:
+        raise click.ClickException(f"Model files not found: {e}") from e
+    except Exception as e:
+        raise click.ClickException(f"Estimate failed: {e}") from e
+
+
 @estimate.command("census-surname")
-@click.argument("input_file", type=CSVFile())
-@click.option(
-    "-l",
-    "--last-column",
-    "last_col",
-    required=True,
-    help="Column name containing last names",
+@_estimate_options(
+    "census-estimates.csv",
+    click.option(
+        "-y",
+        "--year",
+        type=click.Choice(["2000", "2010", "2020"]),
+        default="2020",
+        show_default=True,
+        help="Census year for model",
+    ),
 )
-@click.option(
-    "-o",
-    "--output",
-    type=OutputPath(),
-    help="Output CSV file (default: census-estimates.csv)",
-)
-@click.option(
-    "-y",
-    "--year",
-    type=click.Choice(["2000", "2010", "2020"]),
-    default="2020",
-    show_default=True,
-    help="Census year for model",
-)
-@click.option(
-    "-u",
-    "--uncertainty-level",
-    type=click.FloatRange(0.0, 1.0, min_open=True, max_open=True),
-    default=None,
-    show_default=True,
-    help="MC-dropout range level (0.0-1.0)",
-)
-@click.option(
-    "-m",
-    "--mc-iterations",
-    type=click.IntRange(10, 1000),
-    default=100,
-    show_default=True,
-    help="Monte Carlo iterations for MC-dropout ranges",
-)
-@click.option("--overwrite", is_flag=True, help="Overwrite output file if it exists")
 @click.pass_context
 def estimate_census_surname_command(
     ctx: click.Context,
     input_file: Path,
     last_col: str,
-    output: Path | None,
+    output: Path,
     year: str,
     uncertainty_level: float | None,
     mc_iterations: int,
@@ -178,113 +264,29 @@ def estimate_census_surname_command(
         # Specify output file and Census year
         ethnicolr estimate census-surname data.csv -l surname -o results.csv -y 2000
     """
-    verbose = ctx.obj.get("verbose", False)
-
-    # Default output filename
-    if output is None:
-        output = Path("census-estimates.csv")
-
-    # Check if output file exists
-    if output.exists() and not overwrite:
-        click.confirm(f"Output file {output} exists. Overwrite?", abort=True)
-
-    try:
-        with click.progressbar(length=4, label="Loading data") as bar:
-            # Load input data
-            click.echo(f"Reading input file: {input_file}")
-            input_data = pd.read_csv(input_file, dtype=str, keep_default_na=False)
-            bar.update(1)
-
-            # Validate column exists
-            if last_col not in input_data.columns:
-                raise click.ClickException(
-                    f"Column '{last_col}' not found. Available columns: "
-                    f"{', '.join(input_data.columns)}"
-                )
-            bar.update(1)
-
-            # Run estimate
-            click.echo(f"Running Census {year} estimate on {len(input_data)} rows...")
-            result = estimate_census_surname(
-                input_data,
-                last_col,
-                year=int(year),
-                uncertainty_level=uncertainty_level,
-                mc_iterations=mc_iterations,
-            )
-            bar.update(1)
-
-            # Save results
-            click.echo(f"Saving results to: {output}")
-            result.to_csv(output, index=False)
-            bar.update(1)
-
-        # Success message
-        estimated_count = result.dropna(subset=["race"]).shape[0]
-        success_rate = estimated_count / len(result) * 100
-
-        click.echo(click.style(f"{CHECK} Estimate completed successfully!", fg="green"))
-        click.echo(f"  Processed: {len(result)} rows")
-        click.echo(f"  Estimated: {estimated_count} rows ({success_rate:.1f}%)")
-        click.echo(f"  Output: {output}")
-
-        # Show sample estimates
-        if verbose and len(result) > 0:
-            click.echo("\nSample estimates:")
-            sample = result.head(3)[
-                [last_col, "race"]
-                + [
-                    col
-                    for col in result.columns
-                    if col in ["white", "black", "api", "hispanic"]
-                ]
-            ]
-            click.echo(sample.to_string(index=False))
-
-    except FileNotFoundError as e:
-        raise click.ClickException(f"Model files not found: {e}") from e
-    except Exception as e:
-        raise click.ClickException(f"Estimate failed: {e}") from e
+    _run_estimate(
+        ctx,
+        input_file,
+        last_col,
+        output,
+        overwrite,
+        label=f"Census {year}",
+        estimator=estimate_census_surname,
+        sample_categories=["white", "black", "api", "hispanic"],
+        year=int(year),
+        uncertainty_level=uncertainty_level,
+        mc_iterations=mc_iterations,
+    )
 
 
 @estimate.command("florida-voter-surname")
-@click.argument("input_file", type=CSVFile())
-@click.option(
-    "-l",
-    "--last-column",
-    "last_col",
-    required=True,
-    help="Column name containing last names",
-)
-@click.option(
-    "-o",
-    "--output",
-    type=OutputPath(),
-    help="Output CSV file (default: florida-estimates.csv)",
-)
-@click.option(
-    "-u",
-    "--uncertainty-level",
-    type=click.FloatRange(0.0, 1.0, min_open=True, max_open=True),
-    default=None,
-    show_default=True,
-    help="MC-dropout range level (0.0-1.0)",
-)
-@click.option(
-    "-m",
-    "--mc-iterations",
-    type=click.IntRange(10, 1000),
-    default=100,
-    show_default=True,
-    help="Monte Carlo iterations for MC-dropout ranges",
-)
-@click.option("--overwrite", is_flag=True, help="Overwrite output file if it exists")
+@_estimate_options("florida-estimates.csv")
 @click.pass_context
 def estimate_florida_voter_surname_command(
     ctx: click.Context,
     input_file: Path,
     last_col: str,
-    output: Path | None,
+    output: Path,
     uncertainty_level: float | None,
     mc_iterations: int,
     overwrite: bool,
@@ -309,112 +311,28 @@ def estimate_florida_voter_surname_command(
         # Specify output file
         ethnicolr estimate florida-voter-surname data.csv -l surname -o results.csv
     """
-    verbose = ctx.obj.get("verbose", False)
-
-    # Default output filename
-    if output is None:
-        output = Path("florida-estimates.csv")
-
-    # Check if output file exists
-    if output.exists() and not overwrite:
-        click.confirm(f"Output file {output} exists. Overwrite?", abort=True)
-
-    try:
-        with click.progressbar(length=4, label="Loading data") as bar:
-            # Load input data
-            click.echo(f"Reading input file: {input_file}")
-            input_data = pd.read_csv(input_file, dtype=str, keep_default_na=False)
-            bar.update(1)
-
-            # Validate column exists
-            if last_col not in input_data.columns:
-                raise click.ClickException(
-                    f"Column '{last_col}' not found. Available columns: "
-                    f"{', '.join(input_data.columns)}"
-                )
-            bar.update(1)
-
-            # Run estimate
-            click.echo(f"Running Florida estimate on {len(input_data)} rows...")
-            result = estimate_florida_voter_surname(
-                input_data,
-                last_col,
-                uncertainty_level=uncertainty_level,
-                mc_iterations=mc_iterations,
-            )
-            bar.update(1)
-
-            # Save results
-            click.echo(f"Saving results to: {output}")
-            result.to_csv(output, index=False)
-            bar.update(1)
-
-        # Success message
-        estimated_count = result.dropna(subset=["race"]).shape[0]
-        success_rate = estimated_count / len(result) * 100
-
-        click.echo(click.style(f"{CHECK} Estimate completed successfully!", fg="green"))
-        click.echo(f"  Processed: {len(result)} rows")
-        click.echo(f"  Estimated: {estimated_count} rows ({success_rate:.1f}%)")
-        click.echo(f"  Output: {output}")
-
-        # Show sample estimates
-        if verbose and len(result) > 0:
-            click.echo("\nSample estimates:")
-            sample = result.head(3)[
-                [last_col, "race"]
-                + [
-                    col
-                    for col in result.columns
-                    if col in ["asian", "hispanic", "nh_black", "nh_white"]
-                ]
-            ]
-            click.echo(sample.to_string(index=False))
-
-    except FileNotFoundError as e:
-        raise click.ClickException(f"Model files not found: {e}") from e
-    except Exception as e:
-        raise click.ClickException(f"Estimate failed: {e}") from e
+    _run_estimate(
+        ctx,
+        input_file,
+        last_col,
+        output,
+        overwrite,
+        label="Florida",
+        estimator=estimate_florida_voter_surname,
+        sample_categories=["asian", "hispanic", "nh_black", "nh_white"],
+        uncertainty_level=uncertainty_level,
+        mc_iterations=mc_iterations,
+    )
 
 
 @estimate.command("wikipedia-surname")
-@click.argument("input_file", type=CSVFile())
-@click.option(
-    "-l",
-    "--last-column",
-    "last_col",
-    required=True,
-    help="Column name containing last names",
-)
-@click.option(
-    "-o",
-    "--output",
-    type=OutputPath(),
-    help="Output CSV file (default: wiki-estimates.csv)",
-)
-@click.option(
-    "-u",
-    "--uncertainty-level",
-    type=click.FloatRange(0.0, 1.0, min_open=True, max_open=True),
-    default=None,
-    show_default=True,
-    help="MC-dropout range level (0.0-1.0)",
-)
-@click.option(
-    "-m",
-    "--mc-iterations",
-    type=click.IntRange(10, 1000),
-    default=100,
-    show_default=True,
-    help="Monte Carlo iterations for MC-dropout ranges",
-)
-@click.option("--overwrite", is_flag=True, help="Overwrite output file if it exists")
+@_estimate_options("wiki-estimates.csv")
 @click.pass_context
 def estimate_wikipedia_surname_command(
     ctx: click.Context,
     input_file: Path,
     last_col: str,
-    output: Path | None,
+    output: Path,
     uncertainty_level: float | None,
     mc_iterations: int,
     overwrite: bool,
@@ -439,67 +357,19 @@ def estimate_wikipedia_surname_command(
         # Specify output file
         ethnicolr estimate wikipedia-surname data.csv -l surname -o results.csv
     """
-    verbose = ctx.obj.get("verbose", False)
-
-    # Default output filename
-    if output is None:
-        output = Path("wiki-estimates.csv")
-
-    # Check if output file exists
-    if output.exists() and not overwrite:
-        click.confirm(f"Output file {output} exists. Overwrite?", abort=True)
-
-    try:
-        with click.progressbar(length=4, label="Loading data") as bar:
-            # Load input data
-            click.echo(f"Reading input file: {input_file}")
-            input_data = pd.read_csv(input_file, dtype=str, keep_default_na=False)
-            bar.update(1)
-
-            # Validate column exists
-            if last_col not in input_data.columns:
-                raise click.ClickException(
-                    f"Column '{last_col}' not found. Available columns: "
-                    f"{', '.join(input_data.columns)}"
-                )
-            bar.update(1)
-
-            # Run estimate
-            click.echo(f"Running Wikipedia estimate on {len(input_data)} rows...")
-            result = estimate_wikipedia_surname(
-                input_data,
-                last_col,
-                uncertainty_level=uncertainty_level,
-                mc_iterations=mc_iterations,
-            )
-            bar.update(1)
-
-            # Save results
-            click.echo(f"Saving results to: {output}")
-            result.to_csv(output, index=False)
-            bar.update(1)
-
-        # Success message
-        estimated_count = result.dropna(subset=["race"]).shape[0]
-        success_rate = estimated_count / len(result) * 100
-
-        click.echo(click.style(f"{CHECK} Estimate completed successfully!", fg="green"))
-        click.echo(f"  Processed: {len(result)} rows")
-        click.echo(f"  Estimated: {estimated_count} rows ({success_rate:.1f}%)")
-        click.echo(f"  Output: {output}")
-
-        # Show sample estimates
-        if verbose and len(result) > 0:
-            click.echo("\nSample estimates:")
-            # Show just the main race column for readability since wiki has
-            # very detailed categories
-            sample = result.head(3)[[last_col, "race"]]
-            click.echo(sample.to_string(index=False))
-
-    except FileNotFoundError as e:
-        raise click.ClickException(f"Model files not found: {e}") from e
-    except Exception as e:
-        raise click.ClickException(f"Estimate failed: {e}") from e
+    _run_estimate(
+        ctx,
+        input_file,
+        last_col,
+        output,
+        overwrite,
+        label="Wikipedia",
+        estimator=estimate_wikipedia_surname,
+        # The Wikipedia categories are too detailed to show beside the label.
+        sample_categories=[],
+        uncertainty_level=uncertainty_level,
+        mc_iterations=mc_iterations,
+    )
 
 
 @cli.group()

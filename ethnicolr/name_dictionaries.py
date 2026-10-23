@@ -174,6 +174,107 @@ def _normalize_names(series: pd.Series) -> pd.Series:
     return series.fillna("").astype(str).str.strip().str.upper()
 
 
+def _predict_categories(
+    probabilities: np.ndarray, rows: np.ndarray, categories: list[str]
+) -> np.ndarray:
+    """Return the highest-probability category for ``rows`` and None elsewhere."""
+    predicted_categories = np.full(len(probabilities), None, dtype=object)
+    if rows.any():
+        predicted_categories[rows] = [
+            categories[category_index]
+            for category_index in np.nanargmax(probabilities[rows], axis=1)
+        ]
+    return predicted_categories
+
+
+def _add_census_percentages(
+    data: pd.DataFrame,
+    matched_names: pd.DataFrame,
+    uncertainty_level: float | None,
+) -> tuple[pd.DataFrame, np.ndarray]:
+    """Append matched Census percentages, optional Wilson bounds, and ``race``.
+
+    Returns the result and a mask of rows whose name matched the table.
+    """
+    output_columns = set(CENSUS_PERCENTAGE_COLUMNS) | {"race"}
+    if uncertainty_level is not None:
+        for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
+            output_columns.update(
+                {f"{percentage_column}_lower", f"{percentage_column}_upper"}
+            )
+    result = rename_conflicting_input_columns(data, output_columns)
+    for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
+        result[percentage_column] = matched_names[percentage_column].to_numpy()
+
+    if uncertainty_level is not None:
+        if not 0 < uncertainty_level < 1:
+            raise ValueError("uncertainty_level must be strictly between 0 and 1")
+        sample_sizes = matched_names["count"].to_numpy(dtype=float)
+        for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
+            proportions = result[percentage_column].to_numpy(dtype=float) / 100
+            lower_bound, upper_bound = wilson_interval(
+                proportions, sample_sizes, uncertainty_level
+            )
+            result[f"{percentage_column}_lower"] = (lower_bound * 100).round(2)
+            result[f"{percentage_column}_upper"] = (upper_bound * 100).round(2)
+
+    percentages = result[CENSUS_PERCENTAGE_COLUMNS].to_numpy(dtype=float)
+    matched_rows = np.isfinite(percentages).any(axis=1)
+    result["race"] = _predict_categories(percentages, matched_rows, CENSUS_CATEGORIES)
+    return result, matched_rows
+
+
+def _prepare_full_name_input(
+    data: pd.DataFrame, surname_column: str, first_name_column: str
+) -> tuple[pd.DataFrame, np.ndarray, np.ndarray, pd.Series, pd.Series]:
+    """Check both name columns exist and normalize them for table lookup.
+
+    Returns a copy of ``data``, script support and abstention reasons for the
+    pair of names, and the normalized surnames and first names.
+    """
+    if surname_column not in data.columns or first_name_column not in data.columns:
+        raise ValueError(
+            "surname_column and first_name_column must exist in the DataFrame"
+        )
+
+    result = data.copy()
+    script_supported, abstention_reasons = combined_name_support(
+        cast("pd.Series", result[surname_column]),
+        cast("pd.Series", result[first_name_column]),
+    )
+    normalized_surnames = _normalize_names(cast("pd.Series", result[surname_column]))
+    normalized_first_names = _normalize_names(
+        cast("pd.Series", result[first_name_column])
+    )
+    return (
+        result,
+        script_supported,
+        abstention_reasons,
+        normalized_surnames,
+        normalized_first_names,
+    )
+
+
+def _add_full_name_estimates(
+    result: pd.DataFrame,
+    categories: list[str],
+    category_probabilities: np.ndarray,
+    scored_rows: np.ndarray,
+    evidence_basis: np.ndarray,
+) -> pd.DataFrame:
+    """Append category probabilities, the ``race`` label, and ``evidence_basis``."""
+    result = rename_conflicting_input_columns(
+        result, {*categories, "race", "evidence_basis"}
+    )
+    for category_index, category in enumerate(categories):
+        result[category] = category_probabilities[:, category_index]
+    result["race"] = _predict_categories(
+        category_probabilities, scored_rows, categories
+    )
+    result["evidence_basis"] = evidence_basis
+    return result
+
+
 def lookup_census_first_name(
     data: pd.DataFrame,
     first_name_column: str,
@@ -215,44 +316,9 @@ def lookup_census_first_name(
         cast("pd.Series", data[first_name_column])
     )
 
-    output_columns = set(CENSUS_PERCENTAGE_COLUMNS) | {"race"}
-    if uncertainty_level is not None:
-        for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
-            output_columns.update(
-                {f"{percentage_column}_lower", f"{percentage_column}_upper"}
-            )
-    result = rename_conflicting_input_columns(data, output_columns)
-    for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
-        result[percentage_column] = matched_names[percentage_column].to_numpy()
-
-    if uncertainty_level is not None:
-        if not 0 < uncertainty_level < 1:
-            raise ValueError("uncertainty_level must be between 0 and 1")
-        sample_sizes = matched_names["count"].to_numpy()
-        for percentage_column in CENSUS_PERCENTAGE_COLUMNS:
-            proportions = result[percentage_column].to_numpy() / 100
-            lower_bound, upper_bound = wilson_interval(
-                proportions, sample_sizes, uncertainty_level
-            )
-            result[f"{percentage_column}_lower"] = (lower_bound * 100).round(2)
-            result[f"{percentage_column}_upper"] = (upper_bound * 100).round(2)
-
-    matched_rows = np.asarray(
-        np.isfinite(matched_names[CENSUS_PERCENTAGE_COLUMNS].to_numpy(dtype=float)).any(
-            axis=1
-        ),
-        dtype=bool,
+    result, matched_rows = _add_census_percentages(
+        data, matched_names, uncertainty_level
     )
-    predicted_categories = np.full(len(result), None, dtype=object)
-    if matched_rows.any():
-        matched_percentages = result.loc[
-            matched_rows, CENSUS_PERCENTAGE_COLUMNS
-        ].to_numpy(dtype=float)
-        predicted_categories[matched_rows] = [
-            CENSUS_CATEGORIES[category_index]
-            for category_index in np.nanargmax(matched_percentages, axis=1)
-        ]
-    result["race"] = predicted_categories
     matched_count = int(matched_rows.sum())
     logger.info("Matched %d of %d first names", matched_count, len(result))
     scored_rows = script_supported & matched_rows
@@ -334,20 +400,13 @@ def estimate_census_full_name(
         get_census_surname_model_files,
     )
 
-    if surname_column not in data.columns or first_name_column not in data.columns:
-        raise ValueError(
-            "surname_column and first_name_column must exist in the DataFrame"
-        )
-
-    result = data.copy()
-    script_supported, abstention_reasons = combined_name_support(
-        cast("pd.Series", result[surname_column]),
-        cast("pd.Series", result[first_name_column]),
-    )
-    normalized_surnames = _normalize_names(cast("pd.Series", result[surname_column]))
-    normalized_first_names = _normalize_names(
-        cast("pd.Series", result[first_name_column])
-    )
+    (
+        result,
+        script_supported,
+        abstention_reasons,
+        normalized_surnames,
+        normalized_first_names,
+    ) = _prepare_full_name_input(data, surname_column, first_name_column)
 
     surname_table = _NameTables.census_surname_table(year)
     first_name_table = _NameTables.census_first_name_table()
@@ -527,21 +586,9 @@ def estimate_census_full_name(
         script_supported & has_any_probability & ~has_complete_distribution
     ] = "insufficient-evidence"
 
-    result = rename_conflicting_input_columns(
-        result, {*CENSUS_CATEGORIES, "race", "evidence_basis"}
+    result = _add_full_name_estimates(
+        result, CENSUS_CATEGORIES, category_probabilities, scored_rows, evidence_basis
     )
-    for category_index, category in enumerate(CENSUS_CATEGORIES):
-        result[category] = category_probabilities[:, category_index]
-    predicted_categories = np.full(row_count, None, dtype=object)
-    if scored_rows.any():
-        predicted_categories[scored_rows] = [
-            CENSUS_CATEGORIES[category_index]
-            for category_index in np.nanargmax(
-                category_probabilities[scored_rows], axis=1
-            )
-        ]
-    result["race"] = predicted_categories
-    result["evidence_basis"] = evidence_basis
 
     first_name_table_path = Path(CENSUS_FIRST_NAME_2020_FILE)
     surname_table_path = Path(CENSUS_SURNAME_FILES[year])
@@ -623,20 +670,13 @@ def estimate_voter_file_full_name(
     Raises:
         ValueError: If the name columns are missing from the DataFrame.
     """
-    if surname_column not in data.columns or first_name_column not in data.columns:
-        raise ValueError(
-            "surname_column and first_name_column must exist in the DataFrame"
-        )
-
-    result = data.copy()
-    script_supported, abstention_reasons = combined_name_support(
-        cast("pd.Series", result[surname_column]),
-        cast("pd.Series", result[first_name_column]),
-    )
-    normalized_surnames = _normalize_names(cast("pd.Series", result[surname_column]))
-    normalized_first_names = _normalize_names(
-        cast("pd.Series", result[first_name_column])
-    )
+    (
+        result,
+        script_supported,
+        abstention_reasons,
+        normalized_surnames,
+        normalized_first_names,
+    ) = _prepare_full_name_input(data, surname_column, first_name_column)
 
     surname_table = _NameTables.voter_file_name_probabilities("last")
     first_name_table = _NameTables.voter_file_name_probabilities("first")
@@ -689,21 +729,13 @@ def estimate_voter_file_full_name(
     scored_rows = script_supported & (surname_in_dictionary | first_name_in_dictionary)
     abstention_reasons[script_supported & ~scored_rows] = "out-of-dictionary"
 
-    result = rename_conflicting_input_columns(
-        result, {*VOTER_FILE_CATEGORIES, "race", "evidence_basis"}
+    result = _add_full_name_estimates(
+        result,
+        VOTER_FILE_CATEGORIES,
+        category_probabilities,
+        scored_rows,
+        evidence_basis,
     )
-    for category_index, category in enumerate(VOTER_FILE_CATEGORIES):
-        result[category] = category_probabilities[:, category_index]
-    predicted_categories = np.full(row_count, None, dtype=object)
-    if scored_rows.any():
-        predicted_categories[scored_rows] = [
-            VOTER_FILE_CATEGORIES[category_index]
-            for category_index in np.nanargmax(
-                category_probabilities[scored_rows], axis=1
-            )
-        ]
-    result["race"] = predicted_categories
-    result["evidence_basis"] = evidence_basis
 
     add_inference_metadata(
         result,

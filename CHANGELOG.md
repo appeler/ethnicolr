@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `lookup_census_first_name` now rejects an `uncertainty_level` outside (0, 1)
+  with "uncertainty_level must be strictly between 0 and 1", the message the
+  other estimators already use.
+
 ## [2.0.0] - 2026-08-17
 
 ### Fixed
