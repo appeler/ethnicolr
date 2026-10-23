@@ -227,16 +227,11 @@ def _add_census_percentages(
 def _prepare_full_name_input(
     data: pd.DataFrame, surname_column: str, first_name_column: str
 ) -> tuple[pd.DataFrame, np.ndarray, np.ndarray, pd.Series, pd.Series]:
-    """Check both name columns exist and normalize them for table lookup.
+    """Normalize both name columns for table lookup.
 
     Returns a copy of ``data``, script support and abstention reasons for the
     pair of names, and the normalized surnames and first names.
     """
-    if surname_column not in data.columns or first_name_column not in data.columns:
-        raise ValueError(
-            "surname_column and first_name_column must exist in the DataFrame"
-        )
-
     result = data.copy()
     script_supported, abstention_reasons = combined_name_support(
         cast("pd.Series", result[surname_column]),
@@ -399,6 +394,11 @@ def estimate_census_full_name(
         estimate_census_surname,
         get_census_surname_model_files,
     )
+
+    if surname_column not in data.columns or first_name_column not in data.columns:
+        raise ValueError(
+            "surname_column and first_name_column must exist in the DataFrame"
+        )
 
     (
         result,
@@ -670,6 +670,11 @@ def estimate_voter_file_full_name(
     Raises:
         ValueError: If the name columns are missing from the DataFrame.
     """
+    if surname_column not in data.columns or first_name_column not in data.columns:
+        raise ValueError(
+            "surname_column and first_name_column must exist in the DataFrame"
+        )
+
     (
         result,
         script_supported,
