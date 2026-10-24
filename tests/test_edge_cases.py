@@ -595,3 +595,15 @@ class TestErrorRecovery:
         # For now, just ensure basic prediction works
         result = estimate_census_surname(df, "last", year=2010)
         assert len(result) == 1
+
+
+def test_nullable_column_labels_do_not_break_duplicate_checks():
+    # An unrelated pd.NA label made list.count() raise "boolean value of NA
+    # is ambiguous" before any name column was read.
+    from ethnicolr.inference import prepare_full_name_data
+
+    df = pd.DataFrame(
+        [["smith", "john", 1]],
+        columns=pd.Index(["last", "first", pd.NA], dtype=object),
+    )
+    prepare_full_name_data(df, "last", "first")

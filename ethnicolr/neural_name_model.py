@@ -97,7 +97,7 @@ class NeuralNameModel:
         if name_column not in data.columns:
             raise ValueError(f"Column {name_column!r} does not exist.")
 
-        if data.columns.tolist().count(name_column) > 1:
+        if int(data.columns.isin([name_column]).sum()) > 1:
             raise ValueError(f"Duplicate column name {name_column!r}.")
         null_rows = np.asarray(data[name_column].isna(), dtype=bool)
         null_count = int(null_rows.sum())
