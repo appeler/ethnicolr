@@ -26,7 +26,6 @@ jobs:
     uses: gojiplus/py-canon/.github/workflows/reusable-release.yml@v1
     permissions:
       contents: write
-      id-token: write
     with:
       # `gh release create` fails when the release already exists, so create it
       # only on the original tag push — not on a manual re-run of a released tag.
