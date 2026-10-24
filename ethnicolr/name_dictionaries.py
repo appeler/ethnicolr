@@ -171,7 +171,7 @@ def wilson_interval(
 
 
 def _normalize_names(series: pd.Series) -> pd.Series:
-    return series.fillna("").astype(str).str.strip().str.upper()
+    return series.astype("string").fillna("").astype(str).str.strip().str.upper()
 
 
 def _predict_categories(

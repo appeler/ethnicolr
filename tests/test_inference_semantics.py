@@ -196,6 +196,27 @@ def test_inference_contract_rejects_contradictory_status() -> None:
         )
 
 
+@pytest.mark.parametrize("columns", [["white"], ["race", "race", "white"]])
+def test_inference_contract_requires_one_label_column(columns) -> None:
+    result = pd.DataFrame([["white"] * (len(columns) - 1) + [0.8]], columns=columns)
+
+    with pytest.raises(ValueError, match="must contain one 'race' column"):
+        add_inference_metadata(
+            result,
+            target="race-ethnicity",
+            input_scope="last-name",
+            scored=np.array([True]),
+            script_supported=np.array([True]),
+            abstained=np.array([False]),
+            abstention_reasons=np.array([None], dtype=object),
+            label_column="race",
+            model_id="test",
+            model_revision="sha256:test",
+            reference_population="test",
+            calibration_status="test",
+        )
+
+
 def test_artifact_revision_covers_the_full_bundle(tmp_path) -> None:
     weights = tmp_path / "weights.pt"
     vocab = tmp_path / "vocab.csv"
