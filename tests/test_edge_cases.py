@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import ethnicolr
 from ethnicolr import estimate_census_surname, estimate_wikipedia_full_name
 
 from .helpers import assert_prediction_quality
@@ -99,6 +100,58 @@ class TestNullAndMissingValueHandling:
 
         result = estimate_census_surname(nan_df, "last", year=2010)
         assert len(result) == 3
+
+    @pytest.mark.parametrize(
+        ("estimator_name", "name_columns", "missing_column"),
+        [
+            ("lookup_census_surname", ["last"], "last"),
+            ("lookup_census_first_name", ["first"], "first"),
+            ("estimate_census_surname", ["last"], "last"),
+            ("estimate_florida_voter_surname", ["last"], "last"),
+            ("estimate_wikipedia_surname", ["last"], "last"),
+            *[
+                (estimator_name, ["last", "first"], missing_column)
+                for estimator_name in [
+                    "estimate_census_full_name",
+                    "estimate_voter_file_full_name",
+                    "estimate_florida_voter_full_name",
+                    "estimate_north_carolina_voter_full_name",
+                    "estimate_wikipedia_full_name",
+                    "estimate_wikipedia_origin",
+                ]
+                for missing_column in ["last", "first"]
+            ],
+        ],
+    )
+    def test_all_missing_name_column(
+        self, estimator_name, name_columns, missing_column
+    ):
+        """An all-missing column reads as float64 and must match missing text.
+
+        ``read_csv`` gives a blank column float64 dtype. Filling it with ``""``
+        is an incompatible-dtype ``fillna``, which pandas 3.1 deprecates.
+        """
+        estimator = getattr(ethnicolr, estimator_name)
+        names = pd.DataFrame(
+            {"last": ["Smith", "Garcia", "Lee"], "first": ["John", "Maria", "Ann"]}
+        )
+        float_missing = names.assign(**{missing_column: np.nan})
+        object_missing = names.assign(
+            **{missing_column: pd.Series([None] * 3, dtype=object)}
+        )
+        assert float_missing[missing_column].dtype == np.float64
+
+        result = estimator(float_missing, *name_columns)
+        expected = estimator(object_missing, *name_columns)
+
+        pd.testing.assert_frame_equal(
+            result.drop(columns=missing_column),
+            expected.drop(columns=missing_column),
+        )
+        assert float_missing[missing_column].isna().all()
+        if name_columns == [missing_column]:
+            assert result["abstained"].all()
+            assert (result["abstention_reason"] == "missing-name").all()
 
     def test_empty_string_values(self):
         """Test handling of empty string values in name columns."""
@@ -258,6 +311,23 @@ class TestColumnNameEdgeCases:
 
         with pytest.raises(ValueError, match="Duplicate column name"):
             estimate_census_surname(df, "last", year=2010)
+
+    @pytest.mark.parametrize(
+        ("duplicated_column", "message"),
+        [
+            ("last", "Duplicate surname column"),
+            ("first", "Duplicate first-name column"),
+        ],
+    )
+    def test_duplicate_full_name_columns(self, duplicated_column, message):
+        """A full-name estimator rejects a duplicated surname or first-name column."""
+        df = pd.DataFrame(
+            [["Smith", "John", "Jones"]],
+            columns=["last", "first", duplicated_column],
+        )
+
+        with pytest.raises(ValueError, match=message):
+            estimate_wikipedia_full_name(df, "last", "first")
 
     def test_column_names_with_special_characters(self):
         """Test column names with special characters."""
@@ -525,3 +595,15 @@ class TestErrorRecovery:
         # For now, just ensure basic prediction works
         result = estimate_census_surname(df, "last", year=2010)
         assert len(result) == 1
+
+
+def test_nullable_column_labels_do_not_break_duplicate_checks():
+    # An unrelated pd.NA label made list.count() raise "boolean value of NA
+    # is ambiguous" before any name column was read.
+    from ethnicolr.inference import prepare_full_name_data
+
+    df = pd.DataFrame(
+        [["smith", "john", 1]],
+        columns=pd.Index(["last", "first", pd.NA], dtype=object),
+    )
+    prepare_full_name_data(df, "last", "first")

@@ -25,7 +25,7 @@ df = pd.read_csv(
     names=["a", "b", "c", "d"],
     usecols=["b", "d"],
 )
-df.dropna(subset=["b", "d"], inplace=True)
+df = df.dropna(subset=["b", "d"])
 
 # Parse name
 df[["first", "last", "middle", "suffix"]] = df.b.apply(lambda c: parse_name(c))

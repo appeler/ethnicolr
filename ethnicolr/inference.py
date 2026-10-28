@@ -74,9 +74,9 @@ def prepare_full_name_data(
         raise ValueError(f"Surname column {surname_column!r} does not exist.")
     if first_name_column not in data.columns:
         raise ValueError(f"First-name column {first_name_column!r} does not exist.")
-    if (data.columns == surname_column).sum() > 1:
+    if int(data.columns.isin([surname_column]).sum()) > 1:
         raise ValueError(f"Duplicate surname column {surname_column!r}.")
-    if (data.columns == first_name_column).sum() > 1:
+    if int(data.columns.isin([first_name_column]).sum()) > 1:
         raise ValueError(f"Duplicate first-name column {first_name_column!r}.")
 
     result = data.copy()
@@ -84,9 +84,9 @@ def prepare_full_name_data(
     while full_name_column in result.columns:
         full_name_column += "_"
     result[full_name_column] = (
-        result[surname_column].fillna("").astype(str).str.strip()
+        result[surname_column].astype("string").fillna("").astype(str).str.strip()
         + " "
-        + result[first_name_column].fillna("").astype(str).str.strip()
+        + result[first_name_column].astype("string").fillna("").astype(str).str.strip()
     ).str.strip()
     return result, full_name_column
 
@@ -167,7 +167,7 @@ def add_inference_metadata(
     if np.any(~script_supported & scored):
         raise ValueError("an unsupported-script row cannot be scored")
 
-    if (result.columns == label_column).sum() != 1:
+    if int(result.columns.isin([label_column]).sum()) != 1:
         raise ValueError(f"result must contain one {label_column!r} column")
     label_values = cast("pd.Series", result[label_column])
     predicted_labels = pd.array(label_values, dtype="string")
