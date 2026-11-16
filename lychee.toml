@@ -1,0 +1,11 @@
+# Patterns are written without a scheme: preen's links check scans this file
+# too, and a pattern with one would be extracted and checked as a link.
+exclude = [
+  # API bases and RDF namespace URIs that are alive but answer 404 to the bare
+  # GET a link checker sends.
+  'dataverse\.harvard\.edu/api/access/datafile',
+  'www\.wikidata\.org/prop/direct/',
+  'qlever\.dev/api/wikidata',
+  # Alive, but census.gov's CDN intermittently answers 404 to CI runners.
+  'www\.census\.gov/topics/population/genealogy',
+]
