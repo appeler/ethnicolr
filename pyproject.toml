@@ -219,18 +219,6 @@ builtin = "clear,rare,en-GB_to_en-US"
 # would also silently corrupt the data these models are trained on.
 skip = "*.csv,*.csv.gz,*.parquet,*.joblib,*.h5,*.keras,./ethnicolr/data,./ethnicolr/models,./scripts/data-acquisition/source-tables,uv.lock"
 
-[tool.preen]
-# API bases and RDF namespace URIs that are alive but answer 404 to the bare
-# GET the links check sends. Schemeless on purpose: with a scheme the check's
-# URL extractor reads the patterns themselves as links.
-link_ignore = [
-  'dataverse\.harvard\.edu/api/access/datafile',
-  'www\.wikidata\.org/prop/direct/',
-  'qlever\.dev/api/wikidata',
-  # Alive, but census.gov's CDN intermittently answers 404 to CI runners.
-  'www\.census\.gov/topics/population/genealogy',
-]
-
 [tool.pydoclint]
 style = "google"
 arg-type-hints-in-docstring = false
