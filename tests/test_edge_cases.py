@@ -436,17 +436,10 @@ class TestModelBoundaryConditions:
                 df, "last", year=2010, uncertainty_level=0.9, mc_iterations=1
             )
 
-        # Large iteration count (might be slow)
-        try:
-            result_large = estimate_census_surname(
-                df, "last", year=2010, uncertainty_level=0.9, mc_iterations=10
-            )
-            assert_prediction_quality(result_large, "census", with_uncertainty=True)
-        except Exception:
-            # If it fails due to time/memory constraints, that's acceptable
-            pytest.skip(
-                "Large iteration count test failed - likely resource constraint"
-            )
+        result_large = estimate_census_surname(
+            df, "last", year=2010, uncertainty_level=0.9, mc_iterations=10
+        )
+        assert_prediction_quality(result_large, "census", with_uncertainty=True)
 
     def test_invalid_year_values(self):
         """Test handling of invalid year values."""
