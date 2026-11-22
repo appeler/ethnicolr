@@ -12,7 +12,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 
 authors = [
-  { name = "Gaurav Sood", email = "contact@gsood.com" },
+  { name = "Gaurav Sood" },
   { name = "Suriyan Laohaprapanon", email = "suriyant@gmail.com" },
 ]
 
